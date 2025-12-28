@@ -2,73 +2,8 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { DollarSign, Search, Calendar, CheckCircle2, XCircle, Clock } from "lucide-react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "../../../utils/firebase";
+import { getAllPayments } from "../../../lib/api/payments";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
-
-const PAYMENTS_COLLECTION = "payments";
-
-const getAllPayments = async () => {
-	try {
-		// Try to get payments ordered by createdAt
-		let q = query(
-			collection(db, PAYMENTS_COLLECTION),
-			orderBy("createdAt", "desc")
-		);
-		
-		let querySnapshot;
-		let orderByFailed = false;
-		try {
-			querySnapshot = await getDocs(q);
-		} catch (orderError) {
-			// If orderBy fails (e.g., missing index or createdAt field), get all without ordering
-			console.warn("Error ordering by createdAt, fetching all payments:", orderError);
-			orderByFailed = true;
-			q = query(collection(db, PAYMENTS_COLLECTION));
-			querySnapshot = await getDocs(q);
-		}
-		
-		const payments = [];
-		querySnapshot.forEach((doc) => {
-			const data = doc.data();
-			payments.push({
-				id: doc.id,
-				...data,
-			});
-		});
-		
-		// Sort manually if orderBy failed or if some payments don't have createdAt
-		if (orderByFailed || payments.some(p => !p.createdAt)) {
-			payments.sort((a, b) => {
-				// Handle missing createdAt - put them at the end
-				if (!a.createdAt && !b.createdAt) return 0;
-				if (!a.createdAt) return 1;
-				if (!b.createdAt) return -1;
-				
-				// Normalize dates
-				let dateA, dateB;
-				try {
-					dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-					dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-					
-					// Validate dates
-					if (isNaN(dateA.getTime())) dateA = new Date(0);
-					if (isNaN(dateB.getTime())) dateB = new Date(0);
-				} catch (error) {
-					console.warn("Error parsing date for payment:", a.id || b.id, error);
-					return 0;
-				}
-				
-				return dateB - dateA; // Descending order
-			});
-		}
-		
-		return payments;
-	} catch (error) {
-		console.error("Error getting payments:", error);
-		throw error;
-	}
-};
 
 const PaymentsTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -81,8 +16,10 @@ const PaymentsTab = () => {
 
 	const filteredPayments = payments.filter((payment) => {
 		const matchesSearch =
-			payment.customerEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			payment.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			payment.payment_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			payment.paymentId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			payment.customer_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			payment.customerId?.toLowerCase().includes(searchQuery.toLowerCase());
 
 		const matchesStatus =
@@ -94,20 +31,8 @@ const PaymentsTab = () => {
 	const formatDate = (date) => {
 		if (!date) return "N/A";
 		
-		let d;
 		try {
-			// Handle Firestore Timestamp
-			if (date?.toDate && typeof date.toDate === "function") {
-				d = date.toDate();
-			}
-			// Handle Date object
-			else if (date instanceof Date) {
-				d = date;
-			}
-			// Handle ISO string or timestamp
-			else {
-				d = new Date(date);
-			}
+			const d = new Date(date);
 			
 			// Validate date
 			if (isNaN(d.getTime())) {
@@ -339,16 +264,16 @@ const PaymentsTab = () => {
 								>
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<code className="text-xs text-zinc-600 font-mono">
-											{payment.paymentId || payment.id}
+											{payment.payment_id || payment.paymentId || payment.id}
 										</code>
 									</td>
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<div>
 											<div className="font-medium text-sm text-zinc-900">
-												{payment.customerName || "N/A"}
+												{payment.name || "N/A"}
 											</div>
 											<div className="text-xs text-zinc-600">
-												{payment.customerEmail || "N/A"}
+												{payment.email || "N/A"}
 											</div>
 										</div>
 									</td>
@@ -365,12 +290,12 @@ const PaymentsTab = () => {
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<div className="text-xs text-zinc-600 flex items-center gap-1">
 											<Calendar className="w-3 h-3" />
-											{formatDate(payment.createdAt)}
+											{formatDate(payment.created_at || payment.createdAt)}
 										</div>
 									</td>
 									<td className="py-3 px-4">
 										<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-900 text-white">
-											{payment.planName || "Pro"}
+											{payment.plan_name || payment.planName || "Pro"}
 										</span>
 									</td>
 								</tr>

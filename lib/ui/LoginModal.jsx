@@ -34,18 +34,18 @@ const LoginModal = ({ isOpen, onClose }) => {
 	useEffect(() => {
 		if (!isOpen) return;
 
-		const unsubscribe = onAuthStateChange(async (firebaseUser) => {
-			if (firebaseUser) {
+		const unsubscribe = onAuthStateChange(async (supabaseUser) => {
+			if (supabaseUser) {
 				const userData = {
-					uid: firebaseUser.uid,
-					email: firebaseUser.email,
+					uid: supabaseUser.uid,
+					email: supabaseUser.email,
 					displayName:
-						firebaseUser.displayName ||
-						firebaseUser.email?.split("@")[0] ||
+						supabaseUser.displayName ||
+						supabaseUser.email?.split("@")[0] ||
 						"User",
-					photoURL: firebaseUser.photoURL || null,
+					photoURL: supabaseUser.photoURL || null,
 					provider:
-						firebaseUser.providerData[0]?.providerId === "google.com"
+						supabaseUser.providerData?.[0]?.providerId === "google.com"
 							? "google"
 							: "email",
 				};

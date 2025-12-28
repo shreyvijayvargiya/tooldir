@@ -1,5 +1,4 @@
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../utils/firebase";
+import { supabase } from "../../../lib/api-supabase/supabase";
 
 export default async function handler(req, res) {
 	if (req.method !== "POST") {
@@ -50,21 +49,25 @@ export default async function handler(req, res) {
 
 		const checkoutData = await checkoutResponse.json();
 
-		// Store checkout session in Firestore (optional, for tracking)
-		if (checkoutData.id) {
-			try {
-				await addDoc(collection(db, "checkouts"), {
-					checkoutId: checkoutData.id,
-					planId: planId,
-					customerId: customerId || null,
-					status: "pending",
-					createdAt: serverTimestamp(),
-				});
-			} catch (firestoreError) {
-				console.error("Error storing checkout:", firestoreError);
-				// Don't fail the request if Firestore write fails
-			}
-		}
+		// Store checkout session in Supabase (optional, for tracking)
+		// Note: You may want to create a checkouts table in Supabase if you need this
+		// For now, we'll skip this to avoid errors
+		// if (checkoutData.id) {
+		// 	try {
+		// 		await supabase
+		// 			.from('checkouts')
+		// 			.insert({
+		// 				checkout_id: checkoutData.id,
+		// 				plan_id: planId,
+		// 				customer_id: customerId || null,
+		// 				status: 'pending',
+		// 				created_at: new Date().toISOString(),
+		// 			});
+		// 	} catch (supabaseError) {
+		// 		console.error("Error storing checkout:", supabaseError);
+		// 		// Don't fail the request if Supabase write fails
+		// 	}
+		// }
 
 		return res.status(200).json({
 			checkoutUrl: checkoutData.url || checkoutData.checkout_url,

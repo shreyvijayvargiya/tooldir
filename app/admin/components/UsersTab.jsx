@@ -1,25 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "../../../utils/firebase";
-import { getAllEmails } from "../../../lib/api/emails";
+import { getAllUsers } from "../../../lib/api/users";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
-
-const loadUsers = async () => {
-	const usersRef = collection(db, "users");
-	const q = query(usersRef, orderBy("createdAt", "desc"));
-	const querySnapshot = await getDocs(q);
-	const usersData = [];
-
-	querySnapshot.forEach((doc) => {
-		usersData.push({
-			id: doc.id,
-			...doc.data(),
-		});
-	});
-
-	return usersData;
-};
 
 const UsersTab = () => {
 	// Fetch users with React Query
@@ -29,30 +11,15 @@ const UsersTab = () => {
 		error,
 	} = useQuery({
 		queryKey: ["users"],
-		queryFn: loadUsers,
+		queryFn: getAllUsers,
 	});
 
-	const [demoUsers, setDemoUsers] = useState([
-		{
-			id: "1",
-			name: "Shrey Vijay Vargiya",
-			email: "shreyvijayvargiya26@gmail.com",
-			photoURL: "https://github.com/shreyvijayvargiya.png",
-			provider: "google",
-			emailVerified: true,
-			createdAt: new Date("2025-01-01"),
-			lastSignIn: new Date("2025-01-01"),
-		},
-		
-	]);
 
 
 	// Format date
 	const formatDate = (dateString) => {
 		if (!dateString) return "N/A";
-		const date = dateString?.toDate
-			? dateString.toDate()
-			: new Date(dateString);
+		const date = new Date(dateString);
 		return date.toLocaleDateString("en-US", {
 			year: "numeric",
 			month: "short",
@@ -109,38 +76,38 @@ const UsersTab = () => {
 								</td>
 							</tr>
 						) : (
-							demoUsers.map((user, index) => (
+							users.map((user, index) => (
 								<tr
 									key={user.id}
 									className={`${
-										index === demoUsers.length - 1 ? "" : "border-b border-zinc-200"
+										index === users.length - 1 ? "" : "border-b border-zinc-200"
 									} hover:bg-zinc-50 transition-colors`}
 								>
 									<td className="py-3 px-4 border-l border-r border-zinc-200">
 										<div className="flex items-center gap-3">
-											{user.photoURL ? (
+											{user.photo_url || user.photoURL ? (
 												<img
-													src={user.photoURL}
-													alt={user.name}
+													src={user.photo_url || user.photoURL}
+													alt={user.name || user.display_name}
 													className="w-8 h-8 rounded-full object-cover"
 												/>
 											) : (
 												<div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center">
 													<span className="text-xs font-medium text-zinc-600">
-														{user.name
-															?.split(" ")
+														{(user.name || user.display_name || "U")
+															.split(" ")
 															.map((n) => n[0])
 															.join("")
-															.toUpperCase() || "U"}
+															.toUpperCase()}
 													</span>
 												</div>
 											)}
 											<div>
 												<div className="font-medium text-zinc-900">
-													{user.name || user.displayName || "Unknown"}
+													{user.name || user.display_name || "Unknown"}
 												</div>
 												<div className="text-xs text-zinc-500 font-mono">
-													{user.uid}
+													{user.uid || user.id}
 												</div>
 											</div>
 										</div>
@@ -164,19 +131,19 @@ const UsersTab = () => {
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<span
 											className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-												user.emailVerified
+												user.email_verified || user.emailVerified
 													? "bg-green-100 text-green-800"
 													: "bg-yellow-100 text-yellow-800"
 											}`}
 										>
-											{user.emailVerified ? "Verified" : "Unverified"}
+											{user.email_verified || user.emailVerified ? "Verified" : "Unverified"}
 										</span>
 									</td>
 									<td className="py-3 px-4 text-sm text-zinc-600 border-r border-zinc-200">
-										{formatDate(user.createdAt)}
+										{formatDate(user.created_at || user.createdAt)}
 									</td>
 									<td className="py-3 px-4 text-sm text-zinc-600 border-r border-zinc-200">
-										{formatDate(user.lastSignIn)}
+										{formatDate(user.last_sign_in || user.lastSignIn)}
 									</td>
 								</tr>
 							))

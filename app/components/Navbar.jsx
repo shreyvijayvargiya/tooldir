@@ -34,18 +34,18 @@ const Navbar = () => {
 			// Set up auth state listener to update query cache only once
 			// This runs once when the query is first executed
 			if (!authUnsubscribeRef.current) {
-				const unsubscribe = onAuthStateChange(async (firebaseUser) => {
-					if (firebaseUser) {
+				const unsubscribe = onAuthStateChange(async (supabaseUser) => {
+					if (supabaseUser) {
 						const userData = {
-							uid: firebaseUser.uid,
-							email: firebaseUser.email,
+							uid: supabaseUser.uid,
+							email: supabaseUser.email,
 							displayName:
-								firebaseUser.displayName ||
-								firebaseUser.email?.split("@")[0] ||
+								supabaseUser.displayName ||
+								supabaseUser.email?.split("@")[0] ||
 								"User",
-							photoURL: firebaseUser.photoURL || null,
+							photoURL: supabaseUser.photoURL || null,
 							provider:
-								firebaseUser.providerData[0]?.providerId === "google.com"
+								supabaseUser.providerData?.[0]?.providerId === "google.com"
 									? "google"
 									: "email",
 						};
@@ -67,7 +67,7 @@ const Navbar = () => {
 			return cookieUser;
 		},
 		enabled: true,
-		staleTime: Infinity, // Auth state is managed by Firebase listener
+		staleTime: Infinity, // Auth state is managed by Supabase listener
 		gcTime: Infinity, // Keep in cache indefinitely
 		refetchOnWindowFocus: false,
 		refetchOnMount: false,
@@ -108,7 +108,7 @@ const Navbar = () => {
 			// Clear React Query cache immediately
 			queryClient.setQueryData(["currentUser"], null);
 
-			// Sign out from Firebase (this will trigger auth state change)
+			// Sign out from Supabase (this will trigger auth state change)
 			await signOutUser();
 
 			// Ensure cache is cleared (in case auth listener hasn't fired yet)

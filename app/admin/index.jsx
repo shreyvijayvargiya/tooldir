@@ -65,14 +65,14 @@ const Admin = () => {
 	// Fetch user role with React Query
 	const fetchUserRole = async () => {
 		try {
-			// Get current user email (from Firebase Auth or localStorage fallback)
+			// Get current user email (from Supabase Auth or localStorage fallback)
 			const userEmail = await getCurrentUserEmail();
 
 			console.log("CMS: Current user email:", userEmail);
 
 			if (userEmail) {
-				// Fetch role from Firestore teams collection using email
-				// Firebase Auth users don't have role - we check teams collection
+				// Fetch role from Supabase teams table using email
+				// Supabase Auth users don't have role - we check teams table
 				const role = await getUserRole(userEmail, false);
 				console.log("CMS: Fetched role from teams collection:", role);
 				return role;
@@ -108,22 +108,22 @@ const Admin = () => {
 
 	// Listen for auth state changes and refetch user role
 	useEffect(() => {
-		const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+		const unsubscribe = onAuthStateChange(async (supabaseUser) => {
 			// Invalidate userRole query when auth state changes
 			queryClient.invalidateQueries({ queryKey: ["userRole"] });
 
 			// Update user state and cookie
-			if (firebaseUser) {
+			if (supabaseUser) {
 				const userData = {
-					uid: firebaseUser.uid,
-					email: firebaseUser.email,
+					uid: supabaseUser.uid,
+					email: supabaseUser.email,
 					displayName:
-						firebaseUser.displayName ||
-						firebaseUser.email?.split("@")[0] ||
+						supabaseUser.displayName ||
+						supabaseUser.email?.split("@")[0] ||
 						"User",
-					photoURL: firebaseUser.photoURL || null,
+					photoURL: supabaseUser.photoURL || null,
 					provider:
-						firebaseUser.providerData[0]?.providerId === "google.com"
+						supabaseUser.providerData?.[0]?.providerId === "google.com"
 							? "google"
 							: "email",
 				};

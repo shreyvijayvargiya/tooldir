@@ -2,32 +2,8 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Users, Search, Mail, Calendar, CheckCircle2, XCircle } from "lucide-react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "../../../utils/firebase";
+import { getAllCustomers } from "../../../lib/api/customers";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
-
-const CUSTOMERS_COLLECTION = "customers";
-
-const getAllCustomers = async () => {
-	try {
-		const q = query(
-			collection(db, CUSTOMERS_COLLECTION),
-			orderBy("createdAt", "desc")
-		);
-		const querySnapshot = await getDocs(q);
-		const customers = [];
-		querySnapshot.forEach((doc) => {
-			customers.push({
-				id: doc.id,
-				...doc.data(),
-			});
-		});
-		return customers;
-	} catch (error) {
-		console.error("Error getting customers:", error);
-		throw error;
-	}
-};
 
 const CustomersTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +24,7 @@ const CustomersTab = () => {
 
 	const formatDate = (date) => {
 		if (!date) return "N/A";
-		const d = date?.toDate ? date.toDate() : new Date(date);
+		const d = new Date(date);
 		return d.toLocaleDateString("en-US", {
 			year: "numeric",
 			month: "short",
@@ -156,7 +132,7 @@ const CustomersTab = () => {
 									</td>
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-900 text-white">
-											{customer.planName || "Pro"}
+											{customer.plan_name || customer.planName || "Pro"}
 										</span>
 									</td>
 									<td className="py-3 px-4 border-r border-zinc-200">
@@ -180,12 +156,12 @@ const CustomersTab = () => {
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<div className="text-xs text-zinc-600 flex items-center gap-1">
 											<Calendar className="w-3 h-3" />
-											{formatDate(customer.createdAt)}
+											{formatDate(customer.created_at || customer.createdAt)}
 										</div>
 									</td>
 									<td className="py-3 px-4">
 										<code className="text-xs text-zinc-600 font-mono">
-											{customer.customerId || customer.id}
+											{customer.customer_id || customer.customerId || customer.id}
 										</code>
 									</td>
 								</tr>
