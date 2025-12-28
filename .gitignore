@@ -3,8 +3,7 @@ yarn.lock
 yarn-error.lock
 .next
 .vercel
-
-.env.local
+.cursor
 
 .DS_Store
 app/.DS_Store
