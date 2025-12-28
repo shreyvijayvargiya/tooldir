@@ -1,6 +1,6 @@
 /**
  * Database Seeding Script
- * Populates Firestore with sample blogs and emails
+ * Populates Supabase with sample blogs and emails
  * 
  * Run with: npm run seed
  * Or: node scripts/seed-database.js
@@ -9,8 +9,8 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { createBlog } from "../lib/api-supabase/blog.js";
+import { createEmail } from "../lib/api-supabase/emails.js";
 
 // Load environment variables from .env.local
 const __filename = fileURLToPath(import.meta.url);
@@ -31,20 +31,6 @@ try {
 } catch (error) {
 	console.warn("⚠️  Could not load .env.local file. Make sure environment variables are set.");
 }
-
-// Firebase configuration - uses environment variables
-const firebaseConfig = {
-	apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-	authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-	projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-	storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-	messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-	appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 // Unsplash banner images array - 6 high-quality banners
 const unsplashBanners = [
@@ -396,17 +382,17 @@ const sampleEmails = [
 // Function to seed blogs
 async function seedBlogs() {
 	console.log("🌱 Seeding blogs...");
-	const blogsCollection = collection(db, "blogs");
 	
 	for (const blog of sampleBlogs) {
 		try {
-			const docRef = await addDoc(blogsCollection, {
+			const now = new Date().toISOString();
+			const blogData = {
 				...blog,
-				createdAt: serverTimestamp(),
-				updatedAt: serverTimestamp(),
-				publishedAt: blog.status === "published" ? serverTimestamp() : null,
-			});
-			console.log(`✅ Created blog: ${blog.title} (ID: ${docRef.id})`);
+				banner_image: blog.bannerImage,
+				published_at: blog.status === "published" ? now : null,
+			};
+			const blogId = await createBlog(blogData);
+			console.log(`✅ Created blog: ${blog.title} (ID: ${blogId})`);
 		} catch (error) {
 			console.error(`❌ Error creating blog "${blog.title}":`, error);
 		}
@@ -417,17 +403,19 @@ async function seedBlogs() {
 // Function to seed emails
 async function seedEmails() {
 	console.log("🌱 Seeding emails...");
-	const emailsCollection = collection(db, "emails");
 	
 	for (const email of sampleEmails) {
 		try {
-			const docRef = await addDoc(emailsCollection, {
-				...email,
-				createdAt: serverTimestamp(),
-				updatedAt: serverTimestamp(),
-				publishedAt: email.status === "published" ? serverTimestamp() : null,
-			});
-			console.log(`✅ Created email: ${email.subject} (ID: ${docRef.id}, Category: ${email.category})`);
+			const now = new Date().toISOString();
+			const emailData = {
+				subject: email.subject,
+				content: email.content,
+				status: email.status,
+				recipients: 0,
+				published_at: email.status === "published" ? now : null,
+			};
+			const emailId = await createEmail(emailData);
+			console.log(`✅ Created email: ${email.subject} (ID: ${emailId})`);
 		} catch (error) {
 			console.error(`❌ Error creating email "${email.subject}":`, error);
 		}

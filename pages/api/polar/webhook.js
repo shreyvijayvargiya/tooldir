@@ -1,5 +1,4 @@
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../utils/firebase";
+import { saveCustomer } from "../../../lib/api-supabase/customers";
 import crypto from "crypto";
 import {
 	sendSubscriptionConfirmationEmail,
@@ -8,7 +7,7 @@ import {
 } from "../../../lib/api/subscriptionEmails";
 
 // Import utility functions
-import { COLLECTIONS, DEFAULTS } from "../../../lib/utils/polar/constants";
+import { DEFAULTS } from "../../../lib/utils/polar/constants";
 import { normalizeDate } from "../../../lib/utils/polar/dateUtils";
 import {
 	getCustomerFromFirestore,
@@ -124,42 +123,29 @@ async function handleSubscriptionEvent(event) {
 	);
 
 	const isUpgrade =
-		existingCustomerData.planId &&
-		existingCustomerData.planId !== planData.planId &&
-		existingCustomerData.planName !== planData.planName;
+		existingCustomerData.plan_id &&
+		existingCustomerData.plan_id !== planData.planId &&
+		existingCustomerData.plan_name !== planData.planName;
 
 	const isCancelled =
 		subscription.status === "canceled" || subscription.status === "cancelled";
 
-	// Update customer in Firestore
-	const customerRef = doc(db, COLLECTIONS.CUSTOMERS, customerId);
-	const customerDoc = await getDoc(customerRef);
+	// Update customer in Supabase
+	const expiresAt = subscription.current_period_end
+		? normalizeDate(subscription.current_period_end)
+		: existingCustomerData.expires_at || null;
 
 	const updatedCustomerData = {
-		customerId: customerId,
-		subscriptionId:
-			subscription.id || existingCustomerData.subscriptionId || null,
+		customer_id: customerId,
 		email: customerData.email,
 		name: customerData.name,
-		planId: planData.planId,
-		planName: planData.planName,
+		plan_id: planData.planId,
+		plan_name: planData.planName,
 		status: subscription.status || "active",
-		amount: subscription.price?.amount || existingCustomerData.amount || 0,
-		currency:
-			subscription.price?.currency ||
-			existingCustomerData.currency ||
-			DEFAULTS.CURRENCY,
-		expiresAt: subscription.current_period_end
-			? normalizeDate(subscription.current_period_end)
-			: existingCustomerData.expiresAt || null,
-		updatedAt: serverTimestamp(),
+		expires_at: expiresAt ? expiresAt.toISOString() : null,
 	};
 
-	if (!customerDoc.exists()) {
-		updatedCustomerData.createdAt = serverTimestamp();
-	}
-
-	await setDoc(customerRef, updatedCustomerData, { merge: true });
+	await saveCustomer(updatedCustomerData);
 
 	// Store payment record for subscription events
 	if (subscription.price?.amount && subscription.price.amount > 0) {
@@ -197,19 +183,19 @@ async function handleSubscriptionEvent(event) {
 	if (customerData.isValid) {
 		try {
 			if (isCancelled) {
-				const expiresAtDate = normalizeDate(updatedCustomerData.expiresAt);
+				const expiresAtDate = expiresAt;
 				await sendSubscriptionCancellationEmail({
 					customerEmail: customerData.email,
 					customerName: customerData.name,
 					planName: planData.planName,
 					expiresAt: expiresAtDate,
 				});
-			} else if (isUpgrade && existingCustomerData.planName) {
-				const expiresAtDate = normalizeDate(updatedCustomerData.expiresAt);
+			} else if (isUpgrade && existingCustomerData.plan_name) {
+				const expiresAtDate = expiresAt;
 				await sendSubscriptionUpgradeEmail({
 					customerEmail: customerData.email,
 					customerName: customerData.name,
-					oldPlanName: existingCustomerData.planName,
+					oldPlanName: existingCustomerData.plan_name,
 					newPlanName: planData.planName,
 					amount: subscription.price?.amount || 0,
 					currency: subscription.price?.currency || DEFAULTS.CURRENCY,
@@ -254,29 +240,20 @@ async function handleSubscriptionCanceledEvent(event) {
 
 	const expiresAt = subscription.current_period_end
 		? normalizeDate(subscription.current_period_end)
-		: normalizeDate(existingCustomer.expiresAt);
+		: normalizeDate(existingCustomer.expires_at);
 
 	// Update customer status to canceled
-	const customerRef = doc(db, COLLECTIONS.CUSTOMERS, customerId);
 	const updatedCustomerData = {
-		customerId: customerId,
-		subscriptionId: subscription.id || existingCustomer.subscriptionId || null,
+		customer_id: customerId,
 		email: customerData.email || existingCustomer.email,
 		name: customerData.name || existingCustomer.name,
-		planId: planData.planId || existingCustomer.planId || null,
-		planName: planData.planName,
+		plan_id: planData.planId || existingCustomer.plan_id || null,
+		plan_name: planData.planName,
 		status: "canceled",
-		amount: subscription.price?.amount || existingCustomer.amount || 0,
-		currency:
-			subscription.price?.currency ||
-			existingCustomer.currency ||
-			DEFAULTS.CURRENCY,
-		expiresAt: expiresAt,
-		canceledAt: serverTimestamp(),
-		updatedAt: serverTimestamp(),
+		expires_at: expiresAt ? expiresAt.toISOString() : null,
 	};
 
-	await setDoc(customerRef, updatedCustomerData, { merge: true });
+	await saveCustomer(updatedCustomerData);
 
 	// Send cancellation email
 	if (customerData.isValid) {
@@ -355,15 +332,10 @@ async function handlePaymentEvent(event) {
 
 	// If payment succeeded, update customer subscription status
 	if (payment.status === "succeeded" && payment.customer_id) {
-		const customerRef = doc(db, COLLECTIONS.CUSTOMERS, payment.customer_id);
-		await setDoc(
-			customerRef,
-			{
-				status: "active",
-				updatedAt: serverTimestamp(),
-			},
-			{ merge: true }
-		);
+		await saveCustomer({
+			customer_id: payment.customer_id,
+			status: "active",
+		});
 
 		// Get customer data for email (use enriched data)
 		const customerForEmail = await getCustomerFromFirestore(
@@ -375,7 +347,7 @@ async function handlePaymentEvent(event) {
 		const emailToUse = customerData.email || emailCustomerData.email;
 		if (emailToUse && customerData.isValid) {
 			try {
-				const expiresAtDate = normalizeDate(emailCustomerData.expiresAt);
+				const expiresAtDate = normalizeDate(emailCustomerData.expires_at);
 				await sendSubscriptionConfirmationEmail({
 					customerEmail: emailToUse,
 					customerName:
@@ -399,20 +371,12 @@ async function handlePaymentEvent(event) {
 async function handleCustomerEvent(event) {
 	const customer = event.data;
 
-	// Store customer in Firestore
-	const customerRef = doc(db, COLLECTIONS.CUSTOMERS, customer.id);
-	const customerDoc = await getDoc(customerRef);
-
+	// Store customer in Supabase
 	const customerData = {
-		customerId: customer.id,
+		customer_id: customer.id,
 		email: customer.email || null,
 		name: customer.name || customer.email || DEFAULTS.CUSTOMER_NAME,
-		updatedAt: serverTimestamp(),
 	};
 
-	if (!customerDoc.exists()) {
-		customerData.createdAt = serverTimestamp();
-	}
-
-	await setDoc(customerRef, customerData, { merge: true });
+	await saveCustomer(customerData);
 }

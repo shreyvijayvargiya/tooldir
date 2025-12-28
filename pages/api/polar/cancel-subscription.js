@@ -1,5 +1,4 @@
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../utils/firebase";
+import { getCustomerById, saveCustomer } from "../../../lib/api-supabase/customers";
 
 export default async function handler(req, res) {
 	if (req.method !== "POST") {
@@ -25,19 +24,17 @@ export default async function handler(req, res) {
 			});
 		}
 
-		// If we only have customerId, get subscription from Firestore or Polar API
+		// If we only have customerId, get subscription from Supabase or Polar API
 		let actualSubscriptionId = subscriptionId;
 		if (!actualSubscriptionId && customerId) {
-			// First, try to get customer from Firestore (customerId is the document ID)
-			const customerRef = doc(db, "customers", customerId);
-			const customerDoc = await getDoc(customerRef);
+			// First, try to get customer from Supabase
+			const customerData = await getCustomerById(customerId);
 			
-			let customerData = null;
-			if (customerDoc.exists()) {
-				customerData = customerDoc.data();
+			if (customerData) {
 				// Check if subscription ID is stored in customer data
-				if (customerData.subscriptionId) {
-					actualSubscriptionId = customerData.subscriptionId;
+				// Note: Supabase schema doesn't have subscription_id field, but keeping for compatibility
+				if (customerData.subscription_id) {
+					actualSubscriptionId = customerData.subscription_id;
 				}
 			}
 
@@ -138,32 +135,26 @@ export default async function handler(req, res) {
 				errorMessage.toLowerCase().includes("subscription is cancelled") ||
 				errorMessage.toLowerCase().includes("subscription is canceled");
 
-			// If subscription is already cancelled, update Firestore and return success
+			// If subscription is already cancelled, update Supabase and return success
 			if (isAlreadyCancelled && customerId) {
-				console.log("Subscription already cancelled, updating Firestore...");
+				console.log("Subscription already cancelled, updating Supabase...");
 				
 				try {
-					const customerRef = doc(db, "customers", customerId);
-					const customerDoc = await getDoc(customerRef);
+					await saveCustomer({
+						customer_id: customerId,
+						status: "canceled",
+					});
 					
-					if (customerDoc.exists()) {
-						await updateDoc(customerRef, {
-							status: "canceled",
-							canceledAt: serverTimestamp(),
-							updatedAt: serverTimestamp(),
-						});
-						
-						console.log("Firestore updated: Subscription marked as cancelled");
-						
-						return res.status(200).json({
-							success: true,
-							message: "Subscription was already cancelled. Firestore has been updated.",
-							alreadyCancelled: true,
-						});
-					}
-				} catch (firestoreError) {
-					console.error("Error updating Firestore:", firestoreError);
-					// Continue to return error even if Firestore update fails
+					console.log("Supabase updated: Subscription marked as cancelled");
+					
+					return res.status(200).json({
+						success: true,
+						message: "Subscription was already cancelled. Supabase has been updated.",
+						alreadyCancelled: true,
+					});
+				} catch (supabaseError) {
+					console.error("Error updating Supabase:", supabaseError);
+					// Continue to return error even if Supabase update fails
 				}
 			}
 			
@@ -187,7 +178,7 @@ export default async function handler(req, res) {
 
 		const cancelData = await cancelResponse.json();
 
-		// Note: Firestore will be updated via webhook when Polar sends the cancellation event
+		// Note: Supabase will be updated via webhook when Polar sends the cancellation event
 		// We don't update it here to avoid race conditions
 
 		return res.status(200).json({

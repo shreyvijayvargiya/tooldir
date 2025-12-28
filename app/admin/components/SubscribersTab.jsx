@@ -30,7 +30,7 @@ const SubscribersTab = () => {
 	// Fetch user role with React Query
 	const fetchUserRole = async () => {
 		try {
-			// Get current user email (from Firebase Auth or localStorage fallback)
+			// Get current user email (from Supabase Auth or localStorage fallback)
 			const userEmail = await getCurrentUserEmail();
 
 			console.log("SubscribersTab: Current user email:", userEmail);

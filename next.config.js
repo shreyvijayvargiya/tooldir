@@ -9,12 +9,7 @@ const nextConfig = {
 	images: {
 		domains: [
 			"lh3.googleusercontent.com",
-			"firebasestorage.googleapis.com",
 			"images.unsplash.com",
-			"storage.googleapis.com",
-			"firebase.googleapis.com",
-			"*.firebaseio.com",
-			"*.firebaseapp.com",
 		],
 		minimumCacheTTL: 60,
 	},
