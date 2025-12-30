@@ -1,26 +1,130 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Users, Search, Mail, Calendar, CheckCircle2, XCircle } from "lucide-react";
+import {
+	Users,
+	Search,
+	Mail,
+	Calendar,
+	CheckCircle2,
+	XCircle,
+	ArrowUpDown,
+	ArrowUp,
+	ArrowDown,
+} from "lucide-react";
 import { getAllCustomers } from "../../../lib/api/customers";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
+import Fuse from "fuse.js";
 
 const CustomersTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
+	const [sortField, setSortField] = useState(null);
+	const [sortDirection, setSortDirection] = useState("asc");
 
-	const { data: customers = [], isLoading, error } = useQuery({
+	const {
+		data: customers = [],
+		isLoading,
+		error,
+	} = useQuery({
 		queryKey: ["customers"],
 		queryFn: () => getAllCustomers(),
 	});
 
-	const filteredCustomers = customers.filter((customer) => {
-		const searchLower = searchQuery.toLowerCase();
-		return (
-			customer.email?.toLowerCase().includes(searchLower) ||
-			customer.name?.toLowerCase().includes(searchLower) ||
-			customer.customerId?.toLowerCase().includes(searchLower)
+	// Configure Fuse.js for search
+	const fuse = useMemo(() => {
+		return new Fuse(customers, {
+			keys: [
+				"email",
+				"name",
+				"customer_id",
+				"customerId",
+				"plan_name",
+				"planName",
+				"status",
+			],
+			threshold: 0.3,
+			includeScore: true,
+		});
+	}, [customers]);
+
+	// Perform search with Fuse.js
+	const searchedCustomers = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return customers;
+		}
+		return fuse.search(searchQuery).map((result) => result.item);
+	}, [searchQuery, fuse, customers]);
+
+	// Sort customers
+	const sortedCustomers = useMemo(() => {
+		return [...searchedCustomers].sort((a, b) => {
+			if (!sortField) return 0;
+
+			// Handle date comparison
+			if (sortField === "createdAt") {
+				const dateA = new Date(a.created_at || a.createdAt || 0);
+				const dateB = new Date(b.created_at || b.createdAt || 0);
+				return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+			}
+
+			// Handle numeric comparison for amount
+			if (sortField === "amount") {
+				const amountA = a.amount || 0;
+				const amountB = b.amount || 0;
+				return sortDirection === "asc" ? amountA - amountB : amountB - amountA;
+			}
+
+			// Handle string comparison for other fields
+			let aValue, bValue;
+
+			switch (sortField) {
+				case "name":
+					aValue = (a.name || "").toLowerCase();
+					bValue = (b.name || "").toLowerCase();
+					break;
+				case "planName":
+					aValue = (a.plan_name || a.planName || "").toLowerCase();
+					bValue = (b.plan_name || b.planName || "").toLowerCase();
+					break;
+				case "status":
+					aValue = (a.status || "").toLowerCase();
+					bValue = (b.status || "").toLowerCase();
+					break;
+				case "customerId":
+					aValue = (a.customer_id || a.customerId || a.id || "").toLowerCase();
+					bValue = (b.customer_id || b.customerId || b.id || "").toLowerCase();
+					break;
+				default:
+					return 0;
+			}
+
+			if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+			return 0;
+		});
+	}, [searchedCustomers, sortField, sortDirection]);
+
+	// Handle column sort
+	const handleSort = (field) => {
+		if (sortField === field) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
+
+	// Get sort icon for column header
+	const getSortIcon = (field) => {
+		if (sortField !== field) {
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+		}
+		return sortDirection === "asc" ? (
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		) : (
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
 		);
-	});
+	};
 
 	const formatDate = (date) => {
 		if (!date) return "N/A";
@@ -68,23 +172,59 @@ const CustomersTab = () => {
 				<table className="w-full">
 					<thead className="bg-zinc-50 border-b border-zinc-200">
 						<tr>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Customer
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("name")}
+							>
+								<div className="flex items-center">
+									Customer
+									{getSortIcon("name")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Plan
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("planName")}
+							>
+								<div className="flex items-center">
+									Plan
+									{getSortIcon("planName")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Status
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("status")}
+							>
+								<div className="flex items-center">
+									Status
+									{getSortIcon("status")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Amount
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("amount")}
+							>
+								<div className="flex items-center">
+									Amount
+									{getSortIcon("amount")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Joined
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("createdAt")}
+							>
+								<div className="flex items-center">
+									Joined
+									{getSortIcon("createdAt")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
-								Customer ID
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("customerId")}
+							>
+								<div className="flex items-center">
+									Customer ID
+									{getSortIcon("customerId")}
+								</div>
 							</th>
 						</tr>
 					</thead>
@@ -101,7 +241,7 @@ const CustomersTab = () => {
 									Error loading customers. Please try again.
 								</td>
 							</tr>
-						) : filteredCustomers.length === 0 ? (
+						) : sortedCustomers.length === 0 ? (
 							<tr>
 								<td colSpan={6} className="py-8 text-center text-zinc-500">
 									{searchQuery
@@ -110,11 +250,11 @@ const CustomersTab = () => {
 								</td>
 							</tr>
 						) : (
-							filteredCustomers.map((customer, index) => (
+							sortedCustomers.map((customer, index) => (
 								<tr
 									key={customer.id}
 									className={`${
-										index === filteredCustomers.length - 1
+										index === sortedCustomers.length - 1
 											? ""
 											: "border-b border-zinc-200"
 									} hover:bg-zinc-50 transition-colors`}
@@ -161,7 +301,9 @@ const CustomersTab = () => {
 									</td>
 									<td className="py-3 px-4">
 										<code className="text-xs text-zinc-600 font-mono">
-											{customer.customer_id || customer.customerId || customer.id}
+											{customer.customer_id ||
+												customer.customerId ||
+												customer.id}
 										</code>
 									</td>
 								</tr>
@@ -175,4 +317,3 @@ const CustomersTab = () => {
 };
 
 export default CustomersTab;
-

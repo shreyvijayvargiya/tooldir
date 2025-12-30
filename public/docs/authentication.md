@@ -36,24 +36,23 @@ Firebase Authentication provides secure, scalable user authentication with multi
 ### Email/Password Authentication
 
 **Sign Up**:
+
 ```javascript
-import { signUpWithEmail } from '../lib/api/auth';
+import { signUpWithEmail } from "../lib/api/auth";
 
 const user = await signUpWithEmail(
-  'user@example.com',
-  'password123',
-  'User Name'
+	"user@example.com",
+	"password123",
+	"User Name"
 );
 ```
 
 **Sign In**:
-```javascript
-import { signInWithEmail } from '../lib/api/auth';
 
-const user = await signInWithEmail(
-  'user@example.com',
-  'password123'
-);
+```javascript
+import { signInWithEmail } from "../lib/api/auth";
+
+const user = await signInWithEmail("user@example.com", "password123");
 ```
 
 **Implementation**: `lib/api/auth.js`
@@ -61,17 +60,165 @@ const user = await signInWithEmail(
 ### Google OAuth Authentication
 
 **Sign In with Google**:
+
 ```javascript
-import { signInWithGoogle } from '../lib/api/auth';
+import { signInWithGoogle } from "../lib/api/auth";
 
 const user = await signInWithGoogle();
 ```
 
 **Process**:
+
 1. Opens Google sign-in popup
 2. User authenticates with Google
 3. User data saved to Firestore
 4. Returns Firebase user object
+
+## Supabase Authentication (Alternative)
+
+SAAS Starter also supports Supabase Authentication as an alternative to Firebase. Supabase provides PostgreSQL database with built-in authentication.
+
+### Supabase Google OAuth Setup
+
+**Sign In with Google**:
+
+```javascript
+import { signInWithGoogle } from "../lib/api/auth";
+
+const user = await signInWithGoogle();
+```
+
+**Process**:
+
+1. Redirects to Google OAuth
+2. User authenticates with Google
+3. Supabase handles OAuth callback
+4. User data saved to Supabase `users` table
+5. Redirects to `/auth/callback` in your app
+
+### Configuring Supabase Google OAuth
+
+#### Step 1: Get Your Supabase Callback URL
+
+Your Supabase project has a callback URL in this format:
+
+- Format: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+- Find it in: Supabase Dashboard → Settings → API → Project URL
+- Example: If your project URL is `https://abcdefgh.supabase.co`, the callback is `https://abcdefgh.supabase.co/auth/v1/callback`
+
+#### Step 2: Configure Google Cloud Console
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Select your project (or create one)
+3. Navigate to: **APIs & Services** → **Credentials**
+4. Create OAuth 2.0 Client ID (or edit existing):
+   - **Application type**: Web application
+   - **Name**: Your app name
+   - **Authorized JavaScript origins**:
+     - `https://YOUR_PROJECT_REF.supabase.co`
+     - `http://localhost:3000` (for local development)
+   - **Authorized redirect URIs** (⚠️ **IMPORTANT**):
+     - `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+     - `http://localhost:3000/auth/callback` (for local development)
+5. Save and copy the **Client ID** and **Client Secret**
+
+#### Step 3: Configure OAuth Consent Screen
+
+1. In Google Cloud Console: **APIs & Services** → **OAuth consent screen**
+2. Configure:
+   - **User Type**: External (or Internal if using Google Workspace)
+   - **App name**, support email, developer contact
+   - **Scopes**: Add `email`, `profile`, `openid`
+   - **Test users**: Add your email (if in Testing mode)
+3. Save
+
+#### Step 4: Configure Supabase Dashboard
+
+1. Go to **Supabase Dashboard** → **Authentication** → **Providers**
+2. Enable **Google** provider
+3. Enter:
+   - **Client ID** (from Google Cloud Console)
+   - **Client Secret** (from Google Cloud Console)
+4. Save
+
+#### Step 5: Configure Supabase URL Settings
+
+1. Go to **Supabase Dashboard** → **Authentication** → **URL Configuration**
+2. Set **Site URL**:
+   - Development: `http://localhost:3000`
+   - Production: `https://yourdomain.com`
+3. Add **Redirect URLs**:
+   - `http://localhost:3000/auth/callback`
+   - `https://yourdomain.com/auth/callback`
+   - `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback` (usually auto-added)
+
+#### Step 6: Verify Environment Variables
+
+Ensure `.env.local` has:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_KEY=your_anon_key
+```
+
+### Troubleshooting Supabase Google Login
+
+#### "Access blocked: Authorization Error"
+
+This error occurs when the redirect URI doesn't match between Google Cloud Console and Supabase.
+
+**Solution**:
+
+1. Verify the redirect URI in Google Cloud Console exactly matches: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+2. Ensure no trailing slashes or typos
+3. The redirect URI must be the **Supabase callback URL**, not your app's callback
+4. Your app's `/auth/callback` is handled after Supabase processes the OAuth
+
+#### OAuth Consent Screen Issues
+
+**Problem**: "This app isn't verified" or access denied
+
+**Solution**:
+
+- If in **Testing mode**, add your email as a test user in Google Cloud Console
+- Publish the app if you want public access
+- Wait 5-10 minutes after changes (Google can take time to propagate)
+
+#### Redirect Mismatch
+
+**Problem**: Redirect URI mismatch error
+
+**Solution**:
+
+- The redirect URI in Google Cloud Console must be: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+- This is **NOT** your app's callback URL
+- Supabase handles the OAuth flow first, then redirects to your app's `/auth/callback`
+
+#### Still Not Working?
+
+1. **Wait 5-10 minutes** after making changes (Google can take time to propagate)
+2. **Clear browser cache and cookies**
+3. **Check browser console** for specific error messages
+4. **Verify Client ID and Secret** are correct in Supabase Dashboard
+5. **Check Supabase logs** in Dashboard → Logs → Auth
+
+### Quick Checklist for Supabase Google OAuth
+
+- [ ] Google OAuth Client ID created in Google Cloud Console
+- [ ] Redirect URI added in Google Cloud Console: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+- [ ] OAuth consent screen configured in Google Cloud Console
+- [ ] Google provider enabled in Supabase Dashboard
+- [ ] Client ID and Secret added to Supabase Dashboard
+- [ ] Supabase URL Configuration set correctly
+- [ ] Environment variables set in `.env.local`
+- [ ] Waited a few minutes after changes
+
+### Important Notes
+
+- The redirect URI in Google Cloud Console **must** be the Supabase callback URL (`https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`), not your app's callback URL
+- Supabase handles the OAuth flow and then redirects to your app's `/auth/callback`
+- Always wait a few minutes after making changes in Google Cloud Console
+- Test users must be added if your OAuth app is in Testing mode
 
 ## User Data Management
 
@@ -107,6 +254,7 @@ Users are stored in two places:
 **Location**: `lib/api/auth.js`
 
 **Process**:
+
 1. Check if user exists
 2. Update existing or create new document
 3. Store provider information
@@ -161,6 +309,7 @@ Roles are stored in Firestore `teams` collection, not in Firebase Auth.
 **Location**: `lib/config/roles-config.js`
 
 **Structure**:
+
 ```javascript
 export const ROLES = {
   ADMIN: "admin",
@@ -183,15 +332,17 @@ export const ROLE_PERMISSIONS = {
 **Location**: `lib/utils/getUserRole.js`
 
 **Process**:
+
 1. Check teams collection by email
 2. Return role or default to "viewer"
 3. Cache result for performance
 
 **Usage**:
-```javascript
-import { getUserRole } from '../lib/utils/getUserRole';
 
-const role = await getUserRole('user@example.com');
+```javascript
+import { getUserRole } from "../lib/utils/getUserRole";
+
+const role = await getUserRole("user@example.com");
 ```
 
 ### Checking Permissions
@@ -201,11 +352,12 @@ const role = await getUserRole('user@example.com');
 **Location**: `lib/config/roles-config.js`
 
 **Usage**:
-```javascript
-import { hasPermission } from '../lib/config/roles-config';
 
-const canEdit = hasPermission(userRole, 'blogs', 'edit');
-const canPublish = hasPermission(userRole, 'blogs', 'publish');
+```javascript
+import { hasPermission } from "../lib/config/roles-config";
+
+const canEdit = hasPermission(userRole, "blogs", "edit");
+const canPublish = hasPermission(userRole, "blogs", "publish");
 ```
 
 ## Authentication State
@@ -217,16 +369,17 @@ const canPublish = hasPermission(userRole, 'blogs', 'publish');
 **Location**: `lib/api/auth.js`
 
 **Usage**:
+
 ```javascript
-import { onAuthStateChange } from '../lib/api/auth';
+import { onAuthStateChange } from "../lib/api/auth";
 
 const unsubscribe = onAuthStateChange((user) => {
-  if (user) {
-    // User is signed in
-    console.log('User:', user.email);
-  } else {
-    // User is signed out
-  }
+	if (user) {
+		// User is signed in
+		console.log("User:", user.email);
+	} else {
+		// User is signed out
+	}
 });
 
 // Cleanup
@@ -240,12 +393,13 @@ unsubscribe();
 **Location**: `lib/api/auth.js`
 
 **Usage**:
+
 ```javascript
-import { getCurrentUser } from '../lib/api/auth';
+import { getCurrentUser } from "../lib/api/auth";
 
 const user = await getCurrentUser();
 if (user) {
-  console.log('Current user:', user.email);
+	console.log("Current user:", user.email);
 }
 ```
 
@@ -258,18 +412,20 @@ User session data is stored in cookies for persistence.
 **Location**: `lib/utils/cookies.js`
 
 **Functions**:
+
 ```javascript
 // Set user cookie
-setUserCookie(userData)
+setUserCookie(userData);
 
 // Get user cookie
-getUserCookie()
+getUserCookie();
 
 // Remove user cookie
-removeUserCookie()
+removeUserCookie();
 ```
 
 **Cookie Structure**:
+
 ```javascript
 {
   uid: "firebase_uid",
@@ -287,8 +443,9 @@ removeUserCookie()
 **Location**: `lib/api/auth.js`
 
 **Usage**:
+
 ```javascript
-import { signOutUser } from '../lib/api/auth';
+import { signOutUser } from "../lib/api/auth";
 
 await signOutUser();
 // User is signed out
@@ -303,6 +460,7 @@ await signOutUser();
 **Component**: `lib/ui/LoginModal.jsx`
 
 **Features**:
+
 - Email/Password sign in
 - Google sign in
 - Sign up option
@@ -327,7 +485,7 @@ Admin routes check authentication:
 ```javascript
 const user = auth.currentUser;
 if (user && user.emailVerified) {
-  // Email is verified
+	// Email is verified
 }
 ```
 
@@ -336,7 +494,7 @@ if (user && user.emailVerified) {
 Firebase automatically sends verification emails on sign up. You can also send manually:
 
 ```javascript
-import { sendEmailVerification } from 'firebase/auth';
+import { sendEmailVerification } from "firebase/auth";
 
 await sendEmailVerification(auth.currentUser);
 ```
@@ -346,10 +504,10 @@ await sendEmailVerification(auth.currentUser);
 ### Sending Reset Email
 
 ```javascript
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../utils/firebase';
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../utils/firebase";
 
-await sendPasswordResetEmail(auth, 'user@example.com');
+await sendPasswordResetEmail(auth, "user@example.com");
 ```
 
 ## Security Best Practices
@@ -377,11 +535,11 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if request.auth.uid == userId;
     }
-    
+
     // Teams: Read if authenticated, write if admin
     match /teams/{teamId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null 
+      allow write: if request.auth != null
         && get(/databases/$(database)/documents/teams/$(request.auth.token.email)).data.role == 'admin';
     }
   }
@@ -404,12 +562,12 @@ service cloud.firestore {
 console.log(auth.currentUser);
 
 // Check user role
-const role = await getUserRole('user@example.com');
-console.log('Role:', role);
+const role = await getUserRole("user@example.com");
+console.log("Role:", role);
 
 // Check permissions
-const canEdit = hasPermission(role, 'blogs', 'edit');
-console.log('Can edit:', canEdit);
+const canEdit = hasPermission(role, "blogs", "edit");
+console.log("Can edit:", canEdit);
 ```
 
 ## Environment Variables
@@ -435,4 +593,3 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 - `onAuthStateChange(callback)`: Listen to auth changes
 - `saveUserToFirestore(user, provider)`: Save user data
 - `getUserFromFirestore(uid)`: Get user from Firestore
-

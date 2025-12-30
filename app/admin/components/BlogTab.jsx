@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,7 +9,12 @@ import {
 	Image as ImageIcon,
 	Copy,
 	FileText,
+	Search,
+	ArrowUpDown,
+	ArrowUp,
+	ArrowDown,
 } from "lucide-react";
+import Fuse from "fuse.js";
 import TiptapEditor from "./TiptapEditor";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import {
@@ -95,6 +100,87 @@ const BlogTab = () => {
 		queryKey: ["blogs"],
 		queryFn: () => getAllBlogs(),
 	});
+
+	const [searchQuery, setSearchQuery] = useState("");
+	const [sortField, setSortField] = useState(null);
+	const [sortDirection, setSortDirection] = useState("asc");
+
+	// Configure Fuse.js for search
+	const fuse = useMemo(() => {
+		return new Fuse(blogs, {
+			keys: ["title", "author", "status", "slug", "content"],
+			threshold: 0.3,
+			includeScore: true,
+		});
+	}, [blogs]);
+
+	// Perform search with Fuse.js
+	const searchedBlogs = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return blogs;
+		}
+		return fuse.search(searchQuery).map((result) => result.item);
+	}, [searchQuery, fuse, blogs]);
+
+	// Sort blogs
+	const sortedBlogs = useMemo(() => {
+		return [...searchedBlogs].sort((a, b) => {
+			if (!sortField) return 0;
+
+			// Handle date comparison
+			if (sortField === "createdAt") {
+				const dateA = new Date(a.created_at || a.createdAt || 0);
+				const dateB = new Date(b.created_at || b.createdAt || 0);
+				return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+			}
+
+			// Handle string comparison for other fields
+			let aValue, bValue;
+
+			switch (sortField) {
+				case "title":
+					aValue = (a.title || "").toLowerCase();
+					bValue = (b.title || "").toLowerCase();
+					break;
+				case "author":
+					aValue = (a.author || "").toLowerCase();
+					bValue = (b.author || "").toLowerCase();
+					break;
+				case "status":
+					aValue = (a.status || "").toLowerCase();
+					bValue = (b.status || "").toLowerCase();
+					break;
+				default:
+					return 0;
+			}
+
+			if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+			return 0;
+		});
+	}, [searchedBlogs, sortField, sortDirection]);
+
+	// Handle column sort
+	const handleSort = (field) => {
+		if (sortField === field) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
+
+	// Get sort icon for column header
+	const getSortIcon = (field) => {
+		if (sortField !== field) {
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+		}
+		return sortDirection === "asc" ? (
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		) : (
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		);
+	};
 
 	// Create blog mutation
 	const createBlogMutation = useMutation({
@@ -312,21 +398,57 @@ const BlogTab = () => {
 				)}
 			</div>
 
+			{/* Search */}
+			<div className="relative mb-4">
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<input
+					type="text"
+					placeholder="Search blogs by title, author, status, or slug..."
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+				/>
+			</div>
+
 			<div className="overflow-x-auto border border-zinc-200 rounded-xl">
 				<table className="w-full">
 					<thead>
 						<tr className="border-b border-zinc-200 bg-zinc-50">
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200">
-								Title
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("title")}
+							>
+								<div className="flex items-center">
+									Title
+									{getSortIcon("title")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Author
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("author")}
+							>
+								<div className="flex items-center">
+									Author
+									{getSortIcon("author")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Status
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("status")}
+							>
+								<div className="flex items-center">
+									Status
+									{getSortIcon("status")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Created
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("createdAt")}
+							>
+								<div className="flex items-center">
+									Created
+									{getSortIcon("createdAt")}
+								</div>
 							</th>
 							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
 								Copy
@@ -345,18 +467,22 @@ const BlogTab = () => {
 									Error loading blogs. Please try again.
 								</td>
 							</tr>
-						) : blogs.length === 0 ? (
+						) : sortedBlogs.length === 0 ? (
 							<tr>
 								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									No blogs found. Create your first blog!
+									{searchQuery
+										? "No blogs found matching your search."
+										: "No blogs found. Create your first blog!"}
 								</td>
 							</tr>
 						) : (
-							blogs.map((blog, index) => (
+							sortedBlogs.map((blog, index) => (
 								<tr
 									key={blog.id}
 									className={`${
-										index === blogs.length - 1 ? "" : "border-b border-zinc-200"
+										index === sortedBlogs.length - 1
+											? ""
+											: "border-b border-zinc-200"
 									} hover:bg-zinc-50 transition-colors`}
 								>
 									<td

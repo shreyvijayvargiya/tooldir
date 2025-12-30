@@ -1,7 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, X, Save, Eye, Mail } from "lucide-react";
+import {
+	Plus,
+	Trash2,
+	X,
+	Save,
+	Eye,
+	Mail,
+	Search,
+	ArrowUpDown,
+	ArrowUp,
+	ArrowDown,
+} from "lucide-react";
+import Fuse from "fuse.js";
 import TiptapEditor from "./TiptapEditor";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import {
@@ -88,6 +100,92 @@ const EmailTab = ({ onSendEmail }) => {
 		queryKey: ["emails"],
 		queryFn: () => getAllEmails(),
 	});
+
+	const [searchQuery, setSearchQuery] = useState("");
+	const [sortField, setSortField] = useState(null);
+	const [sortDirection, setSortDirection] = useState("asc");
+
+	// Configure Fuse.js for search
+	const fuse = useMemo(() => {
+		return new Fuse(emails, {
+			keys: ["subject", "status", "content"],
+			threshold: 0.3,
+			includeScore: true,
+		});
+	}, [emails]);
+
+	// Perform search with Fuse.js
+	const searchedEmails = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return emails;
+		}
+		return fuse.search(searchQuery).map((result) => result.item);
+	}, [searchQuery, fuse, emails]);
+
+	// Sort emails
+	const sortedEmails = useMemo(() => {
+		return [...searchedEmails].sort((a, b) => {
+			if (!sortField) return 0;
+
+			// Handle date comparison
+			if (sortField === "createdAt") {
+				const dateA = new Date(a.created_at || a.createdAt || 0);
+				const dateB = new Date(b.created_at || b.createdAt || 0);
+				return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+			}
+
+			// Handle numeric comparison for recipients
+			if (sortField === "recipients") {
+				const recipientsA = a.recipients || 0;
+				const recipientsB = b.recipients || 0;
+				return sortDirection === "asc"
+					? recipientsA - recipientsB
+					: recipientsB - recipientsA;
+			}
+
+			// Handle string comparison for other fields
+			let aValue, bValue;
+
+			switch (sortField) {
+				case "subject":
+					aValue = (a.subject || "").toLowerCase();
+					bValue = (b.subject || "").toLowerCase();
+					break;
+				case "status":
+					aValue = (a.status || "").toLowerCase();
+					bValue = (b.status || "").toLowerCase();
+					break;
+				default:
+					return 0;
+			}
+
+			if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+			return 0;
+		});
+	}, [searchedEmails, sortField, sortDirection]);
+
+	// Handle column sort
+	const handleSort = (field) => {
+		if (sortField === field) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
+
+	// Get sort icon for column header
+	const getSortIcon = (field) => {
+		if (sortField !== field) {
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+		}
+		return sortDirection === "asc" ? (
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		) : (
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		);
+	};
 
 	// Create email mutation
 	const createEmailMutation = useMutation({
@@ -296,21 +394,57 @@ const EmailTab = ({ onSendEmail }) => {
 				)}
 			</div>
 
+			{/* Search */}
+			<div className="relative mb-4">
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<input
+					type="text"
+					placeholder="Search emails by subject, status, or content..."
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+				/>
+			</div>
+
 			<div className="overflow-x-auto border border-zinc-200 rounded-xl">
 				<table className="w-full">
 					<thead>
 						<tr className="border-b border-zinc-200 bg-zinc-50">
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200">
-								Subject
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("subject")}
+							>
+								<div className="flex items-center">
+									Subject
+									{getSortIcon("subject")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Status
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("status")}
+							>
+								<div className="flex items-center">
+									Status
+									{getSortIcon("status")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Recipients
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("recipients")}
+							>
+								<div className="flex items-center">
+									Recipients
+									{getSortIcon("recipients")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Created
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("createdAt")}
+							>
+								<div className="flex items-center">
+									Created
+									{getSortIcon("createdAt")}
+								</div>
 							</th>
 							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
 								Actions
@@ -326,18 +460,20 @@ const EmailTab = ({ onSendEmail }) => {
 									Error loading emails. Please try again.
 								</td>
 							</tr>
-						) : emails.length === 0 ? (
+						) : sortedEmails.length === 0 ? (
 							<tr>
 								<td colSpan={5} className="py-8 text-center text-zinc-500">
-									No emails found. Create your first email campaign!
+									{searchQuery
+										? "No emails found matching your search."
+										: "No emails found. Create your first email campaign!"}
 								</td>
 							</tr>
 						) : (
-							emails.map((email, index) => (
+							sortedEmails.map((email, index) => (
 								<tr
 									key={email.id}
 									className={`${
-										index === emails.length - 1
+										index === sortedEmails.length - 1
 											? ""
 											: "border-b border-zinc-200"
 									} hover:bg-zinc-50 transition-colors`}

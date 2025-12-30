@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Plus, X, Save } from "lucide-react";
+import {
+	Trash2,
+	Plus,
+	X,
+	Save,
+	Search,
+	ArrowUpDown,
+	ArrowUp,
+	ArrowDown,
+} from "lucide-react";
+import Fuse from "fuse.js";
 import {
 	getAllSubscribers,
 	deleteSubscriber,
@@ -74,6 +84,87 @@ const SubscribersTab = () => {
 		queryKey: ["subscribers"],
 		queryFn: () => getAllSubscribers(),
 	});
+
+	const [searchQuery, setSearchQuery] = useState("");
+	const [sortField, setSortField] = useState(null);
+	const [sortDirection, setSortDirection] = useState("asc");
+
+	// Configure Fuse.js for search
+	const fuse = useMemo(() => {
+		return new Fuse(subscribers, {
+			keys: ["email", "name", "status"],
+			threshold: 0.3,
+			includeScore: true,
+		});
+	}, [subscribers]);
+
+	// Perform search with Fuse.js
+	const searchedSubscribers = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return subscribers;
+		}
+		return fuse.search(searchQuery).map((result) => result.item);
+	}, [searchQuery, fuse, subscribers]);
+
+	// Sort subscribers
+	const sortedSubscribers = useMemo(() => {
+		return [...searchedSubscribers].sort((a, b) => {
+			if (!sortField) return 0;
+
+			// Handle date comparison
+			if (sortField === "subscribedAt") {
+				const dateA = new Date(a.subscribed_at || a.subscribedAt || 0);
+				const dateB = new Date(b.subscribed_at || b.subscribedAt || 0);
+				return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+			}
+
+			// Handle string comparison for other fields
+			let aValue, bValue;
+
+			switch (sortField) {
+				case "email":
+					aValue = (a.email || "").toLowerCase();
+					bValue = (b.email || "").toLowerCase();
+					break;
+				case "name":
+					aValue = (a.name || "").toLowerCase();
+					bValue = (b.name || "").toLowerCase();
+					break;
+				case "status":
+					aValue = (a.status || "").toLowerCase();
+					bValue = (b.status || "").toLowerCase();
+					break;
+				default:
+					return 0;
+			}
+
+			if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+			return 0;
+		});
+	}, [searchedSubscribers, sortField, sortDirection]);
+
+	// Handle column sort
+	const handleSort = (field) => {
+		if (sortField === field) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
+
+	// Get sort icon for column header
+	const getSortIcon = (field) => {
+		if (sortField !== field) {
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+		}
+		return sortDirection === "asc" ? (
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		) : (
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		);
+	};
 
 	// Fetch emails with React Query
 	const { data: emails = [], isLoading: isLoadingEmails } = useQuery({
@@ -149,9 +240,9 @@ const SubscribersTab = () => {
 		});
 	};
 
-	const activeSubscribers = subscribers.filter(
-		(s) => s.status === "active"
-	).length;
+	const activeSubscribers = useMemo(() => {
+		return subscribers.filter((s) => s.status === "active").length;
+	}, [subscribers]);
 
 	return (
 		<div>
@@ -174,21 +265,57 @@ const SubscribersTab = () => {
 				</div>
 			</div>
 
+			{/* Search */}
+			<div className="relative mb-4">
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<input
+					type="text"
+					placeholder="Search subscribers by email, name, or status..."
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+				/>
+			</div>
+
 			<div className="overflow-x-auto border border-zinc-200 rounded-xl">
 				<table className="w-full">
 					<thead>
 						<tr className="border-b border-zinc-200 bg-zinc-50">
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200">
-								Email
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("email")}
+							>
+								<div className="flex items-center">
+									Email
+									{getSortIcon("email")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Name
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("name")}
+							>
+								<div className="flex items-center">
+									Name
+									{getSortIcon("name")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Status
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("status")}
+							>
+								<div className="flex items-center">
+									Status
+									{getSortIcon("status")}
+								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Subscribed
+							<th
+								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("subscribedAt")}
+							>
+								<div className="flex items-center">
+									Subscribed
+									{getSortIcon("subscribedAt")}
+								</div>
 							</th>
 							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
 								Actions
@@ -204,18 +331,20 @@ const SubscribersTab = () => {
 									Error loading subscribers. Please try again.
 								</td>
 							</tr>
-						) : subscribers.length === 0 ? (
+						) : sortedSubscribers.length === 0 ? (
 							<tr>
 								<td colSpan={5} className="py-8 text-center text-zinc-500">
-									No subscribers found.
+									{searchQuery
+										? "No subscribers found matching your search."
+										: "No subscribers found."}
 								</td>
 							</tr>
 						) : (
-							subscribers.map((subscriber, index) => (
+							sortedSubscribers.map((subscriber, index) => (
 								<tr
 									key={subscriber.id}
 									className={`${
-										index === subscribers.length - 1
+										index === sortedSubscribers.length - 1
 											? ""
 											: "border-b border-zinc-200"
 									} hover:bg-zinc-50 transition-colors`}

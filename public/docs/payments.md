@@ -48,6 +48,10 @@ Polar is a comprehensive payment platform designed for SaaS applications, handli
    - Save webhook configuration
    - Now webhooks from Polar will be forwarded to your local server
 
+   ![Setting up webhook with ngrok in Polar.sh dashboard](https://b4fcijccdw.ufs.sh/f/mVUSE925dTRYJCfcbyoG2bRAlp9mQzXtCFE8LDa5uTcysUBj)
+   
+   *Screenshot showing how to configure webhook URL using ngrok in Polar.sh dashboard for local development*
+
 ## Checkout Flow
 
 ### Creating Checkout Session
@@ -368,6 +372,10 @@ ngrok http 3000
 # Update webhook URL in Polar dashboard
 # Use ngrok URL: https://your-ngrok-url.ngrok.io/api/polar/webhook
 ```
+
+![Setting up webhook with ngrok in Polar.sh dashboard](https://b4fcijccdw.ufs.sh/f/mVUSE925dTRYJCfcbyoG2bRAlp9mQzXtCFE8LDa5uTcysUBj)
+
+*Screenshot showing how to configure webhook URL using ngrok in Polar.sh dashboard for local development*
 
 ## Error Handling
 

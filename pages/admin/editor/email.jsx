@@ -127,9 +127,6 @@ const EmailEditorPage = () => {
 			toast.success(
 				id ? "Email updated successfully!" : "Email created successfully!"
 			);
-			setTimeout(() => {
-				router.push("/");
-			}, 1500);
 		},
 		onError: (error) => {
 			console.error("Error saving email:", error);
@@ -177,7 +174,9 @@ const EmailEditorPage = () => {
 	const formatDate = (date) => {
 		if (!date) return "N/A";
 		try {
+			// Handle Supabase ISO strings or Firestore Timestamps
 			const dateObj = date?.toDate ? date.toDate() : new Date(date);
+			if (isNaN(dateObj.getTime())) return "N/A";
 			return dateObj.toLocaleDateString("en-US", {
 				month: "short",
 				day: "numeric",

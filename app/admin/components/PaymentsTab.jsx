@@ -1,44 +1,151 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { DollarSign, Search, Calendar, CheckCircle2, XCircle, Clock } from "lucide-react";
+import {
+	DollarSign,
+	Search,
+	Calendar,
+	CheckCircle2,
+	XCircle,
+	Clock,
+	ArrowUpDown,
+	ArrowUp,
+	ArrowDown,
+} from "lucide-react";
 import { getAllPayments } from "../../../lib/api/payments";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
+import Fuse from "fuse.js";
 
 const PaymentsTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all"); // all, succeeded, failed, pending
+	const [sortField, setSortField] = useState(null);
+	const [sortDirection, setSortDirection] = useState("asc");
 
-	const { data: payments = [], isLoading, error } = useQuery({
+	const {
+		data: payments = [],
+		isLoading,
+		error,
+	} = useQuery({
 		queryKey: ["payments"],
 		queryFn: () => getAllPayments(),
 	});
 
-	const filteredPayments = payments.filter((payment) => {
-		const matchesSearch =
-			payment.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			payment.payment_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			payment.paymentId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			payment.customer_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			payment.customerId?.toLowerCase().includes(searchQuery.toLowerCase());
+	// Filter by status first
+	const statusFilteredPayments = useMemo(() => {
+		return payments.filter((payment) => {
+			return statusFilter === "all" || payment.status === statusFilter;
+		});
+	}, [payments, statusFilter]);
 
-		const matchesStatus =
-			statusFilter === "all" || payment.status === statusFilter;
+	// Configure Fuse.js for search
+	const fuse = useMemo(() => {
+		return new Fuse(statusFilteredPayments, {
+			keys: [
+				"email",
+				"payment_id",
+				"paymentId",
+				"customer_id",
+				"customerId",
+				"name",
+				"plan_name",
+				"planName",
+			],
+			threshold: 0.3,
+			includeScore: true,
+		});
+	}, [statusFilteredPayments]);
 
-		return matchesSearch && matchesStatus;
-	});
+	// Perform search with Fuse.js
+	const searchedPayments = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return statusFilteredPayments;
+		}
+		return fuse.search(searchQuery).map((result) => result.item);
+	}, [searchQuery, fuse, statusFilteredPayments]);
+
+	// Sort payments
+	const sortedPayments = useMemo(() => {
+		return [...searchedPayments].sort((a, b) => {
+			if (!sortField) return 0;
+
+			// Handle date comparison
+			if (sortField === "createdAt" || sortField === "date") {
+				const dateA = new Date(a.created_at || a.createdAt || 0);
+				const dateB = new Date(b.created_at || b.createdAt || 0);
+				return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+			}
+
+			// Handle numeric comparison for amount
+			if (sortField === "amount") {
+				const amountA = a.amount || 0;
+				const amountB = b.amount || 0;
+				return sortDirection === "asc" ? amountA - amountB : amountB - amountA;
+			}
+
+			// Handle string comparison for other fields
+			let aValue, bValue;
+
+			switch (sortField) {
+				case "paymentId":
+					aValue = (a.payment_id || a.paymentId || a.id || "").toLowerCase();
+					bValue = (b.payment_id || b.paymentId || b.id || "").toLowerCase();
+					break;
+				case "customerName":
+					aValue = (a.name || a.customer_name || "").toLowerCase();
+					bValue = (b.name || b.customer_name || "").toLowerCase();
+					break;
+				case "status":
+					aValue = (a.status || "").toLowerCase();
+					bValue = (b.status || "").toLowerCase();
+					break;
+				case "planName":
+					aValue = (a.plan_name || a.planName || "").toLowerCase();
+					bValue = (b.plan_name || b.planName || "").toLowerCase();
+					break;
+				default:
+					return 0;
+			}
+
+			if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+			return 0;
+		});
+	}, [searchedPayments, sortField, sortDirection]);
+
+	// Handle column sort
+	const handleSort = (field) => {
+		if (sortField === field) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
+
+	// Get sort icon for column header
+	const getSortIcon = (field) => {
+		if (sortField !== field) {
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+		}
+		return sortDirection === "asc" ? (
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		) : (
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		);
+	};
 
 	const formatDate = (date) => {
 		if (!date) return "N/A";
-		
+
 		try {
 			const d = new Date(date);
-			
+
 			// Validate date
 			if (isNaN(d.getTime())) {
 				return "Invalid Date";
 			}
-			
+
 			return d.toLocaleDateString("en-US", {
 				year: "numeric",
 				month: "short",
@@ -211,23 +318,59 @@ const PaymentsTab = () => {
 				<table className="w-full">
 					<thead className="bg-zinc-50 border-b border-zinc-200">
 						<tr>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Payment ID
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("paymentId")}
+							>
+								<div className="flex items-center">
+									Payment ID
+									{getSortIcon("paymentId")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Customer
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("customerName")}
+							>
+								<div className="flex items-center">
+									Customer
+									{getSortIcon("customerName")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Amount
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("amount")}
+							>
+								<div className="flex items-center">
+									Amount
+									{getSortIcon("amount")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Status
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("status")}
+							>
+								<div className="flex items-center">
+									Status
+									{getSortIcon("status")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Date
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("date")}
+							>
+								<div className="flex items-center">
+									Date
+									{getSortIcon("date")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
-								Plan
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("planName")}
+							>
+								<div className="flex items-center">
+									Plan
+									{getSortIcon("planName")}
+								</div>
 							</th>
 						</tr>
 					</thead>
@@ -244,7 +387,7 @@ const PaymentsTab = () => {
 									Error loading payments. Please try again.
 								</td>
 							</tr>
-						) : filteredPayments.length === 0 ? (
+						) : sortedPayments.length === 0 ? (
 							<tr>
 								<td colSpan={6} className="py-8 text-center text-zinc-500">
 									{searchQuery || statusFilter !== "all"
@@ -253,11 +396,11 @@ const PaymentsTab = () => {
 								</td>
 							</tr>
 						) : (
-							filteredPayments.map((payment, index) => (
+							sortedPayments.map((payment, index) => (
 								<tr
 									key={payment.id}
 									className={`${
-										index === filteredPayments.length - 1
+										index === sortedPayments.length - 1
 											? ""
 											: "border-b border-zinc-200"
 									} hover:bg-zinc-50 transition-colors`}
@@ -309,5 +452,3 @@ const PaymentsTab = () => {
 };
 
 export default PaymentsTab;
-
-

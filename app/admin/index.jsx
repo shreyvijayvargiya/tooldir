@@ -18,6 +18,8 @@ import {
 	Calendar,
 	CreditCard,
 	MessageSquare,
+	User,
+	ExternalLink,
 } from "lucide-react";
 import HomeTab from "./components/HomeTab";
 import BlogTab from "./components/BlogTab";
@@ -403,8 +405,8 @@ const Admin = () => {
 											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
 									}`}
 								>
-									<Users className="w-3.5 h-3.5" />
-									Subscribers
+									<User className="w-3.5 h-3.5" />
+									Email Subscribers
 								</button>
 								<button
 									onClick={() => setActiveTab("users")}
@@ -454,6 +456,13 @@ const Admin = () => {
 							</div>
 						</div>
 						<div className="">
+							<a
+								className="flex gap-1 items-center p-2 my-2 cursor-pointer text-sm text-zinc-500 hover:text-black"
+								href="/docs"
+								target="_blank"
+							>
+								<ExternalLink className="w-3 h-3" /> Read Docs
+							</a>
 							<button
 								onClick={() => setShowLoginModal(true)}
 								className="w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 bg-zinc-100 hover:bg-zinc-200 text-black mb-2"

@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/globals.css";
 import { store, persistor } from "../lib/store/store";
+import SEO from "../lib/modules/SEO";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -36,6 +37,7 @@ const MyApp = ({ Component, pageProps }) => {
 
 	return (
 		<QueryClientProvider client={queryClient}>
+			<SEO />
 			{AppComponent}
 			<ToastContainer
 				position="top-right"
