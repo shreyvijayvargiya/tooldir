@@ -1,4 +1,4 @@
-import { saveCustomer } from "../../../lib/api-supabase/customers";
+import { saveCustomer } from "../../../lib/api/customers";
 import crypto from "crypto";
 import {
 	sendSubscriptionConfirmationEmail,
@@ -142,42 +142,40 @@ async function handleSubscriptionEvent(event) {
 		plan_id: planData.planId,
 		plan_name: planData.planName,
 		status: subscription.status || "active",
-		expires_at: expiresAt ? expiresAt.toISOString() : null,
+		expires_at: expiresAt,
 	};
 
 	await saveCustomer(updatedCustomerData);
 
 	// Store payment record for subscription events
-	if (subscription.price?.amount && subscription.price.amount > 0) {
-		const periodStart =
-			subscription.current_period_start || subscription.created_at;
-		const paymentId =
-			subscription.latest_invoice?.payment_intent?.id ||
-			subscription.latest_invoice?.id ||
-			`sub_${subscription.id}_${periodStart || Date.now()}`;
+	const periodStart =
+		subscription.current_period_start || subscription.created_at;
+	const paymentId =
+		subscription.latest_invoice?.payment_intent?.id ||
+		subscription.latest_invoice?.id ||
+		`sub_${subscription.id}_${periodStart || Date.now()}`;
 
-		const paymentStatus = await verifyPaymentStatus(
-			getPaymentStatusFromSubscription(subscription.status),
-			customerId,
-			subscription.id
-		);
+	const paymentStatus = await verifyPaymentStatus(
+		getPaymentStatusFromSubscription(subscription.status),
+		customerId,
+		subscription.id
+	);
 
-		await storePaymentRecord({
-			paymentId: paymentId,
-			customerId: customerId,
-			customerEmail: customerData.email,
-			customerName: customerData.name,
-			amount: subscription.price.amount,
-			currency: subscription.price.currency || DEFAULTS.CURRENCY,
-			status: paymentStatus,
-			planId: planData.planId,
-			planName: planData.planName,
-			subscriptionId: subscription.id,
-			createdAt: subscription.current_period_start || subscription.created_at,
-			paymentType: "subscription",
-			eventType: event.type,
-		});
-	}
+	await storePaymentRecord({
+		paymentId: paymentId,
+		customerId: customerId,
+		customerEmail: customerData.email,
+		customerName: customerData.name,
+		amount: subscription?.price?.amount,
+		currency: subscription?.price?.currency || DEFAULTS.CURRENCY,
+		status: paymentStatus,
+		planId: planData?.planId,
+		planName: planData?.planName,
+		subscriptionId: subscription.id,
+		createdAt: subscription?.current_period_start || subscription?.created_at,
+		paymentType: "subscription",
+		eventType: event.type,
+	});
 
 	// Send appropriate emails based on subscription status
 	if (customerData.isValid) {
@@ -185,20 +183,20 @@ async function handleSubscriptionEvent(event) {
 			if (isCancelled) {
 				const expiresAtDate = expiresAt;
 				await sendSubscriptionCancellationEmail({
-					customerEmail: customerData.email,
-					customerName: customerData.name,
-					planName: planData.planName,
+					customerEmail: customerData?.email,
+					customerName: customerData?.name,
+					planName: planData?.planName,
 					expiresAt: expiresAtDate,
 				});
 			} else if (isUpgrade && existingCustomerData.plan_name) {
 				const expiresAtDate = expiresAt;
 				await sendSubscriptionUpgradeEmail({
-					customerEmail: customerData.email,
-					customerName: customerData.name,
-					oldPlanName: existingCustomerData.plan_name,
-					newPlanName: planData.planName,
-					amount: subscription.price?.amount || 0,
-					currency: subscription.price?.currency || DEFAULTS.CURRENCY,
+					customerEmail: customerData?.email,
+					customerName: customerData?.name,
+					oldPlanName: existingCustomerData?.plan_name,
+					newPlanName: planData?.planName,
+					amount: subscription?.price?.amount || 0,
+					currency: subscription?.price?.currency || DEFAULTS.CURRENCY,
 					expiresAt: expiresAtDate,
 				});
 			}
@@ -238,19 +236,19 @@ async function handleSubscriptionCanceledEvent(event) {
 		subscription
 	);
 
-	const expiresAt = subscription.current_period_end
+	const expiresAt = subscription?.current_period_end
 		? normalizeDate(subscription.current_period_end)
-		: normalizeDate(existingCustomer.expires_at);
+		: normalizeDate(existingCustomer?.expires_at);
 
 	// Update customer status to canceled
 	const updatedCustomerData = {
 		customer_id: customerId,
-		email: customerData.email || existingCustomer.email,
-		name: customerData.name || existingCustomer.name,
-		plan_id: planData.planId || existingCustomer.plan_id || null,
+		email: customerData.email || existingCustomer?.email,
+		name: customerData.name || existingCustomer?.name,
+		plan_id: planData.planId || existingCustomer?.plan_id || null,
 		plan_name: planData.planName,
 		status: "canceled",
-		expires_at: expiresAt ? expiresAt.toISOString() : null,
+		expires_at: expiresAt ? expiresAt : null,
 	};
 
 	await saveCustomer(updatedCustomerData);
@@ -260,8 +258,8 @@ async function handleSubscriptionCanceledEvent(event) {
 		try {
 			const expiresAtDate = normalizeDate(expiresAt);
 			await sendSubscriptionCancellationEmail({
-				customerEmail: customerData.email,
-				customerName: customerData.name,
+				customerEmail: customerData?.email,
+				customerName: customerData?.name,
 				planName: planData.planName,
 				expiresAt: expiresAtDate,
 			});
@@ -298,9 +296,9 @@ async function handlePaymentEvent(event) {
 
 	// Enrich plan data from multiple sources
 	const planData = await enrichPlanData(
-		payment.customer_id,
-		payment.product,
-		payment.subscription || {}
+		payment?.customer_id,
+		payment?.product,
+		payment?.subscription || {}
 	);
 
 	// Verify payment status against subscription if available
@@ -308,8 +306,8 @@ async function handlePaymentEvent(event) {
 	if (payment.subscription_id) {
 		paymentStatus = await verifyPaymentStatus(
 			paymentStatus,
-			payment.customer_id,
-			payment.subscription_id
+			payment?.customer_id,
+			payment?.subscription_id
 		);
 	}
 
@@ -317,17 +315,17 @@ async function handlePaymentEvent(event) {
 	await storePaymentRecord({
 		paymentId: payment.id,
 		customerId: payment.customer_id,
-		customerEmail: customerData.email,
-		customerName: customerData.name,
-		amount: payment.amount || 0,
-		currency: payment.currency || DEFAULTS.CURRENCY,
+		customerEmail: customerData?.email,
+		customerName: customerData?.name,
+		amount: payment?.amount || 0,
+		currency: payment?.currency || DEFAULTS.CURRENCY,
 		status: paymentStatus,
-		planId: planData.planId,
-		planName: planData.planName,
-		subscriptionId: payment.subscription_id || null,
-		createdAt: payment.created_at,
+		planId: planData?.planId,
+		planName: planData?.planName,
+		subscriptionId: payment?.subscription_id || null,
+		createdAt: payment?.created_at,
 		paymentType: "payment",
-		eventType: event.type,
+		eventType: event?.type,
 	});
 
 	// If payment succeeded, update customer subscription status

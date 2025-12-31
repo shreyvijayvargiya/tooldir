@@ -52,8 +52,8 @@ Firestore is the primary database used in SAAS starter boilerplate. It's a NoSQL
   email: "string (unique)",
   name: "string (optional)",
   status: "active" | "unsubscribed",
-  subscribedAt: "Timestamp",
-  unsubscribedAt: "Timestamp (optional)",
+  subscribed_at: "Timestamp",
+  unsubscribed_at: "Timestamp (optional)",
   createdAt: "Timestamp",
   updatedAt: "Timestamp"
 }

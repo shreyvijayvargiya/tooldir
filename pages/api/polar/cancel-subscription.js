@@ -1,4 +1,4 @@
-import { getCustomerById, saveCustomer } from "../../../lib/api-supabase/customers";
+import { getCustomerById, saveCustomer } from "../../../lib/api/customers";
 
 export default async function handler(req, res) {
 	if (req.method !== "POST") {

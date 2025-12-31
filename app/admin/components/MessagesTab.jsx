@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -7,10 +7,11 @@ import {
 	Calendar,
 	Trash2,
 	Eye,
-	EyeOff,
-	MessageSquare,
 	Send,
 	X,
+	ArrowUpDown,
+	ArrowUp,
+	ArrowDown,
 } from "lucide-react";
 import {
 	getAllMessages,
@@ -19,12 +20,18 @@ import {
 } from "../../../lib/api/messages";
 import { CheckCircle2 } from "lucide-react";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
+import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import { toast } from "react-toastify";
 
 const MessagesTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [readFilter, setReadFilter] = useState("all"); // all, read, unread
 	const [repliedFilter, setRepliedFilter] = useState("all"); // all, replied, unreplied
+	const [sortField, setSortField] = useState(null);
+	const [sortDirection, setSortDirection] = useState("asc");
+	const [readFilterDropdownOpen, setReadFilterDropdownOpen] = useState(false);
+	const [repliedFilterDropdownOpen, setRepliedFilterDropdownOpen] =
+		useState(false);
 	const [replyModalOpen, setReplyModalOpen] = useState(false);
 	const [selectedMessage, setSelectedMessage] = useState(null);
 	const [replyForm, setReplyForm] = useState({
@@ -117,25 +124,100 @@ const MessagesTab = () => {
 		}
 	};
 
-	const filteredMessages = messages.filter((message) => {
-		const matchesSearch =
-			message.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			message.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			message.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			message.message?.toLowerCase().includes(searchQuery.toLowerCase());
+	const filteredMessages = useMemo(() => {
+		return messages.filter((message) => {
+			const matchesSearch =
+				message.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				message.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				message.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				message.message?.toLowerCase().includes(searchQuery.toLowerCase());
 
-		const matchesRead =
-			readFilter === "all" ||
-			(readFilter === "read" && message.read) ||
-			(readFilter === "unread" && !message.read);
+			const matchesRead =
+				readFilter === "all" ||
+				(readFilter === "read" && message.read) ||
+				(readFilter === "unread" && !message.read);
 
-		const matchesReplied =
-			repliedFilter === "all" ||
-			(repliedFilter === "replied" && message.replied) ||
-			(repliedFilter === "unreplied" && !message.replied);
+			const matchesReplied =
+				repliedFilter === "all" ||
+				(repliedFilter === "replied" && message.replied) ||
+				(repliedFilter === "unreplied" && !message.replied);
 
-		return matchesSearch && matchesRead && matchesReplied;
-	});
+			return matchesSearch && matchesRead && matchesReplied;
+		});
+	}, [messages, searchQuery, readFilter, repliedFilter]);
+
+	// Sort messages
+	const sortedMessages = useMemo(() => {
+		return [...filteredMessages].sort((a, b) => {
+			if (!sortField) return 0;
+
+			// Handle date comparison
+			if (sortField === "date" || sortField === "createdAt") {
+				const dateA = new Date(a.createdAt || a.created_at || 0);
+				const dateB = new Date(b.createdAt || b.created_at || 0);
+				return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+			}
+
+			// Handle string comparison for other fields
+			let aValue, bValue;
+
+			switch (sortField) {
+				case "from":
+				case "name":
+					aValue = (a.name || a.email || "").toLowerCase();
+					bValue = (b.name || b.email || "").toLowerCase();
+					break;
+				case "email":
+					aValue = (a.email || "").toLowerCase();
+					bValue = (b.email || "").toLowerCase();
+					break;
+				case "subject":
+					aValue = (a.subject || "").toLowerCase();
+					bValue = (b.subject || "").toLowerCase();
+					break;
+				case "status":
+					// Sort by read status first, then replied status
+					const aRead = a.read ? 1 : 0;
+					const bRead = b.read ? 1 : 0;
+					const aReplied = a.replied ? 1 : 0;
+					const bReplied = b.replied ? 1 : 0;
+					if (aRead !== bRead) {
+						return sortDirection === "asc" ? aRead - bRead : bRead - aRead;
+					}
+					return sortDirection === "asc"
+						? aReplied - bReplied
+						: bReplied - aReplied;
+				default:
+					return 0;
+			}
+
+			if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+			return 0;
+		});
+	}, [filteredMessages, sortField, sortDirection]);
+
+	// Handle column sort
+	const handleSort = (field) => {
+		if (sortField === field) {
+			setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+		} else {
+			setSortField(field);
+			setSortDirection("asc");
+		}
+	};
+
+	// Get sort icon for column header
+	const getSortIcon = (field) => {
+		if (sortField !== field) {
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+		}
+		return sortDirection === "asc" ? (
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		) : (
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+		);
+	};
 
 	const formatDate = (date) => {
 		if (!date) return "N/A";
@@ -180,45 +262,81 @@ const MessagesTab = () => {
 						className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
 					/>
 				</div>
-				<select
+				<AnimatedDropdown
+					isOpen={readFilterDropdownOpen}
+					onToggle={() => setReadFilterDropdownOpen(!readFilterDropdownOpen)}
+					onSelect={(value) => setReadFilter(value)}
+					options={[
+						{ value: "all", label: "All Messages" },
+						{ value: "unread", label: "Unread" },
+						{ value: "read", label: "Read" },
+					]}
 					value={readFilter}
-					onChange={(e) => setReadFilter(e.target.value)}
-					className="px-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
-				>
-					<option value="all">All Messages</option>
-					<option value="unread">Unread</option>
-					<option value="read">Read</option>
-				</select>
-				<select
+					placeholder="All Messages"
+					className="w-48"
+					buttonClassName="text-sm"
+				/>
+				<AnimatedDropdown
+					isOpen={repliedFilterDropdownOpen}
+					onToggle={() =>
+						setRepliedFilterDropdownOpen(!repliedFilterDropdownOpen)
+					}
+					onSelect={(value) => setRepliedFilter(value)}
+					options={[
+						{ value: "all", label: "All Replies" },
+						{ value: "replied", label: "Replied" },
+						{ value: "unreplied", label: "Unreplied" },
+					]}
 					value={repliedFilter}
-					onChange={(e) => setRepliedFilter(e.target.value)}
-					className="px-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
-				>
-					<option value="all">All Replies</option>
-					<option value="replied">Replied</option>
-					<option value="unreplied">Unreplied</option>
-				</select>
+					placeholder="All Replies"
+					className="w-48"
+					buttonClassName="text-sm"
+				/>
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-hidden">
+			<div className="border border-zinc-200 rounded-xl overflow-x-auto">
 				<table className="w-full">
 					<thead className="bg-zinc-50 border-b border-zinc-200">
 						<tr>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								From
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("from")}
+							>
+								<div className="flex items-center">
+									From
+									{getSortIcon("from")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Subject
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("subject")}
+							>
+								<div className="flex items-center">
+									Subject
+									{getSortIcon("subject")}
+								</div>
 							</th>
 							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
 								Message
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Date
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("date")}
+							>
+								<div className="flex items-center">
+									Date
+									{getSortIcon("date")}
+								</div>
 							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Status
+							<th
+								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								onClick={() => handleSort("status")}
+							>
+								<div className="flex items-center">
+									Status
+									{getSortIcon("status")}
+								</div>
 							</th>
 							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
 								Actions
@@ -238,7 +356,7 @@ const MessagesTab = () => {
 									Error loading messages. Please try again.
 								</td>
 							</tr>
-						) : filteredMessages.length === 0 ? (
+						) : sortedMessages.length === 0 ? (
 							<tr>
 								<td colSpan={6} className="py-8 text-center text-zinc-500">
 									{searchQuery ||
@@ -249,11 +367,11 @@ const MessagesTab = () => {
 								</td>
 							</tr>
 						) : (
-							filteredMessages.map((message, index) => (
+							sortedMessages.map((message, index) => (
 								<tr
 									key={message.id}
 									className={`${
-										index === filteredMessages.length - 1
+										index === sortedMessages.length - 1
 											? ""
 											: "border-b border-zinc-200"
 									} ${

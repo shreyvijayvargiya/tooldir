@@ -1,4 +1,4 @@
-import { supabase } from "../../../lib/api-supabase/supabase";
+import { supabase } from "../../../lib/api/supabase";
 
 export default async function handler(req, res) {
 	if (req.method !== "POST") {

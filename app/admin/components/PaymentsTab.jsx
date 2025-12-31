@@ -14,11 +14,14 @@ import {
 } from "lucide-react";
 import { getAllPayments } from "../../../lib/api/payments";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
+import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import Fuse from "fuse.js";
 
 const PaymentsTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all"); // all, succeeded, failed, pending
+	const [statusFilterDropdownOpen, setStatusFilterDropdownOpen] =
+		useState(false);
 	const [sortField, setSortField] = useState(null);
 	const [sortDirection, setSortDirection] = useState("asc");
 
@@ -301,20 +304,39 @@ const PaymentsTab = () => {
 						className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
 					/>
 				</div>
-				<select
+				<AnimatedDropdown
+					isOpen={statusFilterDropdownOpen}
+					onToggle={() =>
+						setStatusFilterDropdownOpen(!statusFilterDropdownOpen)
+					}
+					onSelect={(value) => setStatusFilter(value)}
+					options={[
+						{ value: "all", label: "All Status" },
+						{
+							value: "succeeded",
+							label: "Succeeded",
+							color: "bg-green-100 text-green-800",
+						},
+						{
+							value: "failed",
+							label: "Failed",
+							color: "bg-red-100 text-red-800",
+						},
+						{
+							value: "pending",
+							label: "Pending",
+							color: "bg-yellow-100 text-yellow-800",
+						},
+					]}
 					value={statusFilter}
-					onChange={(e) => setStatusFilter(e.target.value)}
-					className="px-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
-				>
-					<option value="all">All Status</option>
-					<option value="succeeded">Succeeded</option>
-					<option value="failed">Failed</option>
-					<option value="pending">Pending</option>
-				</select>
+					placeholder="All Status"
+					className="w-48"
+					buttonClassName="text-sm"
+				/>
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-hidden">
+			<div className="border border-zinc-200 rounded-xl overflow-x-auto">
 				<table className="w-full">
 					<thead className="bg-zinc-50 border-b border-zinc-200">
 						<tr>
@@ -413,7 +435,7 @@ const PaymentsTab = () => {
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<div>
 											<div className="font-medium text-sm text-zinc-900">
-												{payment.name || "N/A"}
+												{payment.name || payment.customer_name || "N/A"}
 											</div>
 											<div className="text-xs text-zinc-600">
 												{payment.email || "N/A"}
@@ -424,7 +446,7 @@ const PaymentsTab = () => {
 										<span className="font-semibold text-sm text-zinc-900">
 											{payment.amount
 												? formatCurrency(payment.amount, payment.currency)
-												: "N/A"}
+												: "$0"}
 										</span>
 									</td>
 									<td className="py-3 px-4 border-r border-zinc-200">

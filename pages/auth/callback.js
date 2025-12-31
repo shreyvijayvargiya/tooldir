@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/api-supabase/supabase';
+import { supabase } from '../../lib/api/supabase';
 
 export default function AuthCallback() {
 	const router = useRouter();
@@ -23,7 +23,7 @@ export default function AuthCallback() {
 					const provider = user.app_metadata?.provider || 'google';
 					
 					// Import and save user
-					const { saveUser } = await import('../../lib/api-supabase/users');
+					const { saveUser } = await import('../../lib/api/users');
 					await saveUser({
 						uid: user.id,
 						email: user.email,

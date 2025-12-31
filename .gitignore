@@ -4,6 +4,7 @@ yarn-error.lock
 .next
 .vercel
 .cursor
+.swc
 
 .DS_Store
 app/.DS_Store

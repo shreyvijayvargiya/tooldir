@@ -97,7 +97,8 @@ CREATE TABLE IF NOT EXISTS payments (
     plan_name TEXT,
     plan_id TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ
 );
 
 -- ============================================

@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import {
-	Users,
 	Search,
 	Mail,
 	Calendar,
@@ -168,7 +166,7 @@ const CustomersTab = () => {
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-hidden">
+			<div className="border border-zinc-200 rounded-xl overflow-x-auto">
 				<table className="w-full">
 					<thead className="bg-zinc-50 border-b border-zinc-200">
 						<tr>
@@ -289,9 +287,10 @@ const CustomersTab = () => {
 										)}
 									</td>
 									<td className="py-3 px-4 border-r border-zinc-200">
-										{customer.amount
-											? formatCurrency(customer.amount, customer.currency)
-											: "N/A"}
+										{formatCurrency(
+											customer.amount || 0,
+											customer.currency || "usd"
+										)}
 									</td>
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<div className="text-xs text-zinc-600 flex items-center gap-1">

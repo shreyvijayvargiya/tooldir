@@ -36,6 +36,7 @@ const SubscribersTab = () => {
 		name: "",
 	});
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [confirmAction, setConfirmAction] = useState(null);
 
 	// Fetch user role with React Query
 	const fetchUserRole = async () => {
@@ -112,7 +113,7 @@ const SubscribersTab = () => {
 			if (!sortField) return 0;
 
 			// Handle date comparison
-			if (sortField === "subscribedAt") {
+			if (sortField === "subscribed_at") {
 				const dateA = new Date(a.subscribed_at || a.subscribedAt || 0);
 				const dateB = new Date(b.subscribed_at || b.subscribedAt || 0);
 				return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
@@ -223,7 +224,9 @@ const SubscribersTab = () => {
 
 	// Delete subscriber
 	const handleDeleteSubscriber = async (id) => {
-		setConfirmAction(() => () => deleteSubscriberMutation.mutate(id));
+		setConfirmAction(() => {
+			deleteSubscriberMutation.mutate(id);
+		});
 		setShowConfirmModal(true);
 	};
 
@@ -310,11 +313,11 @@ const SubscribersTab = () => {
 							</th>
 							<th
 								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("subscribedAt")}
+								onClick={() => handleSort("subscribed_at")}
 							>
 								<div className="flex items-center">
 									Subscribed
-									{getSortIcon("subscribedAt")}
+									{getSortIcon("subscribed_at")}
 								</div>
 							</th>
 							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
@@ -369,7 +372,7 @@ const SubscribersTab = () => {
 										</span>
 									</td>
 									<td className="py-3 px-4 text-sm text-zinc-600 border-r border-zinc-200">
-										{formatDate(subscriber.subscribedAt)}
+										{formatDate(subscriber.subscribed_at)}
 									</td>
 									<td className="py-3 px-4 border-r border-zinc-200">
 										<div className="flex items-center gap-2">

@@ -20,6 +20,7 @@ import {
 	MessageSquare,
 	User,
 	ExternalLink,
+	RocketIcon,
 } from "lucide-react";
 import HomeTab from "./components/HomeTab";
 import BlogTab from "./components/BlogTab";
@@ -283,7 +284,7 @@ const Admin = () => {
 				{/* Sidebar */}
 				<>
 					{/* Desktop Sidebar - Always visible */}
-					<aside className="hidden h-full py-6 px-3 md:flex w-56 bg-transparent flex-col justify-between items-start overflow-y-auto">
+					<aside className="hidden h-full py-6 px-3 md:flex w-48 bg-transparent flex-col justify-between items-start overflow-y-auto">
 						<div className="space-y-2">
 							<div className="">
 								<div className="relative project-dropdown">
@@ -293,64 +294,11 @@ const Admin = () => {
 										onClick={() =>
 											setIsProjectDropdownOpen(!isProjectDropdownOpen)
 										}
-										className="w-full flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
+										className="text-xs w-full flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
 									>
-										<div className="py-1 px-2 rounded-xl bg-zinc-900 font-mono font-semibold text-white text-xs">
-											C
-										</div>
-										<div className="flex-1 text-left">
-											<div className="text-xs text-zinc-500">Project</div>
-											<div className="text-sm font-semibold text-zinc-900">
-												{selectedProject}
-											</div>
-										</div>
-										<ChevronDown
-											className={`w-4 h-4 text-zinc-400 transition-transform ${
-												isProjectDropdownOpen ? "rotate-180" : ""
-											}`}
-										/>
+										<RocketIcon className="w-3.5 h-3.5" />
+										SAAS Starter Admin
 									</motion.button>
-
-									<AnimatePresence>
-										{isProjectDropdownOpen && (
-											<motion.div
-												initial={{ opacity: 0, y: -10, scale: 0.95 }}
-												animate={{ opacity: 1, y: 0, scale: 1 }}
-												exit={{ opacity: 0, y: -10, scale: 0.95 }}
-												transition={{ duration: 0.15 }}
-												className="absolute top-full left-0 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-lg z-50 overflow-hidden"
-											>
-												<motion.button
-													whileHover={{ backgroundColor: "#f4f4f5" }}
-													onClick={() => {
-														setIsProjectDropdownOpen(false);
-													}}
-													className="w-full px-4 py-3 text-left flex items-center gap-2 text-zinc-700 hover:bg-zinc-50 transition-colors"
-												>
-													<div className="py-1 px-2 rounded-xl bg-zinc-900 font-mono font-semibold text-white text-xs">
-														C
-													</div>
-													<span className="text-sm font-medium">
-														{selectedProject}
-													</span>
-												</motion.button>
-												<div className="border-t border-zinc-200"></div>
-												<motion.button
-													whileHover={{ backgroundColor: "#f4f4f5" }}
-													onClick={() => {
-														toast.info("Add New Project feature coming soon!");
-														setIsProjectDropdownOpen(false);
-													}}
-													className="w-full px-4 py-3 text-left flex items-center gap-2 text-zinc-600 hover:bg-zinc-50 transition-colors"
-												>
-													<Plus className="w-4 h-4" />
-													<span className="text-sm font-medium">
-														Add New Project
-													</span>
-												</motion.button>
-											</motion.div>
-										)}
-									</AnimatePresence>
 								</div>
 							</div>
 							<div className="space-y-1">

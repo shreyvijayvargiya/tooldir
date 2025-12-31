@@ -9,8 +9,8 @@
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { createBlog } from "../lib/api-supabase/blog.js";
-import { createEmail } from "../lib/api-supabase/emails.js";
+import { createBlog } from "../lib/api/blog.js";
+import { createEmail } from "../lib/api/emails.js";
 
 // Load environment variables from .env.local
 const __filename = fileURLToPath(import.meta.url);
