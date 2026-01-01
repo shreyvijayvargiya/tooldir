@@ -56,7 +56,7 @@ const HomePage = () => {
 			icon: Database,
 			title: "Database Ready",
 			description:
-				"Firebase Firestore integration with Supabase alternative included.",
+				"Supabase database integration with PostgreSQL included.",
 		},
 		{
 			icon: Users,
@@ -132,7 +132,7 @@ const HomePage = () => {
 		{
 			question: "Can I use my own backend?",
 			answer:
-				"Yes! The template works with Firebase, Supabase, or any backend API. You can easily swap out the database and API integrations to match your preferences.",
+				"Yes! The template works with Supabase, or any backend API. You can easily swap out the database and API integrations to match your preferences.",
 		},
 		{
 			question: "Is there support included?",

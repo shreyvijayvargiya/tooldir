@@ -39,7 +39,7 @@ const FeaturesPage = () => {
 			icon: Database,
 			title: "Database Ready",
 			description:
-				"Firebase Firestore integration with Supabase alternative. Real-time data synchronization included.",
+				"Supabase database integration with PostgreSQL included. Real-time data synchronization included.",
 		},
 		{
 			icon: Users,

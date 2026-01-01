@@ -74,9 +74,9 @@ const BuildForm = () => {
 # These are sensitive credentials and should not be stored in the repository
 #
 # Required Environment Variables:
-# - Firebase Configuration (NEXT_PUBLIC_FIREBASE_*)
+# - Supabase Configuration (NEXT_PUBLIC_SUPABASE_*)
 # - Resend Email Configuration (RESEND_API_KEY, RESEND_FROM_EMAIL)
-# - Stripe Payments Configuration (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET)
+# - Polar Payments Configuration (POLAR_ACCESS_TOKEN, POLAR_API_URL, POLAR_WEBHOOK_SECRET)
 `;
 		setGeneratedEnv(envContent);
 		setShowEnvCode(true);

@@ -5,6 +5,7 @@ The Admin Panel is a comprehensive content management system for SAAS Starter bo
 ## Overview
 
 The Admin Panel provides a centralized interface for managing:
+
 - Blogs and content
 - Email campaigns
 - Subscribers
@@ -36,6 +37,7 @@ The Admin Panel provides a centralized interface for managing:
 ### Sidebar Navigation
 
 **Sections**:
+
 1. **Home**: Dashboard with statistics
 2. **Blogs**: Blog post management
 3. **Emails**: Email campaign management
@@ -59,12 +61,14 @@ The Admin Panel provides a centralized interface for managing:
 **Component**: `app/admin/components/HomeTab.jsx`
 
 **Features**:
+
 - Dashboard statistics
 - Recent activity
 - Quick actions
 - Analytics overview
 
 **Statistics Displayed**:
+
 - Total blogs
 - Total subscribers
 - Total users
@@ -109,6 +113,7 @@ The Admin Panel provides a centralized interface for managing:
 **Location**: `pages/admin/editor/blog.jsx`
 
 **Features**:
+
 - Tiptap rich text editor
 - Image upload
 - Markdown support
@@ -117,6 +122,7 @@ The Admin Panel provides a centralized interface for managing:
 - Preview mode
 
 **Editor Extensions**:
+
 - Bold, italic, underline
 - Headings
 - Lists (ordered, unordered)
@@ -162,6 +168,7 @@ The Admin Panel provides a centralized interface for managing:
 **Location**: `pages/admin/editor/email.jsx`
 
 **Features**:
+
 - Tiptap editor
 - HTML preview
 - Send test email
@@ -300,16 +307,19 @@ The Admin Panel provides a centralized interface for managing:
 ### Modals
 
 **Confirmation Modal**: `lib/ui/ConfirmationModal.jsx`
+
 - Confirm destructive actions
 - Customizable message
 - Variant support (danger, info, etc.)
 
 **Login Modal**: `lib/ui/LoginModal.jsx`
+
 - Email/password sign in
 - Google sign in
 - Sign up option
 
 **Search Modal**: `app/admin/components/SearchModal.jsx`
+
 - Global search
 - Keyboard navigation
 - Quick actions
@@ -317,6 +327,7 @@ The Admin Panel provides a centralized interface for managing:
 ### Tables
 
 **Table Skeleton**: `lib/ui/TableSkeleton.jsx`
+
 - Loading state
 - Consistent styling
 
@@ -337,10 +348,11 @@ The Admin Panel provides a centralized interface for managing:
 - Background sync
 
 **Usage**:
+
 ```javascript
 const { data, isLoading } = useQuery({
-  queryKey: ['blogs'],
-  queryFn: getAllBlogs
+	queryKey: ["blogs"],
+	queryFn: getAllBlogs,
 });
 ```
 
@@ -443,28 +455,17 @@ const { data, isLoading } = useQuery({
 ### Debug Mode
 
 Enable debug logging:
+
 ```javascript
-console.log('User role:', userRole);
-console.log('Permissions:', permissions);
+console.log("User role:", userRole);
+console.log("Permissions:", permissions);
 ```
 
 ## Environment Variables
 
 ```env
 # Required for admin panel
-NEXT_PUBLIC_FIREBASE_API_KEY=your_key
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-# ... other Firebase vars
+NEXT_PUBLIC_SUPABASE_KEY=your_key
+NEXT_PUBLIC_SUPABASE_URL=your_project_id
+
 ```
-
-## Future Enhancements
-
-- Analytics dashboard
-- Content scheduling
-- Bulk operations
-- Advanced search
-- Custom fields
-- Workflow management
-- Team collaboration
-- Activity logs
-
