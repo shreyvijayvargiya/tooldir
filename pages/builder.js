@@ -146,49 +146,25 @@ ${envVars.length > 0 ? `# - Module-specific variables:\n${envVars.map((v) => `# 
 
 			const originalData = await originalResponse.json();
 
-			// If AI is enabled, use AI to filter the AST
-			if (useAI) {
-				const aiResponse = await fetch("/api/builder/generate-ast-ai", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						originalAST: originalData.ast,
-						selectedModules: config.selectedModules || [],
-						projectName: config.saasName || "saas-starter",
-						excludeFiles: excludeFiles,
-					}),
-				});
+			// Use traditional filtering
+			const response = await fetch("/api/builder/generate-ast", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					excludeFiles: excludeFiles,
+					selectedModules: config.selectedModules || [],
+				}),
+			});
 
-				if (!aiResponse.ok) {
-					throw new Error("Failed to generate AI-powered AST");
-				}
-
-				const aiData = await aiResponse.json();
-				setAstData(aiData);
-				toast.success("AI-powered code repository AST generated successfully!");
-			} else {
-				// Use traditional filtering
-				const response = await fetch("/api/builder/generate-ast", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						excludeFiles: excludeFiles,
-						selectedModules: config.selectedModules || [],
-					}),
-				});
-
-				if (!response.ok) {
-					throw new Error("Failed to generate AST");
-				}
-
-				const data = await response.json();
-				setAstData(data);
-				toast.success("Code repository AST generated successfully!");
+			if (!response.ok) {
+				throw new Error("Failed to generate AST");
 			}
+
+			const data = await response.json();
+			setAstData(data);
+			toast.success("Code repository AST generated successfully!");
 		} catch (error) {
 			console.error("Error fetching AST:", error);
 			toast.error(
