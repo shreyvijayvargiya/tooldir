@@ -242,7 +242,7 @@ ${envVars.length > 0 ? `# - Module-specific variables:\n${envVars.map((v) => `# 
 					? "Failed to generate AI-powered AST. Falling back to traditional method."
 					: "Failed to generate code repository AST"
 			);
-			
+
 			// Fallback to traditional method if AI fails
 			if (useAI) {
 				try {
@@ -488,14 +488,46 @@ ${envVars.length > 0 ? `# - Module-specific variables:\n${envVars.map((v) => `# 
 									animate={{ opacity: 1, y: 0 }}
 									className="space-y-4"
 								>
-									<h2 className="text-xl font-semibold text-zinc-900 mb-4">
-										Select Features & Modules
-									</h2>
-									<p className="text-sm text-zinc-600 mb-6">
-										Choose which features you want to include in your SaaS
-										application. Only selected modules and their dependencies
-										will be included in the generated code repository.
-									</p>
+									<div className="flex items-center justify-between mb-4">
+										<div>
+											<h2 className="text-xl font-semibold text-zinc-900">
+												Select Features & Modules
+											</h2>
+											<p className="text-sm text-zinc-600 mt-1">
+												Choose which features you want to include in your SaaS
+												application. Only selected modules and their
+												dependencies will be included in the generated code
+												repository.
+											</p>
+										</div>
+										<button
+											onClick={() => {
+												const allSelected =
+													config.selectedModules?.length ===
+													selectableModules.length;
+												if (allSelected) {
+													// Deselect all
+													setConfig((prev) => ({
+														...prev,
+														selectedModules: [],
+													}));
+												} else {
+													// Select all
+													setConfig((prev) => ({
+														...prev,
+														selectedModules: [...selectableModules],
+													}));
+												}
+											}}
+											className="flex items-center gap-2 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl transition-colors text-sm font-medium whitespace-nowrap"
+										>
+											<Check className="w-4 h-4" />
+											{config.selectedModules?.length ===
+											selectableModules.length
+												? "Deselect All"
+												: "Select All"}
+										</button>
+									</div>
 
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 										{selectableModules.map((moduleKey) => {
@@ -582,8 +614,6 @@ ${envVars.length > 0 ? `# - Module-specific variables:\n${envVars.map((v) => `# 
 										Repository & Deployment
 									</h2>
 
-								
-
 									{/* Exclude Files Configuration */}
 									<div>
 										<label className="block text-sm font-medium text-zinc-900 mb-2">
@@ -653,7 +683,9 @@ ${envVars.length > 0 ? `# - Module-specific variables:\n${envVars.map((v) => `# 
 										) : (
 											<>
 												<Check className="w-4 h-4" />
-												{useAIGeneration ? "Generate with AI" : "Generate Configuration"}
+												{useAIGeneration
+													? "Generate with AI"
+													: "Generate Configuration"}
 											</>
 										)}
 									</button>
@@ -786,7 +818,6 @@ ${envVars.length > 0 ? `# - Module-specific variables:\n${envVars.map((v) => `# 
 															<span className="text-sm font-mono text-zinc-900 truncate">
 																{fileContent.path}
 															</span>
-															
 														</div>
 														<button
 															onClick={() => {
