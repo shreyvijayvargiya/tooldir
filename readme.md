@@ -3,7 +3,6 @@
 A comprehensive SaaS starter template built with **Next.js**, **Supabase**, and **Polar**. Features include authentication, payments, admin panel, blog, email management, and comprehensive documentation.
 
 ## Features
-
 - 🔐 Authentication with Supabase
 - 💳 Payment processing with Polar
 - 📊 Admin dashboard

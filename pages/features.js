@@ -4,7 +4,6 @@ import Navbar from "../app/components/Navbar";
 import Footer from "../app/components/Footer";
 import { motion } from "framer-motion";
 import {
-	Check,
 	Zap,
 	Shield,
 	Rocket,
@@ -130,4 +129,3 @@ const FeaturesPage = () => {
 };
 
 export default FeaturesPage;
-
