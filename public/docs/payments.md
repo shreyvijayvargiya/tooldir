@@ -175,7 +175,37 @@ if (signature !== expectedSignature) {
 
 ### Webhook Handler
 
+**Location**: `pages/api/polar/webhook.js`
+
+The webhook handler uses utilities from `lib/utils/polar/` for consistent data processing:
+
 ```javascript
+// Import utility functions (can use centralized index or individual files)
+import { DEFAULTS } from "../../../lib/utils/polar/constants";
+import { normalizeDate } from "../../../lib/utils/polar/dateUtils";
+import {
+  getCustomerFromFirestore,
+  enrichCustomerData,
+} from "../../../lib/utils/polar/customerUtils";
+import { enrichPlanData } from "../../../lib/utils/polar/planUtils";
+import {
+  getPaymentStatusFromSubscription,
+  verifyPaymentStatus,
+  storePaymentRecord,
+} from "../../../lib/utils/polar/paymentUtils";
+
+// Or import from centralized index:
+// import {
+//   DEFAULTS,
+//   normalizeDate,
+//   getCustomerFromFirestore,
+//   enrichCustomerData,
+//   enrichPlanData,
+//   getPaymentStatusFromSubscription,
+//   verifyPaymentStatus,
+//   storePaymentRecord,
+// } from "../../../lib/utils/polar";
+
 export default async function handler(req, res) {
   // Verify signature
   // Handle event type
@@ -191,6 +221,16 @@ export default async function handler(req, res) {
   return res.status(200).json({ received: true });
 }
 ```
+
+**Key Utility Usage in Webhooks:**
+
+- **`enrichCustomerData()`** - Enriches customer information from Polar webhook data
+- **`enrichPlanData()`** - Extracts plan information from product and subscription data
+- **`normalizeDate()`** - Converts Polar timestamps to consistent Date objects
+- **`storePaymentRecord()`** - Validates and stores payment records in Supabase
+- **`verifyPaymentStatus()`** - Ensures payment status matches subscription status
+- **`getPaymentStatusFromSubscription()`** - Maps subscription status to payment status
+- **`DEFAULTS`** - Provides fallback values for missing data
 
 ## Subscription Management
 
@@ -269,6 +309,78 @@ const response = await fetch('/api/polar/cancel-subscription', {
 
 ### Location: `lib/utils/polar/`
 
+All Polar webhook utilities are centralized in `lib/utils/polar/index.js` for easy importing. You can import all utilities from a single location:
+
+```javascript
+// Import from centralized index
+import {
+  // Constants
+  COLLECTIONS,
+  DEFAULTS,
+  STATUS_MAPPING,
+  VALIDATION,
+  // Date utilities
+  normalizeDate,
+  getFirestoreDate,
+  // Customer utilities
+  getCustomerFromFirestore,
+  enrichCustomerData,
+  // Plan utilities
+  enrichPlanData,
+  // Payment utilities
+  getPaymentStatusFromSubscription,
+  verifyPaymentStatus,
+  validatePaymentData,
+  storePaymentRecord,
+} from "../../../lib/utils/polar";
+```
+
+**Note**: You can also import directly from individual files if needed, but using the centralized index is recommended for consistency.
+
+### Usage in Webhooks
+
+The webhook handler (`pages/api/polar/webhook.js`) uses these utilities extensively:
+
+```javascript
+import { DEFAULTS } from "../../../lib/utils/polar/constants";
+import { normalizeDate } from "../../../lib/utils/polar/dateUtils";
+import {
+  getCustomerFromFirestore,
+  enrichCustomerData,
+} from "../../../lib/utils/polar/customerUtils";
+import { enrichPlanData } from "../../../lib/utils/polar/planUtils";
+import {
+  getPaymentStatusFromSubscription,
+  verifyPaymentStatus,
+  storePaymentRecord,
+} from "../../../lib/utils/polar/paymentUtils";
+```
+
+### Individual Utility Files
+
+#### Constants (`constants.js`)
+
+Exported via index: `COLLECTIONS`, `DEFAULTS`, `STATUS_MAPPING`, `VALIDATION`
+
+```javascript
+// Collection names
+COLLECTIONS.CUSTOMERS
+COLLECTIONS.PAYMENTS
+
+// Default values
+DEFAULTS.PLAN_NAME
+DEFAULTS.CUSTOMER_NAME
+DEFAULTS.CURRENCY
+DEFAULTS.STATUS
+
+// Status mappings
+STATUS_MAPPING.SUBSCRIPTION_TO_PAYMENT
+
+// Validation rules
+VALIDATION.REQUIRED_PAYMENT_FIELDS
+VALIDATION.INVALID_EMAIL_PATTERN
+```
+
 #### Payment Utils (`paymentUtils.js`)
 
 ```javascript
@@ -287,33 +399,63 @@ verifyPaymentStatus(status, customerId, subscriptionId)
 
 #### Customer Utils (`customerUtils.js`)
 
+Exported via index: `getCustomerFromFirestore`, `enrichCustomerData`
+
 ```javascript
-// Enrich customer data
+// Enrich customer data from multiple sources
 enrichCustomerData(customerId, customerData)
 
-// Store customer record
-storeCustomerRecord(customerData)
+// Get customer from Supabase
+getCustomerFromFirestore(customerId)
 ```
 
 #### Plan Utils (`planUtils.js`)
 
-```javascript
-// Enrich plan data
-enrichPlanData(customerId, product, subscription)
+Exported via index: `enrichPlanData`
 
-// Get plan information
-getPlanInfo(planId)
+```javascript
+// Enrich plan data from product and subscription
+enrichPlanData(customerId, product, subscription)
 ```
 
 #### Date Utils (`dateUtils.js`)
 
+Exported via index: `normalizeDate`, `getFirestoreDate`
+
 ```javascript
-// Normalize date
+// Normalize date to JavaScript Date object
 normalizeDate(timestamp)
 
-// Get Firestore date
+// Get Firestore Timestamp (if using Firestore)
 getFirestoreDate(timestamp)
 ```
+
+### Complete Utility Reference
+
+All utilities exported from `lib/utils/polar/index.js`:
+
+**Constants:**
+- `COLLECTIONS` - Collection names for database
+- `DEFAULTS` - Default values for plans, status, currency
+- `STATUS_MAPPING` - Maps subscription status to payment status
+- `VALIDATION` - Validation rules and required fields
+
+**Date Utilities:**
+- `normalizeDate(timestamp)` - Converts various date formats to Date object
+- `getFirestoreDate(timestamp)` - Converts to Firestore Timestamp (if using Firestore)
+
+**Customer Utilities:**
+- `getCustomerFromFirestore(customerId)` - Retrieves customer from Supabase
+- `enrichCustomerData(customerId, customerData)` - Enriches customer data from multiple sources
+
+**Plan Utilities:**
+- `enrichPlanData(customerId, product, subscription)` - Extracts and enriches plan information
+
+**Payment Utilities:**
+- `getPaymentStatusFromSubscription(subscriptionStatus)` - Maps subscription status to payment status
+- `verifyPaymentStatus(paymentStatus, customerId, subscriptionId)` - Verifies payment status consistency
+- `validatePaymentData(payment)` - Validates payment data before storage
+- `storePaymentRecord(paymentData)` - Stores payment record in Supabase with validation
 
 ## Admin Panel Integration
 

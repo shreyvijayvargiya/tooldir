@@ -8,8 +8,6 @@ import {
 	FileText,
 	Mail,
 	Users,
-	Plus,
-	Shield,
 	ArrowRight,
 	Sparkles,
 } from "lucide-react";
@@ -163,14 +161,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			},
 		},
 		{
-			icon: Shield,
-			label: "Add Team Member",
-			action: () => {
-				onNavigate("teams");
-				onClose();
-			},
-		},
-		{
 			icon: Users,
 			label: "Check Subscribers",
 			action: () => {
@@ -256,8 +246,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 										<X className="w-5 h-5" />
 									</button>
 								</div>
-
-								
 							</div>
 
 							{/* Content */}
