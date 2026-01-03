@@ -1,10 +1,7 @@
 import fs from "fs";
 import path from "path";
 import archiver from "archiver";
-import {
-	getFilesForModules,
-	getAdminTabConfig,
-} from "../../../lib/config/modules-config";
+import { getFilesForModules } from "../../../lib/config/modules-config";
 import {
 	generateFooter,
 	generateBlogPage,
