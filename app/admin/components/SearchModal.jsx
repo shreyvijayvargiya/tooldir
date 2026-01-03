@@ -8,8 +8,13 @@ import {
 	FileText,
 	Mail,
 	Users,
+	Shield,
 	ArrowRight,
 	Sparkles,
+	Receipt,
+	LayoutGrid,
+	UsersRound,
+	AlertCircle,
 } from "lucide-react";
 import { getAllBlogs } from "../../../lib/api/blog";
 import { getAllEmails } from "../../../lib/api/emails";
@@ -161,6 +166,14 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			},
 		},
 		{
+			icon: Shield,
+			label: "Add Team Member",
+			action: () => {
+				onNavigate("teams");
+				onClose();
+			},
+		},
+		{
 			icon: Users,
 			label: "Check Subscribers",
 			action: () => {
@@ -173,6 +186,46 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			label: "Send Email to Subscriber",
 			action: () => {
 				onNavigate("subscribers");
+				onClose();
+			},
+		},
+		{
+			icon: Receipt,
+			label: "Create New Invoice",
+			action: () => {
+				onNavigate("invoices");
+				onClose();
+			},
+		},
+		{
+			icon: LayoutGrid,
+			label: "Open Kanban Board",
+			action: () => {
+				onNavigate("kanban-board");
+				onClose();
+			},
+		},
+		{
+			icon: Receipt,
+			label: "View Invoices",
+			action: () => {
+				onNavigate("invoices");
+				onClose();
+			},
+		},
+		{
+			icon: UsersRound,
+			label: "Manage Waitlist",
+			action: () => {
+				onNavigate("waitlist");
+				onClose();
+			},
+		},
+		{
+			icon: AlertCircle,
+			label: "Report Issues",
+			action: () => {
+				onNavigate("reportIssues");
 				onClose();
 			},
 		},

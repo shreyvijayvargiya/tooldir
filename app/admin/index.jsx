@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	FileText,
@@ -19,17 +19,28 @@ import {
 	CreditCard,
 	MessageSquare,
 	User,
-	ExternalLink,
 	RocketIcon,
+	ExternalLink,
+	Receipt,
+	Building2,
+	AlertCircle,
+	UsersRound,
+	LayoutGrid,
 } from "lucide-react";
 import HomeTab from "./components/HomeTab";
 import BlogTab from "./components/BlogTab";
 import EmailTab from "./components/EmailTab";
+import KanbanBoardTab from "./components/KanbanBoardTab";
 import SubscribersTab from "./components/SubscribersTab";
 import UsersTab from "./components/UsersTab";
 import CustomersTab from "./components/CustomersTab";
 import PaymentsTab from "./components/PaymentsTab";
 import MessagesTab from "./components/MessagesTab";
+import InvoiceTab from "./components/InvoiceTab";
+import WaitlistTab from "./components/WaitlistTab";
+import ReportIssuesTab from "./components/ReportIssuesTab";
+import ProductsTab from "./components/ProductsTab";
+import TeamsTab from "./components/TeamsTab";
 import SearchModal from "./components/SearchModal";
 import { markEmailAsSent } from "../../lib/api/emails";
 import { onAuthStateChange } from "../../lib/api/auth";
@@ -45,9 +56,10 @@ import {
 	setUserCookie,
 } from "../../lib/utils/cookies";
 import { toast } from "react-toastify";
+import { useAppQueryClient } from "../../lib/hooks/useQueryClient";
 
 const Admin = () => {
-	const queryClient = useQueryClient();
+	const queryClient = useAppQueryClient();
 	const [activeTab, setActiveTab] = useState("home");
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [showSearchModal, setShowSearchModal] = useState(false);
@@ -68,14 +80,14 @@ const Admin = () => {
 	// Fetch user role with React Query
 	const fetchUserRole = async () => {
 		try {
-			// Get current user email (from Supabase Auth or localStorage fallback)
+			// Get current user email (from Firebase Auth or localStorage fallback)
 			const userEmail = await getCurrentUserEmail();
 
 			console.log("CMS: Current user email:", userEmail);
 
 			if (userEmail) {
-				// Fetch role from Supabase teams table using email
-				// Supabase Auth users don't have role - we check teams table
+				// Fetch role from Firestore teams collection using email
+				// Firebase Auth users don't have role - we check teams collection
 				const role = await getUserRole(userEmail, false);
 				console.log("CMS: Fetched role from teams collection:", role);
 				return role;
@@ -111,22 +123,22 @@ const Admin = () => {
 
 	// Listen for auth state changes and refetch user role
 	useEffect(() => {
-		const unsubscribe = onAuthStateChange(async (supabaseUser) => {
+		const unsubscribe = onAuthStateChange(async (firebaseUser) => {
 			// Invalidate userRole query when auth state changes
 			queryClient.invalidateQueries({ queryKey: ["userRole"] });
 
 			// Update user state and cookie
-			if (supabaseUser) {
+			if (firebaseUser) {
 				const userData = {
-					uid: supabaseUser.uid,
-					email: supabaseUser.email,
+					uid: firebaseUser.uid,
+					email: firebaseUser.email,
 					displayName:
-						supabaseUser.displayName ||
-						supabaseUser.email?.split("@")[0] ||
+						firebaseUser.displayName ||
+						firebaseUser.email?.split("@")[0] ||
 						"User",
-					photoURL: supabaseUser.photoURL || null,
+					photoURL: firebaseUser.photoURL || null,
 					provider:
-						supabaseUser.providerData?.[0]?.providerId === "google.com"
+						firebaseUser.providerData[0]?.providerId === "google.com"
 							? "google"
 							: "email",
 				};
@@ -284,20 +296,19 @@ const Admin = () => {
 				{/* Sidebar */}
 				<>
 					{/* Desktop Sidebar - Always visible */}
-					<aside className="hidden h-full py-6 px-3 md:flex w-48 bg-transparent flex-col justify-between items-start overflow-y-auto">
+					<aside className="hidden h-full py-6 px-1 md:flex w-48 bg-transparent flex-col justify-between items-start overflow-y-auto hidescrollbar">
 						<div className="space-y-2">
 							<div className="">
 								<div className="relative project-dropdown">
 									<motion.button
 										whileHover={{ scale: 1.02 }}
 										whileTap={{ scale: 0.98 }}
-										onClick={() =>
-											setIsProjectDropdownOpen(!isProjectDropdownOpen)
-										}
-										className="text-xs w-full flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
+										className="w-full flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
 									>
 										<RocketIcon className="w-3.5 h-3.5" />
-										SAAS Starter Admin
+										<span className="text-xs font-medium">
+											SAAS Starter Admin
+										</span>
 									</motion.button>
 								</div>
 							</div>
@@ -312,100 +323,214 @@ const Admin = () => {
 										<i className="text-[10px] text-zinc-500">CMD/CTRL + K </i>
 									</div>
 								</button>
-								<button
-									onClick={() => setActiveTab("home")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "home"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<Home className="w-3.5 h-3.5" />
-									Home
-								</button>
-								<button
-									onClick={() => setActiveTab("blogs")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "blogs"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<FileText className="w-3.5 h-3.5" />
-									Blogs
-								</button>
-								<button
-									onClick={() => setActiveTab("emails")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "emails"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<Mail className="w-3.5 h-3.5" />
-									Emails
-								</button>
-								<button
-									onClick={() => setActiveTab("subscribers")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "subscribers"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<User className="w-3.5 h-3.5" />
-									Email Subscribers
-								</button>
-								<button
-									onClick={() => setActiveTab("users")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "users"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<Users className="w-3.5 h-3.5" />
-									Users
-								</button>
 
-								<button
-									onClick={() => setActiveTab("customers")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "customers"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<Users className="w-3.5 h-3.5" />
-									Customers
-								</button>
-								<button
-									onClick={() => setActiveTab("payments")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "payments"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<CreditCard className="w-3.5 h-3.5" />
-									Payments
-								</button>
-								<button
-									onClick={() => setActiveTab("messages")}
-									className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-										activeTab === "messages"
-											? "bg-zinc-100 text-zinc-900"
-											: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-									}`}
-								>
-									<MessageSquare className="w-3.5 h-3.5" />
-									Messages
-								</button>
+								{/* Overview */}
+								<div className="pt-2">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+										Overview
+									</p>
+									<button
+										onClick={() => setActiveTab("home")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "home"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<Home className="w-3.5 h-3.5" />
+										Home
+									</button>
+								</div>
+
+								{/* Content */}
+								<div className="pt-2">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+										Content
+									</p>
+									<button
+										onClick={() => setActiveTab("blogs")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "blogs"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<FileText className="w-3.5 h-3.5" />
+										Blogs
+									</button>
+									<button
+										onClick={() => setActiveTab("emails")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "emails"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<Mail className="w-3.5 h-3.5" />
+										Emails
+									</button>
+									<button
+										onClick={() => setActiveTab("kanban-board")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "kanban-board"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<LayoutGrid className="w-3.5 h-3.5" />
+										Kanban Board
+									</button>
+								</div>
+
+								{/* Audience */}
+								<div className="pt-2">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+										Audience
+									</p>
+									<button
+										onClick={() => setActiveTab("subscribers")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "subscribers"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<User className="w-3.5 h-3.5" />
+										Email Subscribers
+									</button>
+									<button
+										onClick={() => setActiveTab("users")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "users"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<Users className="w-3.5 h-3.5" />
+										Users
+									</button>
+									<button
+										onClick={() => setActiveTab("customers")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "customers"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<Building2 className="w-3.5 h-3.5" />
+										Customers
+									</button>
+									<button
+										onClick={() => setActiveTab("waitlist")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "waitlist"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<UsersRound className="w-3.5 h-3.5" />
+										Waitlist
+									</button>
+								</div>
+
+								{/* Financial */}
+								<div className="pt-2">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+										Financial
+									</p>
+									<button
+										onClick={() => setActiveTab("payments")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "payments"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<CreditCard className="w-3.5 h-3.5" />
+										Payments
+									</button>
+									<button
+										onClick={() => setActiveTab("invoices")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "invoices"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<Receipt className="w-3.5 h-3.5" />
+										Invoices
+									</button>
+									<button
+										onClick={() => setActiveTab("products")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "products"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<ShoppingBag className="w-3.5 h-3.5" />
+										Products
+									</button>
+								</div>
+
+								{/* Communication */}
+								<div className="pt-2">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+										Communication
+									</p>
+									<button
+										onClick={() => setActiveTab("messages")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "messages"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<MessageSquare className="w-3.5 h-3.5" />
+										Messages
+									</button>
+								</div>
+
+								{/* Support */}
+								<div className="pt-2">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+										Support
+									</p>
+									<button
+										onClick={() => setActiveTab("reportIssues")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "reportIssues"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<AlertCircle className="w-3.5 h-3.5" />
+										Report Issues
+									</button>
+								</div>
+
+								{/* Settings */}
+								<div className="pt-2">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+										Settings
+									</p>
+									<button
+										onClick={() => setActiveTab("teams")}
+										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+											activeTab === "teams"
+												? "bg-zinc-100 text-zinc-900"
+												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+										}`}
+									>
+										<Shield className="w-3.5 h-3.5" />
+										Teams
+									</button>
+								</div>
 							</div>
 						</div>
 						<div className="">
 							<a
-								className="flex gap-1 items-center p-2 my-2 cursor-pointer text-sm text-zinc-500 hover:text-black"
+								className="flex gap-1 items-center p-2 my-1 cursor-pointer text-sm text-zinc-500 hover:text-black"
 								href="/docs"
 								target="_blank"
 							>
@@ -418,6 +543,22 @@ const Admin = () => {
 								<LogIn className="w-3.5 h-3.5" />
 								{user ? user.displayName || "Logged In" : "Login"}
 							</button>
+							<div className="p-2 border bg-white border-zinc-200 rounded-xl">
+								<p className="text-lg">Buildsaas PRO</p>
+								<p className="text-sm text-zinc-500">
+									Build saas applications 10x Faster. Fastest and easiest way to
+									build saas applications
+								</p>
+								<div>
+									<a
+										className="text-zinc-200 bg-zinc-900 text-sm p-1 rounded w-full"
+										target="_blank"
+										href="https://buy.polar.sh/polar_cl_4DKKA9Ohkz60mo6VtK0VetQLUkkS5lWnjpeRv4Y9rPK"
+									>
+										Build Your SAAS
+									</a>
+								</div>
+							</div>
 						</div>
 					</aside>
 
@@ -510,160 +651,251 @@ const Admin = () => {
 										<Search className="w-3.5 h-3.5" />
 										Search
 									</button>
-									<button
-										onClick={() => {
-											setActiveTab("home");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "home"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Home className="w-3.5 h-3.5" />
-										Home
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("blogs");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "blogs"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<FileText className="w-3.5 h-3.5" />
-										Blogs
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("emails");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "emails"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Mail className="w-3.5 h-3.5" />
-										Emails
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("subscribers");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "subscribers"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Users className="w-3.5 h-3.5" />
-										Subscribers
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("users");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "users"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Users className="w-3.5 h-3.5" />
-										Users
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("teams");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "teams"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Shield className="w-3.5 h-3.5" />
-										Teams
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("preview");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "preview"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Eye className="w-3.5 h-3.5" />
-										Blog Preview
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("calendar");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "calendar"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Calendar className="w-3.5 h-3.5" />
-										Calendar
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("customers");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "customers"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<Users className="w-3.5 h-3.5" />
-										Customers
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("payments");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "payments"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<CreditCard className="w-3.5 h-3.5" />
-										Payments
-									</button>
-									<button
-										onClick={() => {
-											setActiveTab("messages");
-											setIsSidebarOpen(false);
-										}}
-										className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-											activeTab === "messages"
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-										}`}
-									>
-										<MessageSquare className="w-3.5 h-3.5" />
-										Messages
-									</button>
+
+									{/* Overview */}
+									<div className="pt-2">
+										<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+											Overview
+										</p>
+										<button
+											onClick={() => {
+												setActiveTab("home");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "home"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<Home className="w-3.5 h-3.5" />
+											Home
+										</button>
+									</div>
+
+									{/* Content */}
+									<div className="pt-2">
+										<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+											Content
+										</p>
+										<button
+											onClick={() => {
+												setActiveTab("blogs");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "blogs"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<FileText className="w-3.5 h-3.5" />
+											Blogs
+										</button>
+										<button
+											onClick={() => {
+												setActiveTab("emails");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "emails"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<Mail className="w-3.5 h-3.5" />
+											Emails
+										</button>
+										<button
+											onClick={() => {
+												setActiveTab("kanban-board");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "kanban-board"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<LayoutGrid className="w-3.5 h-3.5" />
+											Kanban Board
+										</button>
+									</div>
+
+									{/* Audience */}
+									<div className="pt-2">
+										<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+											Audience
+										</p>
+										<button
+											onClick={() => {
+												setActiveTab("subscribers");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "subscribers"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<Users className="w-3.5 h-3.5" />
+											Subscribers
+										</button>
+										<button
+											onClick={() => {
+												setActiveTab("users");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "users"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<Users className="w-3.5 h-3.5" />
+											Users
+										</button>
+										<button
+											onClick={() => {
+												setActiveTab("customers");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "customers"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<Building2 className="w-3.5 h-3.5" />
+											Customers
+										</button>
+										<button
+											onClick={() => {
+												setActiveTab("waitlist");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "waitlist"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<UsersRound className="w-3.5 h-3.5" />
+											Waitlist
+										</button>
+									</div>
+
+									{/* Financial */}
+									<div className="pt-2">
+										<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+											Financial
+										</p>
+										<button
+											onClick={() => {
+												setActiveTab("payments");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "payments"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<CreditCard className="w-3.5 h-3.5" />
+											Payments
+										</button>
+										<button
+											onClick={() => {
+												setActiveTab("invoices");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "invoices"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<Receipt className="w-3.5 h-3.5" />
+											Invoices
+										</button>
+										<button
+											onClick={() => {
+												setActiveTab("products");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "products"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<ShoppingBag className="w-3.5 h-3.5" />
+											Products
+										</button>
+									</div>
+
+									{/* Communication */}
+									<div className="pt-2">
+										<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+											Communication
+										</p>
+										<button
+											onClick={() => {
+												setActiveTab("messages");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "messages"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<MessageSquare className="w-3.5 h-3.5" />
+											Messages
+										</button>
+									</div>
+
+									{/* Support */}
+									<div className="pt-2">
+										<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+											Support
+										</p>
+										<button
+											onClick={() => {
+												setActiveTab("reportIssues");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "reportIssues"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<AlertCircle className="w-3.5 h-3.5" />
+											Report Issues
+										</button>
+									</div>
+
+									{/* Settings */}
+									<div className="pt-2">
+										<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+											Settings
+										</p>
+										<button
+											onClick={() => {
+												setActiveTab("teams");
+												setIsSidebarOpen(false);
+											}}
+											className={`w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
+												activeTab === "teams"
+													? "bg-zinc-100 text-zinc-900"
+													: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+											}`}
+										>
+											<Shield className="w-3.5 h-3.5" />
+											Teams
+										</button>
+									</div>
 									<div className="p-3 space-y-1.5 mt-10">
 										<div className="p-3 rounded-xl space-y-2 bg-white border border-zinc-200">
 											<p className="text-lg">Content Management Template</p>
@@ -723,22 +955,48 @@ const Admin = () => {
 
 				{/* Content Area */}
 				<main className="flex-1 w-full h-full overflow-y-auto">
-					<div className="h-full w-full md:p-6">
-						<div className="h-full w-full bg-white rounded-2xl p-6 overflow-y-auto">
-							{activeTab === "home" && <HomeTab />}
-							{activeTab === "blogs" && <BlogTab />}
+					<div className="h-full w-full md:p-2">
+						<div className="h-full w-full bg-white rounded-2xl py-6 px-4 overflow-y-auto">
+							{activeTab === "home" && <HomeTab onNavigate={setActiveTab} />}
+							{activeTab === "blogs" && <BlogTab queryClient={queryClient} />}
 							{activeTab === "emails" && (
-								<EmailTab onSendEmail={handleSendEmail} />
+								<EmailTab
+									queryClient={queryClient}
+									onSendEmail={handleSendEmail}
+								/>
+							)}
+							{activeTab === "kanban-board" && (
+								<KanbanBoardTab queryClient={queryClient} />
 							)}
 							{activeTab === "subscribers" && (
-								<SubscribersTab onSendEmail={handleSendEmail} />
+								<SubscribersTab
+									queryClient={queryClient}
+									onSendEmail={handleSendEmail}
+								/>
 							)}
 							{activeTab === "users" && (
 								<UsersTab onSendEmailToUsers={handleSendEmailToUsers} />
 							)}
 							{activeTab === "customers" && <CustomersTab />}
-							{activeTab === "payments" && <PaymentsTab />}
-							{activeTab === "messages" && <MessagesTab />}
+							{activeTab === "payments" && (
+								<PaymentsTab queryClient={queryClient} />
+							)}
+							{activeTab === "invoices" && (
+								<InvoiceTab queryClient={queryClient} />
+							)}
+							{activeTab === "products" && (
+								<ProductsTab queryClient={queryClient} />
+							)}
+							{activeTab === "messages" && (
+								<MessagesTab queryClient={queryClient} />
+							)}
+							{activeTab === "waitlist" && (
+								<WaitlistTab queryClient={queryClient} />
+							)}
+							{activeTab === "reportIssues" && (
+								<ReportIssuesTab queryClient={queryClient} />
+							)}
+							{activeTab === "teams" && <TeamsTab queryClient={queryClient} />}
 						</div>
 					</div>
 				</main>

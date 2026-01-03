@@ -13,6 +13,7 @@ import {
 	Menu,
 	X,
 	Calendar,
+	Send,
 } from "lucide-react";
 import TiptapEditor from "../../../app/admin/components/TiptapEditor";
 import {
@@ -21,8 +22,11 @@ import {
 	updateEmail,
 	getAllEmails,
 } from "../../../lib/api/emails";
+import { getAllUsers } from "../../../lib/api/users";
+import { getAllCustomers } from "../../../lib/api/customers";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import { toast } from "react-toastify";
+import ReactMarkdown from "react-markdown";
 
 const EmailEditorPage = () => {
 	const router = useRouter();
@@ -72,10 +76,31 @@ const EmailEditorPage = () => {
 	const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 	const [scheduledDate, setScheduledDate] = useState("");
 
+	// Send email state
+	const [recipientType, setRecipientType] = useState("custom"); // 'user', 'customer', 'custom'
+	const [isRecipientTypeDropdownOpen, setIsRecipientTypeDropdownOpen] =
+		useState(false);
+	const [selectedRecipient, setSelectedRecipient] = useState("");
+	const [isRecipientDropdownOpen, setIsRecipientDropdownOpen] = useState(false);
+	const [customEmail, setCustomEmail] = useState("");
+	const [customName, setCustomName] = useState("");
+	const [isSendingEmail, setIsSendingEmail] = useState(false);
+
 	// Fetch all emails for sidebar
 	const { data: emails = [], isLoading: isLoadingEmails } = useQuery({
 		queryKey: ["emails"],
 		queryFn: () => getAllEmails(),
+	});
+
+	// Fetch users and customers for sending
+	const { data: users = [] } = useQuery({
+		queryKey: ["users"],
+		queryFn: () => getAllUsers(),
+	});
+
+	const { data: customers = [] } = useQuery({
+		queryKey: ["customers"],
+		queryFn: () => getAllCustomers(),
 	});
 
 	// Filter emails based on search
@@ -174,9 +199,7 @@ const EmailEditorPage = () => {
 	const formatDate = (date) => {
 		if (!date) return "N/A";
 		try {
-			// Handle Supabase ISO strings or Firestore Timestamps
 			const dateObj = date?.toDate ? date.toDate() : new Date(date);
-			if (isNaN(dateObj.getTime())) return "N/A";
 			return dateObj.toLocaleDateString("en-US", {
 				month: "short",
 				day: "numeric",
@@ -184,6 +207,135 @@ const EmailEditorPage = () => {
 			});
 		} catch {
 			return "N/A";
+		}
+	};
+
+	// Recipient type options
+	const recipientTypeOptions = [
+		{ value: "user", label: "Send to User" },
+		{ value: "customer", label: "Send to Customer" },
+		{ value: "custom", label: "Send to Custom Email" },
+	];
+
+	// Get recipient options based on type
+	const getRecipientOptions = () => {
+		if (recipientType === "user") {
+			return users.map((user) => ({
+				value: user.id,
+				label: `${user.name || user.displayName || user.email} (${user.email})`,
+				data: user,
+			}));
+		} else if (recipientType === "customer") {
+			return customers.map((customer) => ({
+				value: customer.id,
+				label: `${customer.name || customer.email} (${customer.email})`,
+				data: customer,
+			}));
+		}
+		return [];
+	};
+
+	// Handle recipient type change
+	const handleRecipientTypeChange = (type) => {
+		setRecipientType(type);
+		setSelectedRecipient("");
+		setCustomEmail("");
+		setCustomName("");
+	};
+
+	// Handle recipient select
+	const handleRecipientSelect = (recipientId) => {
+		setSelectedRecipient(recipientId);
+		const options = getRecipientOptions();
+		const selected = options.find((opt) => opt.value === recipientId);
+		if (selected && selected.data) {
+			setCustomEmail(selected.data.email || "");
+			setCustomName(
+				selected.data.name ||
+					selected.data.displayName ||
+					selected.data.email ||
+					""
+			);
+		}
+	};
+
+	// Handle send email
+	const handleSendEmail = async () => {
+		if (!emailForm.subject || !emailContent) {
+			toast.warning("Subject and content are required");
+			return;
+		}
+
+		let recipientEmail = "";
+		let recipientName = "";
+
+		if (recipientType === "custom") {
+			if (!customEmail.trim()) {
+				toast.warning("Please enter an email address");
+				return;
+			}
+			recipientEmail = customEmail.trim();
+			recipientName = customName.trim();
+		} else {
+			if (!selectedRecipient) {
+				toast.warning("Please select a recipient");
+				return;
+			}
+			const options = getRecipientOptions();
+			const selected = options.find((opt) => opt.value === selectedRecipient);
+			if (selected && selected.data) {
+				recipientEmail = selected.data.email || "";
+				recipientName =
+					selected.data.name ||
+					selected.data.displayName ||
+					selected.data.email ||
+					"";
+			}
+		}
+
+		if (!recipientEmail) {
+			toast.warning("Recipient email is missing");
+			return;
+		}
+
+		// Validate email format
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(recipientEmail)) {
+			toast.warning("Please enter a valid email address");
+			return;
+		}
+
+		setIsSendingEmail(true);
+		try {
+			const response = await fetch("/api/emails/send-single", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					email: recipientEmail,
+					name: recipientName || undefined,
+					subject: emailForm.subject,
+					content: emailContent,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success("Email sent successfully!");
+				// Reset recipient fields
+				setSelectedRecipient("");
+				setCustomEmail("");
+				setCustomName("");
+			} else {
+				toast.error(data.error || "Failed to send email");
+			}
+		} catch (error) {
+			console.error("Error sending email:", error);
+			toast.error("Failed to send email. Please try again.");
+		} finally {
+			setIsSendingEmail(false);
 		}
 	};
 
@@ -229,7 +381,7 @@ const EmailEditorPage = () => {
 								whileHover={{ scale: 1.02 }}
 								whileTap={{ scale: 0.98 }}
 								onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-								className="md:hidden block flex items-center gap-1.5 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
+								className="md:hidden flex items-center gap-1.5 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
 							>
 								<Menu className="w-4 h-4" />
 							</motion.button>
@@ -239,7 +391,7 @@ const EmailEditorPage = () => {
 								whileHover={{ scale: 1.02 }}
 								whileTap={{ scale: 0.98 }}
 								onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-								className="md:hidden block flex items-center gap-1.5 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
+								className="md:hidden flex items-center gap-1.5 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
 							>
 								<Settings className="w-4 h-4" />
 							</motion.button>
@@ -396,10 +548,9 @@ const EmailEditorPage = () => {
 							<h1 className="text-3xl font-bold text-zinc-900 mb-4">
 								{emailForm.subject || "Email Preview"}
 							</h1>
-							<div
-								className="prose prose-zinc max-w-none prose-sm"
-								dangerouslySetInnerHTML={{ __html: emailContent }}
-							/>
+							<div className="prose prose-zinc max-w-none prose-sm">
+								<ReactMarkdown>{emailContent || ""}</ReactMarkdown>
+							</div>
 						</div>
 					) : (
 						<div className="w-full max-w-3xl bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden flex flex-col">
@@ -494,6 +645,93 @@ const EmailEditorPage = () => {
 										</motion.div>
 									)}
 								</AnimatePresence>
+							</div>
+
+							{/* Action Section */}
+							<div className="pt-4 border-t border-zinc-200">
+								<label className="block text-xs font-medium text-zinc-700 mb-3">
+									Action
+								</label>
+
+								{/* Recipient Type */}
+								<div className="mb-3">
+									<AnimatedDropdown
+										isOpen={isRecipientTypeDropdownOpen}
+										onToggle={() =>
+											setIsRecipientTypeDropdownOpen(
+												!isRecipientTypeDropdownOpen
+											)
+										}
+										onSelect={handleRecipientTypeChange}
+										options={recipientTypeOptions}
+										value={recipientType}
+										placeholder="Select recipient type"
+										buttonClassName="text-sm"
+									/>
+								</div>
+
+								{/* Recipient Selection */}
+								{recipientType !== "custom" && (
+									<div className="mb-3">
+										<AnimatedDropdown
+											isOpen={isRecipientDropdownOpen}
+											onToggle={() =>
+												setIsRecipientDropdownOpen(!isRecipientDropdownOpen)
+											}
+											onSelect={handleRecipientSelect}
+											options={getRecipientOptions()}
+											value={selectedRecipient}
+											placeholder={
+												recipientType === "user"
+													? "Select user..."
+													: "Select customer..."
+											}
+											buttonClassName="text-sm"
+										/>
+									</div>
+								)}
+
+								{/* Custom Email Input */}
+								{recipientType === "custom" && (
+									<div className="space-y-3 mb-3">
+										<div>
+											<label className="block text-xs font-medium text-zinc-700 mb-1.5">
+												Email *
+											</label>
+											<input
+												type="email"
+												value={customEmail}
+												onChange={(e) => setCustomEmail(e.target.value)}
+												className="w-full px-3 py-1.5 text-sm border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+												placeholder="recipient@example.com"
+											/>
+										</div>
+										<div>
+											<label className="block text-xs font-medium text-zinc-700 mb-1.5">
+												Name (Optional)
+											</label>
+											<input
+												type="text"
+												value={customName}
+												onChange={(e) => setCustomName(e.target.value)}
+												className="w-full px-3 py-1.5 text-sm border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+												placeholder="Recipient name"
+											/>
+										</div>
+									</div>
+								)}
+
+								{/* Send Button */}
+								<motion.button
+									whileHover={{ scale: 1.02 }}
+									whileTap={{ scale: 0.98 }}
+									onClick={handleSendEmail}
+									disabled={isSendingEmail}
+									className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									<Send className="w-4 h-4" />
+									{isSendingEmail ? "Sending..." : "Send Email"}
+								</motion.button>
 							</div>
 						</div>
 					</div>

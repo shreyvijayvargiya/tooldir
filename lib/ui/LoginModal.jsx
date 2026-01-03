@@ -13,12 +13,14 @@ import {
 	removeUserCookie,
 } from "../utils/cookies";
 import { toast } from "react-toastify";
+import SignupModal from "./SignupModal";
 
 const LoginModal = ({ isOpen, onClose }) => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [user, setUser] = useState(null);
+	const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
 
 	// Check for existing user in cookie on mount and when modal opens
 	useEffect(() => {
@@ -111,9 +113,10 @@ const LoginModal = ({ isOpen, onClose }) => {
 		}
 	};
 
-	if (!isOpen) return null;
+	if (!isOpen && !isSignupModalOpen) return null;
 
 	return (
+		<>
 		<AnimatePresence>
 			{isOpen && (
 				<motion.div
@@ -279,6 +282,22 @@ const LoginModal = ({ isOpen, onClose }) => {
 										</svg>
 										{isLoading ? "Logging in..." : "Google"}
 									</motion.button>
+
+									<div className="text-center mt-4">
+										<p className="text-sm text-zinc-600">
+											New user?{" "}
+											<button
+												type="button"
+												onClick={() => {
+													setIsSignupModalOpen(true);
+													onClose();
+												}}
+												className="text-zinc-900 font-medium hover:underline"
+											>
+												Sign Up
+											</button>
+										</p>
+									</div>
 								</div>
 							)}
 						</div>
@@ -286,6 +305,11 @@ const LoginModal = ({ isOpen, onClose }) => {
 				</motion.div>
 			)}
 		</AnimatePresence>
+		<SignupModal
+			isOpen={isSignupModalOpen}
+			onClose={() => setIsSignupModalOpen(false)}
+		/>
+	</>
 	);
 };
 

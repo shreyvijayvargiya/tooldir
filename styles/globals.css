@@ -162,3 +162,11 @@
 	font-style: italic !important;
 	color: #4a5568 !important;
 }
+
+.hidescrollbar::-webkit-scrollbar {
+	display: none;
+}
+.hidescrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}

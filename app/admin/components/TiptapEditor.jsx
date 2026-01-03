@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
@@ -24,27 +24,53 @@ import {
 	ListOrdered,
 	Upload,
 	Eye,
+	Quote,
+	Strikethrough,
+	Underline as UnderlineIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { htmlToMarkdown } from "../../../lib/utils/htmlToMarkdown";
 
-// Helper function to check if content is HTML and normalize it
+// Helper function to detect content type and normalize it
 const normalizeContent = (content) => {
-	if (!content || typeof content !== "string") return "";
-	
+	if (!content || typeof content !== "string")
+		return { content: "", type: "empty" };
+
 	// Check if it's HTML (contains HTML tags)
-	const isHTML = content.includes("<") && content.includes(">") && content.match(/<\/?[a-z][\s\S]*>/i);
-	
+	const isHTML =
+		content.includes("<") &&
+		content.includes(">") &&
+		content.match(/<\/?[a-z][\s\S]*>/i);
+
+	// Check if it's markdown (contains markdown patterns)
+	const markdownPatterns = [
+		/^#{1,6}\s/m, // Headers
+		/^\*\*.*\*\*$/m, // Bold
+		/^\*.*\*$/m, // Italic
+		/^\- .*$/m, // Unordered lists
+		/^\d+\. .*$/m, // Ordered lists
+		/^> .*$/m, // Blockquotes
+		/\[.*\]\(.*\)/, // Links
+		/!\[.*\]\(.*\)/, // Images
+		/```[\s\S]*```/, // Code blocks
+	];
+	const isMarkdown = markdownPatterns.some((pattern) => pattern.test(content));
+
 	if (isHTML) {
 		// If it's HTML, let Tiptap parse it (it handles HTML natively)
-		// But we'll extract text for comparison
 		const tempDiv = document.createElement("div");
 		tempDiv.innerHTML = content;
 		const text = (tempDiv.textContent || tempDiv.innerText || "").trim();
-		return { content, text, isHTML: true };
+		return { content, text, type: "html" };
 	}
-	
+
+	if (isMarkdown) {
+		// If it's markdown, Tiptap Markdown extension will parse it
+		return { content, text: content.trim(), type: "markdown" };
+	}
+
 	// Plain text - wrap in paragraph for Tiptap
-	return { content: `<p>${content}</p>`, text: content.trim(), isHTML: false };
+	return { content: `<p>${content}</p>`, text: content.trim(), type: "text" };
 };
 
 const TiptapEditor = ({
@@ -63,6 +89,8 @@ const TiptapEditor = ({
 				heading: {
 					levels: [1, 2],
 				},
+				blockquote: true,
+				strike: true,
 			}),
 			Image,
 			Link.configure({
@@ -85,7 +113,9 @@ const TiptapEditor = ({
 				nested: true,
 			}),
 			Markdown.configure({
-				html: false,
+				html: true, // Allow HTML input for backward compatibility
+				transformPastedText: true, // Transform pasted markdown
+				transformCopiedText: true, // Transform copied text to markdown
 			}),
 		],
 		content: content || "",
@@ -97,8 +127,24 @@ const TiptapEditor = ({
 		},
 		onUpdate: ({ editor }) => {
 			if (onChange) {
-				// Simple: get text content directly
-				onChange(editor.getText());
+				// Get markdown content using the Markdown extension
+				try {
+					// Check if markdown storage is available
+					if (editor.storage && editor.storage.markdown) {
+						const markdown = editor.storage.markdown.getMarkdown();
+						if (markdown) {
+							onChange(markdown);
+							return;
+						}
+					}
+				} catch (error) {
+					console.warn("Failed to get markdown from editor:", error);
+				}
+
+				// Fallback: Convert HTML to markdown
+				const html = editor.getHTML();
+				const markdown = htmlToMarkdown(html);
+				onChange(markdown || "");
 			}
 		},
 	});
@@ -106,17 +152,27 @@ const TiptapEditor = ({
 	// Update content when prop changes
 	React.useEffect(() => {
 		if (!editor) return;
-		
-		// Get current text content for comparison
-		const currentText = (editor.getText() || "").trim();
-		
-		// Normalize incoming content (handle both HTML and plain text)
-		const normalized = normalizeContent(content);
-		
-		// Only update if content is different
-		if (currentText === normalized.text && content) return;
 
-		// Set content - Tiptap will parse HTML or plain text
+		// Get current markdown content for comparison
+		let currentContent = "";
+		try {
+			if (editor.storage && editor.storage.markdown) {
+				currentContent = (editor.storage.markdown.getMarkdown() || "").trim();
+			} else {
+				currentContent = (editor.getText() || "").trim();
+			}
+		} catch (error) {
+			currentContent = (editor.getText() || "").trim();
+		}
+
+		// Normalize incoming content (handle HTML, markdown, and plain text)
+		const normalized = normalizeContent(content);
+
+		// Only update if content is different (compare markdown or text)
+		if (currentContent === normalized.text && content) return;
+
+		// Set content - TipTap Markdown extension will automatically parse markdown
+		// It can handle both HTML and markdown input
 		if (normalized.content) {
 			editor.commands.setContent(normalized.content, false);
 		} else {
@@ -180,6 +236,45 @@ const TiptapEditor = ({
 					title="Italic"
 				>
 					<Italic className="w-3.5 h-3.5" />
+				</motion.button>
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().toggleUnderline().run()}
+					className={`p-1.5 rounded-xl ${
+						editor.isActive("underline")
+							? "bg-zinc-200 text-zinc-900"
+							: "text-zinc-600 hover:bg-zinc-100"
+					}`}
+					title="Underline"
+				>
+					<UnderlineIcon className="w-3.5 h-3.5" />
+				</motion.button>
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().toggleStrike().run()}
+					className={`p-1.5 rounded-xl ${
+						editor.isActive("strike")
+							? "bg-zinc-200 text-zinc-900"
+							: "text-zinc-600 hover:bg-zinc-100"
+					}`}
+					title="Strikethrough"
+				>
+					<Strikethrough className="w-3.5 h-3.5" />
+				</motion.button>
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().toggleBlockquote().run()}
+					className={`p-1.5 rounded-xl ${
+						editor.isActive("blockquote")
+							? "bg-zinc-200 text-zinc-900"
+							: "text-zinc-600 hover:bg-zinc-100"
+					}`}
+					title="Quote"
+				>
+					<Quote className="w-3.5 h-3.5" />
 				</motion.button>
 				<motion.button
 					whileHover={{ scale: 1.05 }}
