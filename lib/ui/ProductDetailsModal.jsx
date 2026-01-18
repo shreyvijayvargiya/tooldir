@@ -69,10 +69,8 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 	// Get banner images - support multiple formats
 	const getBannerImages = (product) => {
 		// Support multiple formats: bannerImages array, bannerImageUrl, banner_url, image_url
-		// Also handle Supabase field name: banner_images
-		const bannerImages = product.banner_images || product.bannerImages;
-		if (bannerImages && Array.isArray(bannerImages)) {
-			return bannerImages
+		if (product.bannerImages && Array.isArray(product.bannerImages)) {
+			return product.bannerImages
 				.map((img) => {
 					// Handle both object format and URL string format
 					if (typeof img === "string") {
@@ -158,8 +156,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 								{bannerImages.length > 0 && (
 									<div>
 										<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
-											Banner Images{" "}
-											{bannerImages.length > 1 && `(${bannerImages.length})`}
+											Banner Images {bannerImages.length > 1 && `(${bannerImages.length})`}
 										</label>
 										<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
 											{bannerImages.map((imgUrl, index) => (
@@ -175,9 +172,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 															e.target.style.display = "none";
 															const parent = e.target.parentElement;
 															if (parent) {
-																const placeholder = parent.querySelector(
-																	".error-placeholder"
-																);
+																const placeholder = parent.querySelector(".error-placeholder");
 																if (placeholder) {
 																	placeholder.style.display = "flex";
 																}
@@ -241,16 +236,14 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 									<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
 										Checkout Link
 									</label>
-									{product.checkout_link || product.checkoutLink ? (
+									{product.checkoutLink ? (
 										<a
-											href={product.checkout_link || product.checkoutLink}
+											href={product.checkoutLink}
 											target="_blank"
 											rel="noopener noreferrer"
 											className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline break-all"
 										>
-											<span>
-												{product.checkout_link || product.checkoutLink}
-											</span>
+											<span>{product.checkoutLink}</span>
 											<ExternalLink className="w-4 h-4 flex-shrink-0" />
 										</a>
 									) : (
@@ -266,7 +259,11 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 										Created At
 									</label>
 									<p className="text-sm text-zinc-700">
-										{formatDate(product.created_at || product.createdAt)}
+										{formatDate(
+											product.createdAt?.toDate
+												? product.createdAt.toDate()
+												: product.createdAt
+										)}
 									</p>
 								</div>
 							</div>
@@ -289,4 +286,3 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 };
 
 export default ProductDetailsModal;
-

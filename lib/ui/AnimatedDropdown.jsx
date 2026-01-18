@@ -14,6 +14,7 @@ import { ChevronDown } from "lucide-react";
  * @param {string} props.className - Additional classes for container
  * @param {string} props.buttonClassName - Additional classes for button
  * @param {string} props.dropdownClassName - Additional classes for dropdown
+ * @param {string} props.optionClassName - Additional classes for each option
  * @param {Function} props.renderOption - Custom render function for options
  * @param {Function} props.renderButton - Custom render function for button
  */
@@ -27,6 +28,7 @@ const AnimatedDropdown = ({
 	className = "",
 	buttonClassName = "",
 	dropdownClassName = "",
+	optionClassName = "",
 	renderOption,
 	renderButton,
 }) => {
@@ -65,12 +67,12 @@ const AnimatedDropdown = ({
 				whileHover={{ scale: 1.01 }}
 				whileTap={{ scale: 0.99 }}
 				onClick={onToggle}
-				className={`w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none bg-white flex items-center justify-between ${buttonClassName}`}
+				className={`w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-100 focus:outline-none bg-white flex items-center justify-between ${buttonClassName}`}
 			>
 				{selectedOption ? (
 					<span
 						className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-							selectedOption.color || "bg-gray-100 text-gray-800"
+							selectedOption.color || "bg-zinc-100 text-zinc-800"
 						}`}
 					>
 						{selectedOption.label}
@@ -101,11 +103,11 @@ const AnimatedDropdown = ({
 					onSelect(option.value);
 					onToggle();
 				}}
-				className={`w-full px-4 py-3 text-left flex items-center gap-2 transition-colors ${
+				className={`w-full px-4 py-1.5 text-left flex items-center gap-2 transition-colors text-sm ${
 					value === option.value
-						? "bg-zinc-50 text-zinc-700"
-						: "text-zinc-700 hover:bg-zinc-50"
-				}`}
+						? "bg-zinc-50 text-zinc-900 font-medium"
+						: "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+				} ${optionClassName}`}
 			>
 				{option.color ? (
 					<span
@@ -144,9 +146,11 @@ const AnimatedDropdown = ({
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0, y: -10, scale: 0.95 }}
 						transition={{ duration: 0.15 }}
-						className={`absolute top-full left-0 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-lg z-50 overflow-hidden ${dropdownClassName}`}
+						className={`absolute top-full left-0 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-lg z-[60] overflow-hidden ${dropdownClassName}`}
 					>
-						{options.map((option, index) => defaultRenderOption(option, index))}
+						<div className="max-h-64 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+							{options.map((option, index) => defaultRenderOption(option, index))}
+						</div>
 					</motion.div>
 				)}
 			</AnimatePresence>

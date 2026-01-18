@@ -15,14 +15,52 @@ import {
 	LayoutGrid,
 	UsersRound,
 	AlertCircle,
+	CreditCard,
+	ShoppingBag,
+	Building2,
+	User,
+	MessageSquare,
+	FileEdit,
 } from "lucide-react";
 import { getAllBlogs } from "../../../lib/api/blog";
 import { getAllEmails } from "../../../lib/api/emails";
 import { getAllSubscribers } from "../../../lib/api/subscribers";
+import { getAllProducts } from "../../../lib/api/products";
+import { getAllPayments } from "../../../lib/api/payments";
+import { getAllInvoices } from "../../../lib/api/invoice";
+import { getAllCustomers } from "../../../lib/api/customers";
+import { getAllUsers } from "../../../lib/api/users";
+import { getAllTeamMembers } from "../../../lib/api/teams";
+import { getAllWaitlist } from "../../../lib/api/waitlist";
+import { getAllMessages } from "../../../lib/api/messages";
+import { getAllForms } from "../../../lib/api/forms";
 
 const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedCategory, setSelectedCategory] = useState("all"); // all, blogs, emails, subscribers
+	const [selectedCategory, setSelectedCategory] = useState("all"); // all, blogs, emails, subscribers, users, customers, products, payments, invoices, messages, forms, teams, waitlist
+
+	// Normalize values for safe React rendering and search indexing
+	const formatValue = (value) => {
+		if (value === null || value === undefined) return "";
+		if (typeof value === "string") return value;
+		if (typeof value === "number" || typeof value === "boolean") return String(value);
+		if (value instanceof Date) {
+			if (isNaN(value.getTime())) return "";
+			return value.toLocaleString();
+		}
+		// Firestore Timestamp-like object
+		if (
+			typeof value === "object" &&
+			typeof value.seconds === "number" &&
+			typeof value.nanoseconds === "number"
+		) {
+			const ms = value.seconds * 1000 + Math.floor(value.nanoseconds / 1e6);
+			const d = new Date(ms);
+			return isNaN(d.getTime()) ? "" : d.toLocaleString();
+		}
+		// Avoid rendering arbitrary objects as React children
+		return "";
+	};
 
 	// Fetch all data
 	const { data: blogs = [] } = useQuery({
@@ -40,6 +78,60 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 	const { data: subscribers = [] } = useQuery({
 		queryKey: ["subscribers"],
 		queryFn: () => getAllSubscribers(),
+		enabled: isOpen,
+	});
+
+	const { data: users = [] } = useQuery({
+		queryKey: ["users"],
+		queryFn: () => getAllUsers(),
+		enabled: isOpen,
+	});
+
+	const { data: customers = [] } = useQuery({
+		queryKey: ["customers"],
+		queryFn: () => getAllCustomers(),
+		enabled: isOpen,
+	});
+
+	const { data: products = [] } = useQuery({
+		queryKey: ["products"],
+		queryFn: () => getAllProducts(),
+		enabled: isOpen,
+	});
+
+	const { data: payments = [] } = useQuery({
+		queryKey: ["payments"],
+		queryFn: () => getAllPayments(),
+		enabled: isOpen,
+	});
+
+	const { data: invoices = [] } = useQuery({
+		queryKey: ["invoices"],
+		queryFn: () => getAllInvoices(),
+		enabled: isOpen,
+	});
+
+	const { data: messages = [] } = useQuery({
+		queryKey: ["messages"],
+		queryFn: () => getAllMessages(),
+		enabled: isOpen,
+	});
+
+	const { data: forms = [] } = useQuery({
+		queryKey: ["forms"],
+		queryFn: () => getAllForms(),
+		enabled: isOpen,
+	});
+
+	const { data: teams = [] } = useQuery({
+		queryKey: ["teams"],
+		queryFn: () => getAllTeamMembers(),
+		enabled: isOpen,
+	});
+
+	const { data: waitlist = [] } = useQuery({
+		queryKey: ["waitlist"],
+		queryFn: () => getAllWaitlist(),
 		enabled: isOpen,
 	});
 
@@ -86,8 +178,168 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			});
 		}
 
+		if (selectedCategory === "all" || selectedCategory === "users") {
+			users.forEach((u) => {
+				const id = u.id || u.uid || u.email || `${u.email || "user"}-${Math.random()}`;
+				const title = formatValue(u.email || u.name || u.displayName || "User");
+				const subtitle = formatValue(u.role || u.plan || u.status || "");
+				data.push({
+					type: "user",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle} ${formatValue(u.email || "")}`,
+					data: u,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "customers") {
+			customers.forEach((c) => {
+				const id = c.id || c.customerId || c.email || `${c.email || "customer"}-${Math.random()}`;
+				const title = formatValue(c.email || c.name || c.customer_email || "Customer");
+				const subtitle = formatValue(c.plan || c.status || c.company || "");
+				data.push({
+					type: "customer",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle}`,
+					data: c,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "products") {
+			products.forEach((p) => {
+				const id = p.id || p.productId || p.slug || `${p.name || "product"}-${Math.random()}`;
+				const title = formatValue(p.name || p.title || "Product");
+				const subtitle = formatValue(p.status || p.type || p.slug || "");
+				data.push({
+					type: "product",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle}`,
+					data: p,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "payments") {
+			payments.forEach((p) => {
+				const id = p.id || p.paymentId || p.orderId || `${p.email || "payment"}-${Math.random()}`;
+				const title = formatValue(p.customerEmail || p.email || p.customer_email || "Payment");
+				const subtitle = formatValue(p.status || p.amount || p.currency || "");
+				data.push({
+					type: "payment",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle}`,
+					data: p,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "invoices") {
+			invoices.forEach((inv) => {
+				const id = inv.id || inv.invoiceId || inv.number || `${inv.customerEmail || "invoice"}-${Math.random()}`;
+				const title = formatValue(
+					inv.number ? `Invoice ${inv.number}` : inv.customerEmail || inv.email || "Invoice"
+				);
+				const subtitle = formatValue(inv.status || inv.total || "");
+				data.push({
+					type: "invoice",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle} ${formatValue(inv.customerEmail || inv.email || "")}`,
+					data: inv,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "messages") {
+			messages.forEach((m) => {
+				const id = m.id || m.messageId || `${m.email || "message"}-${Math.random()}`;
+				const title = formatValue(m.subject || m.title || m.email || "Message");
+				const subtitle = formatValue(m.status || m.createdAt || "");
+				data.push({
+					type: "message",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle} ${formatValue(m.email || "")}`,
+					data: m,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "forms") {
+			forms.forEach((f) => {
+				const id = f.id || f.slug || f.formId || `${f.name || "form"}-${Math.random()}`;
+				const title = formatValue(f.name || f.title || f.slug || "Form");
+				const subtitle = formatValue(f.status || "");
+				data.push({
+					type: "form",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle}`,
+					data: f,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "teams") {
+			teams.forEach((t) => {
+				const id = t.id || t.email || `${t.email || "team"}-${Math.random()}`;
+				const title = formatValue(t.email || t.name || "Team Member");
+				const subtitle = formatValue(t.role || "");
+				data.push({
+					type: "team",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle}`,
+					data: t,
+				});
+			});
+		}
+
+		if (selectedCategory === "all" || selectedCategory === "waitlist") {
+			waitlist.forEach((w) => {
+				const id = w.id || w.email || `${w.email || "waitlist"}-${Math.random()}`;
+				const title = formatValue(w.email || w.name || "Waitlist");
+				const subtitle = formatValue(w.status || "");
+				data.push({
+					type: "waitlist",
+					id,
+					title,
+					subtitle,
+					searchText: `${title} ${subtitle}`,
+					data: w,
+				});
+			});
+		}
+
 		return data;
-	}, [blogs, emails, subscribers, selectedCategory]);
+	}, [
+		blogs,
+		emails,
+		subscribers,
+		users,
+		customers,
+		products,
+		payments,
+		invoices,
+		messages,
+		forms,
+		teams,
+		waitlist,
+		selectedCategory,
+	]);
 
 	// Configure Fuse.js
 	const fuse = useMemo(() => {
@@ -141,6 +393,24 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			window.location.href = `/admin/editor/email?id=${result.id}`;
 		} else if (result.type === "subscriber") {
 			onNavigate("subscribers");
+		} else if (result.type === "user") {
+			onNavigate("users");
+		} else if (result.type === "customer") {
+			onNavigate("customers");
+		} else if (result.type === "product") {
+			onNavigate("products");
+		} else if (result.type === "payment") {
+			onNavigate("payments");
+		} else if (result.type === "invoice") {
+			onNavigate("invoices");
+		} else if (result.type === "message") {
+			onNavigate("messages");
+		} else if (result.type === "form") {
+			onNavigate("forms");
+		} else if (result.type === "team") {
+			onNavigate("teams");
+		} else if (result.type === "waitlist") {
+			onNavigate("waitlist");
 		}
 		onClose();
 	};
@@ -239,6 +509,24 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 				return Mail;
 			case "subscriber":
 				return Users;
+			case "user":
+				return Users;
+			case "customer":
+				return Building2;
+			case "product":
+				return ShoppingBag;
+			case "payment":
+				return CreditCard;
+			case "invoice":
+				return Receipt;
+			case "message":
+				return MessageSquare;
+			case "form":
+				return FileEdit;
+			case "team":
+				return Shield;
+			case "waitlist":
+				return UsersRound;
 			default:
 				return FileText;
 		}
@@ -252,6 +540,24 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 				return "bg-purple-100 text-purple-800";
 			case "subscriber":
 				return "bg-green-100 text-green-800";
+			case "user":
+				return "bg-blue-100 text-blue-800";
+			case "customer":
+				return "bg-amber-100 text-amber-800";
+			case "product":
+				return "bg-indigo-100 text-indigo-800";
+			case "payment":
+				return "bg-emerald-100 text-emerald-800";
+			case "invoice":
+				return "bg-zinc-100 text-zinc-800";
+			case "message":
+				return "bg-pink-100 text-pink-800";
+			case "form":
+				return "bg-violet-100 text-violet-800";
+			case "team":
+				return "bg-zinc-100 text-zinc-800";
+			case "waitlist":
+				return "bg-teal-100 text-teal-800";
 			default:
 				return "bg-zinc-100 text-zinc-800";
 		}
@@ -279,7 +585,7 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 							className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col pointer-events-auto"
 						>
 							{/* Header */}
-							<div className="p-4 border-b border-zinc-200">
+							<div className="p-4">
 								<div className="flex items-center gap-3 mb-3">
 									<div className="flex-1 relative">
 										<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -287,7 +593,7 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 											type="text"
 											value={searchQuery}
 											onChange={(e) => setSearchQuery(e.target.value)}
-											placeholder="Search blogs, emails, subscribers..."
+											placeholder="Search blogs, emails, subscribers, users, customers, products, payments, invoices..."
 											className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none text-sm"
 											autoFocus
 										/>
@@ -320,7 +626,7 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 															whileHover={{ scale: 1.01 }}
 															whileTap={{ scale: 0.99 }}
 															onClick={() => handleResultClick(result)}
-															className="w-full p-3 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors text-left flex items-center gap-3"
+															className="w-full p-2 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors text-left flex items-center gap-3"
 														>
 															<div
 																className={`p-2 rounded-xl ${getTypeColor(
@@ -374,9 +680,9 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 													whileHover={{ scale: 1.02 }}
 													whileTap={{ scale: 0.98 }}
 													onClick={action.action}
-													className="p-3 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors text-left flex items-center gap-3"
+													className="py-1 px-2 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors text-left flex items-center gap-3"
 												>
-													<div className="p-2 rounded-xl bg-zinc-100 text-zinc-700">
+													<div className="py-1 px-2 rounded-xl bg-zinc-100 text-zinc-700">
 														<Icon className="w-4 h-4" />
 													</div>
 													<span className="text-sm font-medium text-zinc-900">
