@@ -525,7 +525,7 @@ const CodeGroupComponent = ({
 												setEditingTabName("");
 											}
 										}}
-										className="flex-1 px-1.5 py-0.5 text-xs bg-white border border-zinc-300 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900 min-w-[60px]"
+										className="flex-1 px-1.5 py-0.5 text-xs bg-white border border-zinc-300 rounded focus:outline-none focus:ring-1 focus:ring-zinc-100 min-w-[60px]"
 										autoFocus
 										onClick={(e) => e.stopPropagation()}
 									/>

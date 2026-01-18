@@ -124,7 +124,7 @@ const ContactPage = () => {
 										value={formData.name}
 										onChange={handleChange}
 										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
 									/>
 								</div>
 								<div>
@@ -137,7 +137,7 @@ const ContactPage = () => {
 										value={formData.email}
 										onChange={handleChange}
 										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
 									/>
 								</div>
 								<div>
@@ -150,7 +150,7 @@ const ContactPage = () => {
 										value={formData.subject}
 										onChange={handleChange}
 										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
 									/>
 								</div>
 								<div>
@@ -163,7 +163,7 @@ const ContactPage = () => {
 										onChange={handleChange}
 										required
 										rows={5}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
 									/>
 								</div>
 								<button

@@ -851,7 +851,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 							placeholder="Search tasks..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent text-sm w-64"
+							className="pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-sm w-64"
 						/>
 					</div>
 					<div className="relative" ref={filterDropdownRef}>
@@ -1438,7 +1438,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setFormData({ ...formData, title: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									/>
 								</div>
 								<div>
@@ -1451,7 +1451,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 											setFormData({ ...formData, description: e.target.value })
 										}
 										rows={3}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									/>
 								</div>
 								<div className="grid grid-cols-2 gap-4">
@@ -1526,7 +1526,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setFormData({ ...formData, category: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									/>
 								</div>
 								<div className="flex items-center gap-2 pt-2">

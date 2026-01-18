@@ -385,7 +385,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 													});
 												}
 											}}
-											className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-900"
+											className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-100"
 										/>
 										<label
 											htmlFor="useCustomEmail"
@@ -455,7 +455,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 											type="text"
 											value={invoiceNumber}
 											onChange={(e) => setInvoiceNumber(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											placeholder="INV-001"
 										/>
 									</div>
@@ -467,7 +467,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 											type="date"
 											value={invoiceDate}
 											onChange={(e) => setInvoiceDate(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 										/>
 									</div>
 									<div>
@@ -478,7 +478,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 											type="date"
 											value={dueDate}
 											onChange={(e) => setDueDate(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 										/>
 									</div>
 								</div>
@@ -501,7 +501,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 														name: e.target.value,
 													})
 												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											/>
 											<input
 												type="email"
@@ -513,7 +513,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 														email: e.target.value,
 													})
 												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											/>
 											<input
 												type="text"
@@ -525,7 +525,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 														address: e.target.value,
 													})
 												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											/>
 											<div className="grid grid-cols-2 gap-2">
 												<input
@@ -538,7 +538,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															city: e.target.value,
 														})
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 												<input
 													type="text"
@@ -550,7 +550,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															state: e.target.value,
 														})
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 											</div>
 											<div className="grid grid-cols-2 gap-2">
@@ -564,7 +564,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															zip: e.target.value,
 														})
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 												<input
 													type="text"
@@ -576,7 +576,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															country: e.target.value,
 														})
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 											</div>
 										</div>
@@ -595,7 +595,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 												onChange={(e) =>
 													setToDetails({ ...toDetails, name: e.target.value })
 												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											/>
 											<input
 												type="email"
@@ -604,7 +604,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 												onChange={(e) =>
 													setToDetails({ ...toDetails, email: e.target.value })
 												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											/>
 											<input
 												type="text"
@@ -616,7 +616,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 														address: e.target.value,
 													})
 												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											/>
 											<div className="grid grid-cols-2 gap-2">
 												<input
@@ -626,7 +626,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 													onChange={(e) =>
 														setToDetails({ ...toDetails, city: e.target.value })
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 												<input
 													type="text"
@@ -638,7 +638,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															state: e.target.value,
 														})
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 											</div>
 											<div className="grid grid-cols-2 gap-2">
@@ -649,7 +649,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 													onChange={(e) =>
 														setToDetails({ ...toDetails, zip: e.target.value })
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 												<input
 													type="text"
@@ -661,7 +661,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															country: e.target.value,
 														})
 													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 												/>
 											</div>
 										</div>
@@ -721,7 +721,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															onChange={(e) =>
 																updateItem(index, "description", e.target.value)
 															}
-															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 															placeholder="Item description"
 														/>
 													</td>
@@ -734,7 +734,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															onChange={(e) =>
 																updateItem(index, "quantity", e.target.value)
 															}
-															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 														/>
 													</td>
 													<td className="py-2 px-4">
@@ -746,7 +746,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 															onChange={(e) =>
 																updateItem(index, "price", e.target.value)
 															}
-															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 														/>
 													</td>
 													<td className="py-2 px-4">
@@ -795,7 +795,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 										value={notes}
 										onChange={(e) => setNotes(e.target.value)}
 										rows={3}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 										placeholder="Additional notes or terms..."
 									/>
 								</div>
@@ -810,7 +810,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 											type="text"
 											value={signature}
 											onChange={(e) => setSignature(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 											placeholder="Your signature"
 										/>
 									</div>
@@ -828,7 +828,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 									<select
 										value={status}
 										onChange={(e) => setStatus(e.target.value)}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									>
 										<option value="unpaid">Unpaid</option>
 										<option value="paid">Paid</option>

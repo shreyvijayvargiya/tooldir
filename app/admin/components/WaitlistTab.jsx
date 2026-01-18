@@ -290,7 +290,7 @@ const WaitlistTab = ({ queryClient }) => {
 					placeholder="Search waitlist by name or email..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 				/>
 			</div>
 
@@ -455,7 +455,7 @@ const WaitlistTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setNewEntry({ ...newEntry, name: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 										placeholder="Enter name"
 									/>
 								</div>
@@ -469,7 +469,7 @@ const WaitlistTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setNewEntry({ ...newEntry, email: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 										placeholder="Enter email address"
 									/>
 								</div>
@@ -556,7 +556,7 @@ const WaitlistTab = ({ queryClient }) => {
 												subject: e.target.value,
 											})
 										}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 										placeholder="Enter message subject"
 									/>
 								</div>
@@ -573,7 +573,7 @@ const WaitlistTab = ({ queryClient }) => {
 											})
 										}
 										rows={8}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm resize-none"
+										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm resize-none"
 										placeholder="Type your message here..."
 									/>
 								</div>

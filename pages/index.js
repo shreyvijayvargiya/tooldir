@@ -463,7 +463,7 @@ const HomePage = () => {
 											})
 										}
 										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									/>
 								</div>
 								<div>
@@ -481,7 +481,7 @@ const HomePage = () => {
 											})
 										}
 										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									/>
 								</div>
 								<div>
@@ -499,7 +499,7 @@ const HomePage = () => {
 											})
 										}
 										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									/>
 								</div>
 								<div>
@@ -517,7 +517,7 @@ const HomePage = () => {
 										}
 										required
 										rows={4}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 									/>
 								</div>
 								<button

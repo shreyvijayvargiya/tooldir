@@ -68,7 +68,7 @@ const BlogPage = () => {
 									placeholder="Search blog posts..."
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
-									className="w-fit min-w-[250px] pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900"
+									className="w-fit min-w-[250px] pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
 								/>
 							</div>
 						</div>

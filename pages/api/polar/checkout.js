@@ -1,4 +1,6 @@
-import { supabase } from "../../../lib/api/supabase";
+import { supabase } from "../../../lib/config/supabase";
+
+
 
 export default async function handler(req, res) {
 	if (req.method !== "POST") {
@@ -52,22 +54,22 @@ export default async function handler(req, res) {
 		// Store checkout session in Supabase (optional, for tracking)
 		// Note: You may want to create a checkouts table in Supabase if you need this
 		// For now, we'll skip this to avoid errors
-		// if (checkoutData.id) {
-		// 	try {
-		// 		await supabase
-		// 			.from('checkouts')
-		// 			.insert({
-		// 				checkout_id: checkoutData.id,
-		// 				plan_id: planId,
-		// 				customer_id: customerId || null,
-		// 				status: 'pending',
-		// 				created_at: new Date().toISOString(),
-		// 			});
-		// 	} catch (supabaseError) {
-		// 		console.error("Error storing checkout:", supabaseError);
-		// 		// Don't fail the request if Supabase write fails
-		// 	}
-		// }
+		if (checkoutData.id) {
+			try {
+				await supabase
+					.from('checkouts')
+					.insert({
+						checkout_id: checkoutData.id,
+						plan_id: planId,
+						customer_id: customerId || null,
+						status: 'pending',
+						created_at: new Date().toISOString(),
+					});
+			} catch (supabaseError) {
+				console.error("Error storing checkout:", supabaseError);
+				// Don't fail the request if Supabase write fails
+			}
+		}
 
 		return res.status(200).json({
 			checkoutUrl: checkoutData.url || checkoutData.checkout_url,

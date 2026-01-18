@@ -163,7 +163,7 @@ const SignupModal = ({ isOpen, onClose }) => {
 													value={displayName}
 													onChange={(e) => setDisplayName(e.target.value)}
 													placeholder="Enter your full name"
-													className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent text-zinc-900"
+													className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
 													required
 												/>
 											</div>
@@ -183,7 +183,7 @@ const SignupModal = ({ isOpen, onClose }) => {
 													value={email}
 													onChange={(e) => setEmail(e.target.value)}
 													placeholder="Enter your email"
-													className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent text-zinc-900"
+													className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
 													required
 												/>
 											</div>
@@ -203,7 +203,7 @@ const SignupModal = ({ isOpen, onClose }) => {
 													value={password}
 													onChange={(e) => setPassword(e.target.value)}
 													placeholder="Enter your password (min. 6 characters)"
-													className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent text-zinc-900"
+													className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
 													required
 													minLength={6}
 												/>

@@ -639,7 +639,7 @@ const FormsTab = ({ queryClient }) => {
 												id="isPublished"
 												checked={isPublished}
 												onChange={(e) => setIsPublished(e.target.checked)}
-												className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-900"
+												className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-100"
 											/>
 											<label
 												htmlFor="isPublished"
@@ -805,7 +805,7 @@ const FormsTab = ({ queryClient }) => {
 																		required: e.target.checked,
 																	})
 																}
-																className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-900"
+																className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-100"
 															/>
 															<label
 																htmlFor={`required-${field.id}`}

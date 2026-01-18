@@ -133,7 +133,7 @@ const Footer = () => {
 								placeholder="Your name (optional)"
 								value={newsletterName}
 								onChange={(e) => setNewsletterName(e.target.value)}
-								className="flex-1 px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+								className="flex-1 px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 							/>
 							<input
 								type="email"
@@ -141,7 +141,7 @@ const Footer = () => {
 								value={newsletterEmail}
 								onChange={(e) => setNewsletterEmail(e.target.value)}
 								required
-								className="flex-1 px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900 text-sm"
+								className="flex-1 px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
 							/>
 							<button
 								type="submit"
