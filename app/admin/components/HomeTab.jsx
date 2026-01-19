@@ -11,38 +11,38 @@ import {
 	Receipt,
 	MessageSquare,
 	Building2,
-	UsersRound,
-	AlertCircle,
 	ArrowRight,
 	CheckCircle2,
-	Clock,
 	Activity,
 	Zap,
-	Eye,
+	Settings,
+	HelpCircle,
+	BookOpen,
+	ExternalLink,
+	Rocket,
 } from "lucide-react";
 import {
-	LineChart,
-	Line,
+	AreaChart,
+	Area,
 	XAxis,
 	YAxis,
 	CartesianGrid,
 	Tooltip,
-	Legend,
 	ResponsiveContainer,
+	Legend,
 } from "recharts";
 import { getAllBlogs } from "../../../lib/api/blog";
 import { getAllEmails } from "../../../lib/api/emails";
 import { getAllCustomers } from "../../../lib/api/customers";
 import { getAllPayments } from "../../../lib/api/payments";
 import { getAllInvoices } from "../../../lib/api/invoice";
-import { getAllWaitlist } from "../../../lib/api/waitlist";
-import { getAllReportIssues } from "../../../lib/api/reportissues";
 import { getAllMessages } from "../../../lib/api/messages";
 import { getAllSubscribers } from "../../../lib/api/subscribers";
 import { getAllUsers } from "../../../lib/api/users";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 
 const HomeTab = ({ onNavigate }) => {
+	const [activeTab, setActiveTab] = useState("overview");
 	const [isQuickActionsDropdownOpen, setIsQuickActionsDropdownOpen] =
 		useState(false);
 
@@ -72,16 +72,6 @@ const HomeTab = ({ onNavigate }) => {
 		queryFn: () => getAllInvoices(),
 	});
 
-	const { data: waitlist = [], isLoading: waitlistLoading } = useQuery({
-		queryKey: ["waitlist"],
-		queryFn: () => getAllWaitlist(),
-	});
-
-	const { data: reportIssues = [], isLoading: issuesLoading } = useQuery({
-		queryKey: ["reportIssues"],
-		queryFn: () => getAllReportIssues(),
-	});
-
 	const { data: messages = [], isLoading: messagesLoading } = useQuery({
 		queryKey: ["messages"],
 		queryFn: () => getAllMessages(),
@@ -105,7 +95,6 @@ const HomeTab = ({ onNavigate }) => {
 		}).format(amount / 100);
 	};
 
-	// Content Stats
 	const contentStats = {
 		blogs: {
 			total: blogs.length,
@@ -119,15 +108,12 @@ const HomeTab = ({ onNavigate }) => {
 		},
 	};
 
-	// Audience Stats
 	const audienceStats = {
 		subscribers: subscribers.filter((s) => s.status === "active").length,
 		users: users.length,
 		customers: customers.filter((c) => c.status === "active").length,
-		waitlist: waitlist.length,
 	};
 
-	// Financial Stats
 	const financialStats = {
 		totalRevenue: payments
 			.filter((p) => p.status === "succeeded")
@@ -144,27 +130,51 @@ const HomeTab = ({ onNavigate }) => {
 			.reduce((sum, i) => sum + (i.total || 0), 0),
 	};
 
-	// Communication Stats
+	// Key metrics calculations
+	const metrics = [
+		{
+			title: "Total Revenue",
+			value: formatCurrency(financialStats.totalRevenue),
+			subtitle: `${financialStats.totalPayments} successful payments`,
+			icon: DollarSign,
+			color: "from-blue-600 to-indigo-600",
+			tab: "payments"
+		},
+		{
+			title: "Active Customers",
+			value: audienceStats.customers,
+			subtitle: "Joined your platform",
+			icon: Building2,
+			color: "from-emerald-500 to-teal-600",
+			tab: "customers"
+		},
+		{
+			title: "Blog Posts",
+			value: contentStats.blogs.published,
+			subtitle: `${contentStats.blogs.total} total posts`,
+			icon: FileText,
+			color: "from-amber-400 to-orange-500",
+			tab: "blogs"
+		},
+		{
+			title: "Subscribers",
+			value: audienceStats.subscribers,
+			subtitle: "Email audience",
+			icon: Users,
+			color: "from-violet-500 to-purple-600",
+			tab: "subscribers"
+		}
+	];
+
 	const communicationStats = {
 		totalMessages: messages.length,
 		unreadMessages: messages.filter((m) => !m.read).length,
 		unrepliedMessages: messages.filter((m) => !m.replied).length,
 	};
 
-	// Support Stats
-	const supportStats = {
-		totalIssues: reportIssues.length,
-		pendingIssues: reportIssues.filter((i) => i.status === "pending").length,
-		fixedIssues: reportIssues.filter((i) => i.status === "fixed").length,
-	};
-
 	// Recent activity
-	const recentBlogs = blogs.slice(0, 3);
-	const recentInvoices = invoices.slice(0, 3);
-	const recentMessages = messages.filter((m) => !m.read).slice(0, 3);
-	const recentIssues = reportIssues
-		.filter((i) => i.status === "pending")
-		.slice(0, 3);
+	const recentInvoices = invoices.slice(0, 5);
+	const recentMessages = messages.filter((m) => !m.read).slice(0, 5);
 
 	const formatDate = (date) => {
 		if (!date) return "";
@@ -224,39 +234,27 @@ const HomeTab = ({ onNavigate }) => {
 	const priorityAlerts = [
 		...(communicationStats.unreadMessages > 0
 			? [
-					{
-						type: "message",
-						count: communicationStats.unreadMessages,
-						label: "unread message",
-						action: () => onNavigate?.("messages"),
-						color: "bg-zinc-50 border-zinc-300 text-zinc-900",
-						icon: MessageSquare,
-					},
-				]
-			: []),
-		...(supportStats.pendingIssues > 0
-			? [
-					{
-						type: "issue",
-						count: supportStats.pendingIssues,
-						label: "pending issue",
-						action: () => onNavigate?.("reportIssues"),
-						color: "bg-zinc-50 border-zinc-300 text-zinc-900",
-						icon: AlertCircle,
-					},
-				]
+				{
+					type: "message",
+					count: communicationStats.unreadMessages,
+					label: "unread message",
+					action: () => onNavigate?.("messages"),
+					color: "bg-zinc-50 border-zinc-300 text-zinc-900",
+					icon: MessageSquare,
+				},
+			]
 			: []),
 		...(financialStats.unpaidInvoices > 0
 			? [
-					{
-						type: "invoice",
-						count: financialStats.unpaidInvoices,
-						label: "unpaid invoice",
-						action: () => onNavigate?.("invoices"),
-						color: "bg-zinc-50 border-zinc-300 text-zinc-900",
-						icon: Receipt,
-					},
-				]
+				{
+					type: "invoice",
+					count: financialStats.unpaidInvoices,
+					label: "unpaid invoice",
+					action: () => onNavigate?.("invoices"),
+					color: "bg-zinc-50 border-zinc-300 text-zinc-900",
+					icon: Receipt,
+				},
+			]
 			: []),
 	];
 
@@ -274,10 +272,6 @@ const HomeTab = ({ onNavigate }) => {
 			value: "invoice",
 			label: "Create Invoice",
 		},
-		{
-			value: "waitlist",
-			label: "Add Waitlist",
-		},
 	];
 
 	const handleQuickActionSelect = (value) => {
@@ -292,561 +286,461 @@ const HomeTab = ({ onNavigate }) => {
 			case "invoice":
 				onNavigate?.("invoices");
 				break;
-			case "waitlist":
-				onNavigate?.("waitlist");
-				break;
 			default:
 				break;
 		}
 	};
 
+	const tabs = [
+		{ id: "overview", label: "Overview", icon: Activity },
+		{ id: "content", label: "Content", icon: FileText },
+		{ id: "communication", label: "Messages", icon: MessageSquare },
+	];
+
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between border-b border-zinc-200 px-4 pb-2">
 				<div>
-					<h1 className="text-3xl font-bold text-zinc-900">Dashboard</h1>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h1 className="text-lg text-zinc-900 text-shadow-sm">Dashboard</h1>
+					<p className="text-sm text-zinc-500 font-medium mt-1">
 						Welcome back! Here's what's happening with your business.
 					</p>
 				</div>
-				<div className="flex items-center gap-2 text-sm text-zinc-600">
-					<Activity className="w-4 h-4" />
-					<span>Last updated: Just now</span>
+				<div className="flex items-center gap-4">
+					{/* Priority Alerts */}
+					{priorityAlerts.length > 0 && (
+						<div className="flex gap-3">
+							{priorityAlerts.map((alert, index) => {
+								const Icon = alert.icon;
+								return (
+									<motion.div
+										key={index}
+										initial={{ opacity: 0, x: 20 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ delay: index * 0.1 }}
+										onClick={alert.action}
+										className={`group flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-zinc-200 cursor-pointer transition-all hover:bg-zinc-50 hover:shadow-md hover:-translate-y-0.5 ${alert.color}`}
+									>
+										<div className="p-1.5 rounded-xl bg-white/80 shadow-sm transition-transform group-hover:scale-110">
+											<Icon className="w-4 h-4 text-zinc-900" />
+										</div>
+										<div>
+											<p className="text-xs font-bold text-zinc-900 leading-none">
+												{alert.count} {alert.label}{alert.count > 1 ? "s" : ""}
+											</p>
+											<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1 group-hover:text-zinc-600 transition-colors">Attention Required</p>
+										</div>
+										<ArrowRight className="w-3.5 h-3.5 text-zinc-300 group-hover:text-zinc-900 transition-colors" />
+									</motion.div>
+								);
+							})}
+						</div>
+					)}
+					<div className="h-10 w-px bg-zinc-100 mx-2" />
+					<div className="flex flex-col items-end">
+						<div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+							<div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+							Live System Status
+						</div>
+						<div className="flex items-center gap-2 text-sm font-bold text-zinc-900 mt-1">
+							<Activity className="w-4 h-4 text-zinc-400" />
+							<span>Updated Just now</span>
+						</div>
+					</div>
 				</div>
 			</div>
-
-			{/* Priority Alerts */}
-			{priorityAlerts.length > 0 && (
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-					{priorityAlerts.map((alert, index) => {
-						const Icon = alert.icon;
-					return (
-						<motion.div
-							key={index}
-								initial={{ opacity: 0, x: -20 }}
-								animate={{ opacity: 1, x: 0 }}
-							transition={{ delay: index * 0.1 }}
-								onClick={alert.action}
-								className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ${alert.color}`}
-						>
-							<div className="flex items-center justify-between">
-									<div className="flex items-center gap-3">
-										<div className="p-2 rounded-xl bg-white/50">
-											<Icon className="w-5 h-5" />
-										</div>
-								<div>
-											<p className="text-sm font-medium">
-												{alert.count} {alert.label}
-												{alert.count > 1 ? "s" : ""}
-											</p>
-											<p className="text-xs opacity-75 mt-0.5">Click to view</p>
-										</div>
-									</div>
-									<ArrowRight className="w-4 h-4 opacity-50" />
-							</div>
-						</motion.div>
-					);
-				})}
-			</div>
-			)}
 
 			{/* Key Metrics */}
-			<div>
-				<div className="flex items-center justify-between mb-4">
-					<h2 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
-						<TrendingUp className="w-5 h-5 text-zinc-600" />
-						Key Metrics
-					</h2>
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+				{metrics.map((metric, index) => (
+					<motion.div
+						key={index}
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: index * 0.1 }}
+						onClick={() => onNavigate?.(metric.tab)}
+						className="relative group p-6 rounded-3xl overflow-hidden bg-white border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+					>
+						{/* Background Glow */}
+						<div className={`absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br ${metric.color} opacity-[0.03] rounded-full group-hover:scale-150 transition-transform duration-500`} />
+
+						<div className="relative flex items-center justify-between mb-4">
+							<div className={`p-3 rounded-2xl bg-gradient-to-br ${metric.color} shadow-lg shadow-indigo-500/10`}>
+								<metric.icon className="w-6 h-6 text-white" />
+							</div>
+							<div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-50 rounded-full border border-zinc-100">
+								<TrendingUp className="w-3 h-3 text-emerald-500" />
+								<span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">+12%</span>
+							</div>
+						</div>
+
+						<div className="relative">
+							<p className="text-3xl font-black text-zinc-900 tracking-tight mb-1">
+								{metric.value}
+							</p>
+							<div className="flex items-center justify-between">
+								<p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">{metric.title}</p>
+								<p className="text-[10px] font-medium text-zinc-400">{metric.subtitle}</p>
+							</div>
+						</div>
+					</motion.div>
+				))}
+			</div>
+
+			{/* Quick Actions & Help */}
+			<div className="flex items-center justify-between gap-4 flex-wrap px-4">
+				<div className="flex items-center gap-3">
+					<Zap className="w-5 h-5 text-zinc-600" />
+					<div className="w-64">
+						<AnimatedDropdown
+							isOpen={isQuickActionsDropdownOpen}
+							onToggle={() =>
+								setIsQuickActionsDropdownOpen(!isQuickActionsDropdownOpen)
+							}
+							onSelect={handleQuickActionSelect}
+							options={quickActionsOptions}
+							value=""
+							placeholder="Quick Actions..."
+							buttonClassName="text-sm"
+						/>
+					</div>
 				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-					{/* Revenue Card */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="p-5 rounded-xl border-2 border-zinc-200 bg-zinc-50 cursor-pointer hover:shadow-lg transition-all"
-						onClick={() => onNavigate?.("payments")}
+				<div className="flex items-center gap-2">
+					<a
+						href="/docs"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white border border-zinc-200 rounded-xl hover:bg-zinc-100 transition-colors text-zinc-700"
 					>
-						<div className="flex items-center justify-between mb-3">
-							<div className="p-2.5 rounded-xl bg-zinc-200">
-								<DollarSign className="w-6 h-6 text-zinc-900" />
-							</div>
-							<span className="text-xs font-medium text-zinc-700 bg-zinc-200 px-2 py-1 rounded-full">
-								Revenue
-							</span>
-						</div>
-						<p className="text-3xl font-bold text-zinc-900 mb-1">
-							{paymentsLoading
-								? "..."
-								: formatCurrency(financialStats.totalRevenue)}
-						</p>
-						<p className="text-sm text-zinc-600">
-							{financialStats.totalPayments} successful payments
-						</p>
-					</motion.div>
-
-					{/* Customers Card */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.1 }}
-						className="p-5 rounded-xl border-2 border-zinc-200 bg-zinc-50 cursor-pointer hover:shadow-lg transition-all"
-						onClick={() => onNavigate?.("customers")}
+						<BookOpen className="w-4 h-4" />
+						View Docs
+						<ExternalLink className="w-3 h-3" />
+					</a>
+					<button
+						onClick={() => onNavigate?.("teams")}
+						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors"
 					>
-						<div className="flex items-center justify-between mb-3">
-							<div className="p-2.5 rounded-xl bg-zinc-200">
-								<Building2 className="w-6 h-6 text-zinc-900" />
-							</div>
-							<span className="text-xs font-medium text-zinc-700 bg-zinc-200 px-2 py-1 rounded-full">
-								Active
-							</span>
-						</div>
-						<p className="text-3xl font-bold text-zinc-900 mb-1">
-							{customersLoading ? "..." : audienceStats.customers}
-						</p>
-						<p className="text-sm text-zinc-600">Active customers</p>
-					</motion.div>
-
-					{/* Content Card */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.2 }}
-						className="p-5 rounded-xl border-2 border-zinc-200 bg-zinc-50 cursor-pointer hover:shadow-lg transition-all"
-						onClick={() => onNavigate?.("blogs")}
-					>
-						<div className="flex items-center justify-between mb-3">
-							<div className="p-2.5 rounded-xl bg-zinc-200">
-								<FileText className="w-6 h-6 text-zinc-900" />
-							</div>
-							<span className="text-xs font-medium text-zinc-700 bg-zinc-200 px-2 py-1 rounded-full">
-								Published
-							</span>
-				</div>
-						<p className="text-3xl font-bold text-zinc-900 mb-1">
-							{blogsLoading ? "..." : contentStats.blogs.published}
-						</p>
-						<p className="text-sm text-zinc-600">
-							{contentStats.blogs.total} total blog posts
-						</p>
-					</motion.div>
-
-					{/* Audience Card */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.3 }}
-						className="p-5 rounded-xl border-2 border-zinc-200 bg-zinc-50 cursor-pointer hover:shadow-lg transition-all"
-						onClick={() => onNavigate?.("subscribers")}
-					>
-						<div className="flex items-center justify-between mb-3">
-							<div className="p-2.5 rounded-xl bg-zinc-200">
-								<Users className="w-6 h-6 text-zinc-900" />
-							</div>
-							<span className="text-xs font-medium text-zinc-700 bg-zinc-200 px-2 py-1 rounded-full">
-								Subscribers
-							</span>
-						</div>
-						<p className="text-3xl font-bold text-zinc-900 mb-1">
-							{subscribersLoading ? "..." : audienceStats.subscribers}
-						</p>
-						<p className="text-sm text-zinc-600">Email subscribers</p>
-					</motion.div>
+						<Settings className="w-4 h-4" />
+						Settings
+					</button>
 				</div>
 			</div>
 
-			{/* Quick Actions */}
-			<div>
-				<div className="flex items-center justify-between mb-3">
-					<h2 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
-						<Zap className="w-5 h-5 text-zinc-600" />
-						Quick Actions
-					</h2>
-				</div>
-				<div className="w-full md:w-64">
-					<AnimatedDropdown
-						isOpen={isQuickActionsDropdownOpen}
-						onToggle={() =>
-							setIsQuickActionsDropdownOpen(!isQuickActionsDropdownOpen)
-						}
-						onSelect={handleQuickActionSelect}
-						options={quickActionsOptions}
-						value=""
-						placeholder="Select an action..."
-						buttonClassName="text-sm"
-					/>
-				</div>
-				</div>
-
-			{/* Charts and Activity */}
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Content Creation Chart */}
-				<div className="lg:col-span-2 p-5 rounded-xl border border-zinc-200 bg-white">
-					<div className="flex items-center justify-between mb-4">
-						<h3 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
-							<Activity className="w-4 h-4 text-zinc-600" />
-							Content Activity (Last 7 Days)
-					</h3>
+			<div className="flex flex-col lg:flex-row gap-8 px-4">
+				<div className="flex-1 min-w-0 space-y-6">
+					{/* Tabs */}
+					<div className="border-b border-zinc-200">
+						<div className="flex gap-1 overflow-x-auto no-scrollbar">
+							{tabs.map((tab) => {
+								const Icon = tab.icon;
+								return (
+									<button
+										key={tab.id}
+										onClick={() => setActiveTab(tab.id)}
+										className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === tab.id
+											? "border-zinc-900 text-zinc-900"
+											: "border-transparent text-zinc-600 hover:text-zinc-900"
+											}`}
+									>
+										<Icon className="w-4 h-4" />
+										{tab.label}
+									</button>
+								);
+							})}
+						</div>
 					</div>
-					{blogsLoading || emailsLoading ? (
-						<div className="h-64 flex items-center justify-center text-zinc-500">
-							Loading...
-						</div>
-					) : (
-						<ResponsiveContainer width="100%" height={250}>
-							<LineChart data={timeSeriesData}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
-								<XAxis
-									dataKey="date"
-									stroke="#71717a"
-									style={{ fontSize: "12px" }}
-								/>
-								<YAxis stroke="#71717a" style={{ fontSize: "12px" }} />
-								<Tooltip
-									contentStyle={{
-										backgroundColor: "#fff",
-										border: "1px solid #e4e4e7",
-										borderRadius: "8px",
-									}}
-								/>
-								<Legend />
-								<Line
-									type="monotone"
-									dataKey="blogs"
-									stroke="#3b82f6"
-									strokeWidth={3}
-									name="Blogs"
-									dot={{ fill: "#3b82f6", r: 5 }}
-								/>
-								<Line
-									type="monotone"
-									dataKey="emails"
-									stroke="#a855f7"
-									strokeWidth={3}
-									name="Emails"
-									dot={{ fill: "#a855f7", r: 5 }}
-								/>
-							</LineChart>
-						</ResponsiveContainer>
-					)}
-				</div>
 
-				{/* Financial Summary */}
-				<div className="p-5 rounded-xl border border-zinc-200 bg-white">
-					<h3 className="text-base font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-						<CreditCard className="w-4 h-4 text-zinc-600" />
-						Financial Summary
-					</h3>
-					<div className="space-y-4">
-						<div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-							<p className="text-xs text-zinc-600 mb-1">Paid Invoices</p>
-							<p className="text-xl font-bold text-zinc-900">
-								{invoicesLoading ? "..." : financialStats.paidInvoices}
-							</p>
-							<p className="text-xs text-zinc-600 mt-1">
-								{new Intl.NumberFormat("en-US", {
-									style: "currency",
-									currency: "USD",
-								}).format(financialStats.invoiceRevenue)}
-							</p>
-						</div>
-						<div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200">
-							<p className="text-xs text-zinc-600 mb-1">Unpaid Invoices</p>
-							<p className="text-xl font-bold text-zinc-900">
-								{invoicesLoading ? "..." : financialStats.unpaidInvoices}
-							</p>
-							<p className="text-xs text-zinc-600 mt-1">
-								{new Intl.NumberFormat("en-US", {
-									style: "currency",
-									currency: "USD",
-								}).format(financialStats.unpaidAmount)}
-							</p>
-						</div>
-						<button
-							onClick={() => onNavigate?.("invoices")}
-							className="w-full mt-4 px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
-						>
-							<Receipt className="w-4 h-4" />
-							View All Invoices
-						</button>
-					</div>
-				</div>
-			</div>
-
-			{/* Recent Activity */}
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Unread Messages */}
-				<div className="p-5 rounded-xl border border-zinc-200 bg-white">
-					<div className="flex items-center justify-between mb-4">
-						<h3 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
-							<MessageSquare className="w-4 h-4 text-zinc-600" />
-							Unread Messages
-							{communicationStats.unreadMessages > 0 && (
-								<span className="ml-2 px-2 py-0.5 bg-zinc-200 text-zinc-800 text-xs font-medium rounded-full">
-									{communicationStats.unreadMessages}
-								</span>
-							)}
-						</h3>
-						{communicationStats.unreadMessages > 0 && (
-							<button
-								onClick={() => onNavigate?.("messages")}
-								className="text-xs text-zinc-600 hover:text-zinc-900 flex items-center gap-1"
-							>
-								View All
-								<ArrowRight className="w-3 h-3" />
-							</button>
-						)}
-					</div>
-					{messagesLoading ? (
-						<div className="text-center py-8 text-zinc-500 text-sm">
-							Loading...
-						</div>
-					) : recentMessages.length === 0 ? (
-						<div className="text-center py-8 text-zinc-500 text-sm">
-							<div className="p-3 rounded-xl bg-zinc-50">
-								<CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
-								<p>All caught up!</p>
-								<p className="text-xs mt-1">No unread messages</p>
-							</div>
-						</div>
-					) : (
-						<div className="space-y-2">
-							{recentMessages.map((message) => (
-								<div
-									key={message.id}
-									className="p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 transition-colors cursor-pointer group"
-									onClick={() => onNavigate?.("messages")}
-								>
-									<div className="flex items-start justify-between">
-										<div className="flex-1">
-											<p className="text-sm font-medium text-zinc-900 group-hover:text-zinc-600">
-												{message.name || "Anonymous"}
-											</p>
-											<p className="text-xs text-zinc-600 mt-1 line-clamp-1">
-												{message.subject || message.message}
-											</p>
-											<p className="text-xs text-zinc-500 mt-1">
-												{formatDate(message.createdAt)}
-											</p>
-										</div>
-										<div className="w-2 h-2 bg-zinc-900 rounded-full mt-1.5"></div>
-									</div>
-								</div>
-							))}
-						</div>
-					)}
-				</div>
-
-				{/* Pending Issues */}
-				<div className="p-5 rounded-xl border border-zinc-200 bg-white">
-					<div className="flex items-center justify-between mb-4">
-						<h3 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
-							<AlertCircle className="w-4 h-4 text-zinc-600" />
-							Pending Issues
-							{supportStats.pendingIssues > 0 && (
-								<span className="ml-2 px-2 py-0.5 bg-zinc-200 text-zinc-800 text-xs font-medium rounded-full">
-									{supportStats.pendingIssues}
-								</span>
-							)}
-						</h3>
-						{supportStats.pendingIssues > 0 && (
-							<button
-								onClick={() => onNavigate?.("reportIssues")}
-								className="text-xs text-zinc-600 hover:text-zinc-900 flex items-center gap-1"
-							>
-								View All
-								<ArrowRight className="w-3 h-3" />
-							</button>
-						)}
-					</div>
-					{issuesLoading ? (
-						<div className="text-center py-8 text-zinc-500 text-sm">
-							Loading...
-						</div>
-					) : recentIssues.length === 0 ? (
-						<div className="text-center py-8 text-zinc-500 text-sm">
-							<div className="p-3 rounded-xl bg-zinc-50">
-								<CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
-								<p>All clear!</p>
-								<p className="text-xs mt-1">No pending issues</p>
-							</div>
-						</div>
-					) : (
-						<div className="space-y-2">
-							{recentIssues.map((issue) => (
-								<div
-									key={issue.id}
-									className="p-3 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 transition-colors cursor-pointer group"
-									onClick={() => onNavigate?.("reportIssues")}
-								>
-									<div className="flex items-start justify-between">
-										<div className="flex-1">
-											<p className="text-sm font-medium text-zinc-900">
-												{issue.name || "Anonymous"}
-											</p>
-											<p className="text-xs text-zinc-600 mt-1 line-clamp-2">
-												{issue.issue}
-											</p>
-											<p className="text-xs text-zinc-500 mt-1">
-												{formatDate(issue.createdAt)}
-											</p>
-										</div>
-										<Clock className="w-4 h-4 text-zinc-600 mt-0.5" />
-									</div>
-								</div>
-							))}
-						</div>
-					)}
-				</div>
-
-				{/* Recent Invoices */}
-				<div className="p-5 rounded-xl border border-zinc-200 bg-white">
-					<div className="flex items-center justify-between mb-4">
-						<h3 className="text-base font-semibold text-zinc-900 flex items-center gap-2">
-							<Receipt className="w-4 h-4 text-zinc-600" />
-							Recent Invoices
-						</h3>
-						<button
-							onClick={() => onNavigate?.("invoices")}
-							className="text-xs text-zinc-600 hover:text-zinc-900 flex items-center gap-1"
-						>
-							View All
-							<ArrowRight className="w-3 h-3" />
-						</button>
-					</div>
-					{invoicesLoading ? (
-						<div className="text-center py-8 text-zinc-500 text-sm">
-							Loading...
-						</div>
-					) : recentInvoices.length === 0 ? (
-						<div className="text-center py-8 text-zinc-500 text-sm">
-							<div className="p-3 rounded-xl bg-zinc-50">
-								<Receipt className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
-								<p>No invoices yet</p>
-								<button
-									onClick={() => onNavigate?.("invoices")}
-									className="mt-2 text-xs text-blue-600 hover:text-blue-700"
-								>
-									Create your first invoice
-								</button>
-							</div>
-						</div>
-					) : (
-						<div className="space-y-2">
-							{recentInvoices.map((invoice) => (
-								<div
-									key={invoice.id}
-									className="p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 transition-colors cursor-pointer group"
-									onClick={() => onNavigate?.("invoices")}
-								>
-									<div className="flex items-center justify-between">
-										<div className="flex-1">
-											<div className="flex items-center gap-2">
-												<p className="text-sm font-medium text-zinc-900 group-hover:text-zinc-600">
-													{invoice.invoiceNumber || invoice.id}
-												</p>
-												{invoice.status === "paid" ? (
-													<span className="px-2 py-0.5 bg-zinc-200 text-zinc-800 text-xs font-medium rounded-full">
-														Paid
-													</span>
-												) : (
-													<span className="px-2 py-0.5 bg-zinc-200 text-zinc-800 text-xs font-medium rounded-full">
-														Unpaid
-													</span>
-												)}
+					{/* Tab Content */}
+					<div className="space-y-6">
+						{/* Overview Tab */}
+						{activeTab === "overview" && (
+							<div className="space-y-6">
+								{/* Content Activity Chart */}
+								<div className="p-5 rounded-3xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+									<div className="flex items-center justify-between mb-6">
+										<h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
+											<Activity className="w-4 h-4 text-zinc-600" />
+											Content Activity
+										</h3>
+										<div className="flex items-center gap-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+											<div className="flex items-center gap-1.5">
+												<div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+												Blogs
 											</div>
-											<p className="text-xs text-zinc-600 mt-1">
-												{invoice.to?.name || invoice.to?.email || ""}
-											</p>
-											<p className="text-xs text-zinc-500 mt-1">
-												{formatDate(invoice.createdAt || invoice.invoiceDate)}
-											</p>
+											<div className="flex items-center gap-1.5">
+												<div className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+												Emails
+											</div>
 										</div>
-										<div className="text-right">
-											<p className="text-sm font-semibold text-zinc-900">
-												${invoice.total?.toFixed(2) || "0.00"}
-											</p>
+									</div>
+									{blogsLoading || emailsLoading ? (
+										<div className="h-64 flex items-center justify-center text-zinc-500">
+											<div className="flex flex-col items-center gap-3">
+												<div className="w-8 h-8 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
+												<span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Syncing Data...</span>
+											</div>
+										</div>
+									) : (
+										<ResponsiveContainer width="100%" height={300}>
+											<AreaChart data={timeSeriesData}>
+												<defs>
+													<linearGradient id="colorBlogs" x1="0" y1="0" x2="0" y2="1">
+														<stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+														<stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+													</linearGradient>
+													<linearGradient id="colorEmails" x1="0" y1="0" x2="0" y2="1">
+														<stop offset="5%" stopColor="#a855f7" stopOpacity={0.1} />
+														<stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+													</linearGradient>
+												</defs>
+												<CartesianGrid
+													strokeDasharray="3 3"
+													vertical={false}
+													stroke="#f3f4f6"
+												/>
+												<XAxis
+													dataKey="date"
+													axisLine={false}
+													tickLine={false}
+													tick={{ fill: "#9ca3af", fontSize: 10, fontWeight: 700 }}
+													dy={10}
+												/>
+												<YAxis
+													axisLine={false}
+													tickLine={false}
+													tick={{ fill: "#9ca3af", fontSize: 10, fontWeight: 700 }}
+												/>
+												<Tooltip
+													contentStyle={{
+														borderRadius: "16px",
+														border: "1px solid #e5e7eb",
+														boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+														fontSize: "12px",
+														fontWeight: "600",
+													}}
+												/>
+												<Area
+													type="monotone"
+													dataKey="blogs"
+													stroke="#3b82f6"
+													strokeWidth={3}
+													fillOpacity={1}
+													fill="url(#colorBlogs)"
+													name="Blogs"
+												/>
+												<Area
+													type="monotone"
+													dataKey="emails"
+													stroke="#a855f7"
+													strokeWidth={3}
+													fillOpacity={1}
+													fill="url(#colorEmails)"
+													name="Emails"
+												/>
+											</AreaChart>
+										</ResponsiveContainer>
+									)}
+								</div>
+							</div>
+						)}
+
+						{/* Content Tab */}
+						{activeTab === "content" && (
+							<div className="space-y-6">
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+									<div className="p-6 rounded-3xl border border-zinc-200 bg-white shadow-sm">
+										<div className="flex items-center justify-between mb-6">
+											<div className="p-2.5 rounded-2xl bg-blue-50">
+												<FileText className="w-5 h-5 text-blue-600" />
+											</div>
+											<button
+												onClick={() => onNavigate?.("blogs")}
+												className="p-2 text-zinc-400 hover:text-zinc-600 transition-all"
+											>
+												<ArrowRight className="w-4 h-4" />
+											</button>
+										</div>
+										<h4 className="text-sm font-bold text-zinc-900 mb-1">Blog Content</h4>
+										<p className="text-xs text-zinc-500 mb-6">Manage your articles and posts</p>
+										<div className="grid grid-cols-3 gap-2">
+											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
+												<p className="text-lg font-black text-zinc-900">{contentStats.blogs.total}</p>
+												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total</p>
+											</div>
+											<div className="p-3 rounded-2xl bg-zinc-50 text-center border border-zinc-100">
+												<p className="text-lg font-black text-emerald-600">{contentStats.blogs.published}</p>
+												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Live</p>
+											</div>
+											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
+												<p className="text-lg font-black text-zinc-400">{contentStats.blogs.draft}</p>
+												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Draft</p>
+											</div>
+										</div>
+									</div>
+
+									<div className="p-6 rounded-3xl border border-zinc-200 bg-white shadow-sm">
+										<div className="flex items-center justify-between mb-6">
+											<div className="p-2.5 rounded-2xl bg-purple-50">
+												<Mail className="w-5 h-5 text-purple-600" />
+											</div>
+											<button
+												onClick={() => onNavigate?.("emails")}
+												className="p-2 text-zinc-400 hover:text-zinc-600 transition-all"
+											>
+												<ArrowRight className="w-4 h-4" />
+											</button>
+										</div>
+										<h4 className="text-sm font-bold text-zinc-900 mb-1">Email Campaigns</h4>
+										<p className="text-xs text-zinc-500 mb-6">Monitor your email outreach</p>
+										<div className="grid grid-cols-3 gap-2">
+											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
+												<p className="text-lg font-black text-zinc-900">{contentStats.emails.total}</p>
+												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total</p>
+											</div>
+											<div className="p-3 rounded-2xl bg-zinc-50 text-center border border-zinc-100">
+												<p className="text-lg font-black text-emerald-600">{contentStats.emails.published}</p>
+												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sent</p>
+											</div>
+											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
+												<p className="text-lg font-black text-zinc-400">{contentStats.emails.draft}</p>
+												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Draft</p>
+											</div>
 										</div>
 									</div>
 								</div>
-							))}
+							</div>
+						)}
+
+						{/* Communication Tab */}
+						{activeTab === "communication" && (
+							<div className="space-y-6">
+								<div className="p-6 rounded-3xl border border-zinc-200 bg-white shadow-sm">
+									<div className="flex items-center justify-between mb-6">
+										<div className="flex items-center gap-3">
+											<div className="p-2.5 rounded-2xl bg-zinc-900">
+												<MessageSquare className="w-5 h-5 text-white" />
+											</div>
+											<div>
+												<h4 className="text-sm font-bold text-zinc-900">Inbox activity</h4>
+												<p className="text-xs text-zinc-500">Respond to customer inquiries</p>
+											</div>
+										</div>
+										<button
+											onClick={() => onNavigate?.("messages")}
+											className="px-4 py-2 text-[10px] font-bold bg-zinc-50 hover:bg-zinc-100 text-zinc-900 rounded-xl transition-all border border-zinc-200 uppercase tracking-widest"
+										>
+											Open Inbox
+										</button>
+									</div>
+									{messagesLoading ? (
+										<div className="text-center py-20">
+											<div className="inline-block w-6 h-6 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin mb-4" />
+											<p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Checking Messages...</p>
+										</div>
+									) : recentMessages.length === 0 ? (
+										<div className="text-center py-20 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200">
+											<CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+											<p className="text-sm font-bold text-zinc-900">All caught up!</p>
+											<p className="text-xs text-zinc-400 mt-1">Consistency is key. Keep up the great work.</p>
+										</div>
+									) : (
+										<div className="space-y-3">
+											{recentMessages.map((message) => (
+												<div
+													key={message.id}
+													className="p-4 rounded-2xl border border-zinc-100 bg-white hover:border-zinc-300 transition-all cursor-pointer group shadow-sm hover:shadow-md"
+													onClick={() => onNavigate?.("messages")}
+												>
+													<div className="flex items-start justify-between">
+														<div className="flex-1">
+															<p className="text-sm font-bold text-zinc-900 group-hover:text-zinc-600 transition-colors">
+																{message.name || "Anonymous"}
+															</p>
+															<p className="text-xs text-zinc-500 mt-1 line-clamp-1 font-medium">
+																{message.subject || message.message}
+															</p>
+															<p className="text-[10px] text-zinc-400 mt-2 font-bold uppercase tracking-widest group-hover:text-zinc-600">
+																{formatDate(message.createdAt)}
+															</p>
+														</div>
+														<div className="w-2 h-2 bg-zinc-900 rounded-full mt-1.5 shadow-sm shadow-zinc-900/20" />
+													</div>
+												</div>
+											))}
+										</div>
+									)}
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+
+				<div className="w-full lg:w-[400px] flex-shrink-0">
+					{/* Users Table Section */}
+					<div className="space-y-6">
+						<div className="flex items-center justify-between">
+							<div>
+								<h3 className="text-base font-bold text-zinc-900">Recent Users</h3>
+								<p className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Community update</p>
+							</div>
+							<button
+								onClick={() => onNavigate?.("users")}
+								className="p-2 text-zinc-400 hover:text-zinc-900 transition-all"
+							>
+								<ArrowRight className="w-5 h-5" />
+							</button>
 						</div>
-					)}
+
+						<div className="bg-white border border-zinc-200 rounded-3xl overflow-hidden shadow-sm">
+							{usersLoading ? (
+								<div className="p-20 text-center">
+									<div className="inline-block w-8 h-8 border-4 border-zinc-100 border-t-zinc-900 rounded-full animate-spin" />
+								</div>
+							) : (
+								<div className="divide-y divide-zinc-50">
+									{users.slice(0, 6).map((u, i) => (
+										<div key={u.id || i} className="p-4 hover:bg-zinc-50 transition-all group flex items-center justify-between">
+											<div className="flex items-center gap-3">
+												<div className="w-10 h-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold border border-zinc-200 group-hover:bg-white transition-colors">
+													{u.email?.substring(0, 1).toUpperCase() || "U"}
+												</div>
+												<div className="flex flex-col">
+													<span className="text-sm font-bold text-zinc-900 group-hover:text-blue-600 transition-colors">
+														{u.username || "Anonymous"}
+													</span>
+													<span className={`text-[10px] font-bold uppercase tracking-widest mt-0.5 ${u.role === "admin" ? "text-zinc-900" : "text-zinc-400"
+														}`}>
+														{u.role || "user"}
+													</span>
+												</div>
+											</div>
+											<div className="flex flex-col items-end">
+												<span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+													{formatDate(u.createdAt)}
+												</span>
+												<button
+													onClick={() => onNavigate?.("users")}
+													className="mt-1 text-zinc-300 hover:text-zinc-900 transition-all opacity-0 group-hover:opacity-100"
+												>
+													<ExternalLink className="w-3.5 h-3.5" />
+												</button>
+											</div>
+										</div>
+									))}
+									<button
+										onClick={() => onNavigate?.("users")}
+										className="w-full p-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-zinc-900 transition-colors bg-zinc-50/50"
+									>
+										Show all registration data
+									</button>
+								</div>
+							)}
+						</div>
+					</div>
 				</div>
 			</div>
 
-			{/* All Metrics Overview */}
-			<div className="p-5 rounded-xl border border-zinc-200 bg-white">
-				<h3 className="text-base font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-					<Eye className="w-4 h-4 text-zinc-500" />
-					Complete Overview
-				</h3>
-				<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-					{[
-						{
-							label: "Blogs",
-							value: contentStats.blogs.total,
-							icon: FileText,
-							action: () => onNavigate?.("blogs"),
-							color: "text-zinc-600",
-						},
-						{
-							label: "Emails",
-							value: contentStats.emails.total,
-							icon: Mail,
-							action: () => onNavigate?.("emails"),
-							color: "text-zinc-600",
-						},
-						{
-							label: "Users",
-							value: audienceStats.users,
-							icon: Users,
-							action: () => onNavigate?.("users"),
-							color: "text-zinc-600",
-						},
-						{
-							label: "Waitlist",
-							value: audienceStats.waitlist,
-							icon: UsersRound,
-							action: () => onNavigate?.("waitlist"),
-							color: "text-zinc-600",
-						},
-						{
-							label: "Messages",
-							value: communicationStats.totalMessages,
-							icon: MessageSquare,
-							action: () => onNavigate?.("messages"),
-							color: "text-zinc-600",
-						},
-						{
-							label: "Issues",
-							value: supportStats.totalIssues,
-							icon: AlertCircle,
-							action: () => onNavigate?.("reportIssues"),
-							color: "text-zinc-600",
-						},
-					].map((metric, index) => {
-						const Icon = metric.icon;
-						return (
-							<motion.button
-								key={index}
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-								onClick={metric.action}
-								className="p-3 rounded-xl border border-zinc-200 hover:bg-zinc-50 transition-colors text-left"
-							>
-								<div className="flex items-center gap-2 mb-2">
-									<Icon className={`w-4 h-4 ${metric.color}`} />
-									<p className="text-xs text-zinc-600">{metric.label}</p>
-								</div>
-								<p className="text-xl font-bold text-zinc-900">
-									{metric.value}
-								</p>
-							</motion.button>
-						);
-					})}
-				</div>
-			</div>
 		</div>
 	);
 };

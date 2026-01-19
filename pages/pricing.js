@@ -223,6 +223,21 @@ const PricingPage = () => {
 		}
 	};
 
+	// Formats date (e.g. "January 1, 2024") - used for next billing date (works for both monthly/yearly)
+	const formatDate = (dateString) => {
+		if (!dateString) return "N/A";
+		try {
+			const date = new Date(dateString);
+			return date.toLocaleDateString("en-US", {
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			});
+		} catch (error) {
+			return "Invalid date";
+		}
+	};
+
 	return (
 		<>
 			<Head>
@@ -255,11 +270,10 @@ const PricingPage = () => {
 									whileInView={{ opacity: 1, y: 0 }}
 									viewport={{ once: true }}
 									transition={{ delay: index * 0.1 }}
-									className={`relative p-8 bg-white border-2 rounded-xl ${
-										plan.popular
-											? "border-zinc-900 shadow-lg"
-											: "border-zinc-200"
-									}`}
+									className={`relative p-8 bg-white border-2 rounded-xl ${plan.popular
+										? "border-zinc-900 shadow-lg"
+										: "border-zinc-200"
+										}`}
 								>
 									{plan.popular && (
 										<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -295,18 +309,17 @@ const PricingPage = () => {
 										// Enterprise plan - Contact Sales button
 										<a
 											href="/contact"
-											className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
-												plan.popular
-													? "bg-zinc-900 text-white hover:bg-zinc-800"
-													: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
-											}`}
+											className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${plan.popular
+												? "bg-zinc-900 text-white hover:bg-zinc-800"
+												: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+												}`}
 										>
 											<Mail className="w-4 h-4" />
 											Contact Sales
 										</a>
 									) : subscription.isSubscribed &&
-									  subscription.status === "active" &&
-									  subscription.planId === plan.id ? (
+										subscription.status === "active" &&
+										subscription.planId === plan.id ? (
 										// This is the user's active plan
 										<div className="space-y-2">
 											<button
@@ -316,6 +329,15 @@ const PricingPage = () => {
 												<CheckCircle2 className="w-5 h-5" />
 												Active Plan
 											</button>
+
+											{subscription.expiresAt && (
+												<p className="text-xs text-center text-zinc-500 font-medium">
+													{subscription.status === "active"
+														? `Next payment: ${formatDate(subscription.expiresAt)}`
+														: `Ends on: ${formatDate(subscription.expiresAt)}`}
+												</p>
+											)}
+
 											<button
 												onClick={() => setShowCancelModal(true)}
 												className="w-full py-2 rounded-xl font-medium bg-red-50 text-red-700 border-2 border-red-200 hover:bg-red-100 transition-colors flex items-center justify-center gap-2 text-sm"
@@ -328,11 +350,10 @@ const PricingPage = () => {
 										// User is logged in but this is not their active plan
 										<button
 											onClick={() => handleCheckout(plan.id)}
-											className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
-												plan.popular
-													? "bg-zinc-900 text-white hover:bg-zinc-800"
-													: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
-											}`}
+											className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${plan.popular
+												? "bg-zinc-900 text-white hover:bg-zinc-800"
+												: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+												}`}
 										>
 											<ArrowRight className="w-4 h-4" />
 											Subscribe to {plan.name}
@@ -341,11 +362,10 @@ const PricingPage = () => {
 										// User not logged in - show Google login button
 										<button
 											onClick={handleGoogleLogin}
-											className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
-												plan.popular
-													? "bg-zinc-900 text-white hover:bg-zinc-800"
-													: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
-											}`}
+											className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${plan.popular
+												? "bg-zinc-900 text-white hover:bg-zinc-800"
+												: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+												}`}
 										>
 											<svg
 												className="w-5 h-5"

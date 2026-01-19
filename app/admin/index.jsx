@@ -60,14 +60,14 @@ const Admin = () => {
 	// Fetch user role with React Query
 	const fetchUserRole = async () => {
 		try {
-			// Get current user email (from Firebase Auth or localStorage fallback)
+			// Get current user email (from Supabase Auth or localStorage fallback)
 			const userEmail = await getCurrentUserEmail();
 
 			console.log("CMS: Current user email:", userEmail);
 
 			if (userEmail) {
 				// Fetch role from Firestore teams collection using email
-				// Firebase Auth users don't have role - we check teams collection
+				// Supabase Auth users don't have role - we check teams collection
 				const role = await getUserRole(userEmail, false);
 				console.log("CMS: Fetched role from teams collection:", role);
 				return role;
@@ -103,22 +103,22 @@ const Admin = () => {
 
 	// Listen for auth state changes and refetch user role
 	useEffect(() => {
-		const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+		const unsubscribe = onAuthStateChange(async (authUser) => {
 			// Invalidate userRole query when auth state changes
 			queryClient.invalidateQueries({ queryKey: ["userRole"] });
 
 			// Update user state and cookie
-			if (firebaseUser) {
+			if (authUser) {
 				const userData = {
-					uid: firebaseUser.uid,
-					email: firebaseUser.email,
+					uid: authUser.uid,
+					email: authUser.email,
 					displayName:
-						firebaseUser.displayName ||
-						firebaseUser.email?.split("@")[0] ||
+						authUser.displayName ||
+						authUser.email?.split("@")[0] ||
 						"User",
-					photoURL: firebaseUser.photoURL || null,
+					photoURL: authUser.photoURL || null,
 					provider:
-						firebaseUser.providerData[0]?.providerId === "google.com"
+						authUser.providerData[0]?.providerId === "google.com"
 							? "google"
 							: "email",
 				};
@@ -344,18 +344,18 @@ const Admin = () => {
 							{[
 								"docs-editor",
 							].includes(activeTab) && (
-								<div className="p-6">
-									<div className="border border-zinc-200 rounded-2xl bg-zinc-50 p-6">
-										<p className="text-sm font-semibold text-zinc-900">
-											Coming soon
-										</p>
-										<p className="text-sm text-zinc-600 mt-1">
-											This section (<span className="font-mono">{activeTab}</span>)
-											is not implemented yet.
-										</p>
+									<div className="p-6">
+										<div className="border border-zinc-200 rounded-2xl bg-zinc-50 p-6">
+											<p className="text-sm font-semibold text-zinc-900">
+												Coming soon
+											</p>
+											<p className="text-sm text-zinc-600 mt-1">
+												This section (<span className="font-mono">{activeTab}</span>)
+												is not implemented yet.
+											</p>
+										</div>
 									</div>
-								</div>
-							)}
+								)}
 						</div>
 					</div>
 				</main>

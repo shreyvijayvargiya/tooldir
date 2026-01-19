@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
 	ShoppingBag,
@@ -13,7 +13,7 @@ import {
 	ExternalLink,
 	Image as ImageIcon,
 } from "lucide-react";
-import { getAllProducts, deleteProduct } from "../../../lib/api/products";
+import { getAllProducts, deleteProduct, createProduct } from "../../../lib/api/products";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import ProductModal from "../../../lib/ui/ProductModal";
 import ProductDetailsModal from "../../../lib/ui/ProductDetailsModal";
@@ -30,7 +30,8 @@ import {
 } from "../../../lib/ui/Table";
 import { toast } from "react-toastify";
 
-const ProductsTab = ({ queryClient }) => {
+const ProductsTab = () => {
+	const queryClient = useQueryClient();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortField, setSortField] = useState(null);
 	const [sortDirection, setSortDirection] = useState("asc");
@@ -343,7 +344,7 @@ const ProductsTab = ({ queryClient }) => {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{sortedProducts.length === 0 ? (
+							{sortedProducts?.length === 0 ? (
 								<TableEmpty
 									colSpan={8}
 									icon={ShoppingBag}
@@ -354,7 +355,7 @@ const ProductsTab = ({ queryClient }) => {
 									}
 								/>
 							) : (
-								sortedProducts.map((product) => {
+								sortedProducts?.map((product) => {
 									const bannerImages = getBannerImages(product);
 									return (
 										<TableRow key={product.id}>
@@ -485,7 +486,6 @@ const ProductsTab = ({ queryClient }) => {
 				isOpen={isProductModalOpen}
 				onClose={handleModalClose}
 				productToEdit={productToEdit}
-				queryClient={queryClient}
 			/>
 
 			<ProductDetailsModal
@@ -514,4 +514,3 @@ const ProductsTab = ({ queryClient }) => {
 };
 
 export default ProductsTab;
-

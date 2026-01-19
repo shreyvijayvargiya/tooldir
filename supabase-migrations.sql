@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS messages (
 -- ============================================
 CREATE TABLE IF NOT EXISTS products (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    polar_product_id TEXT UNIQUE NOT NULL,
+    stripe_product_id TEXT UNIQUE NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     banner_images JSONB DEFAULT '[]'::jsonb,
@@ -134,8 +134,8 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create index on polar_product_id for faster lookups
-CREATE INDEX IF NOT EXISTS idx_products_polar_product_id ON products(polar_product_id);
+-- Create index on stripe_product_id for faster lookups
+CREATE INDEX IF NOT EXISTS idx_products_stripe_product_id ON products(stripe_product_id);
 
 -- ============================================
 -- REPORT ISSUES TABLE

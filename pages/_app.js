@@ -8,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "../styles/globals.css";
 import { store, persistor } from "../lib/store/store";
 import SEO from "../lib/modules/SEO";
+import AnalyticsTracker from "../lib/ui/AnalyticsTracker";
+import PostHogProvider from "../lib/ui/PostHogProvider";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -37,20 +39,23 @@ const MyApp = ({ Component, pageProps }) => {
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<SEO />
-			{AppComponent}
-			<ToastContainer
-				position="top-right"
-				autoClose={3000}
-				hideProgressBar={false}
-				newestOnTop={false}
-				closeOnClick
-				rtl={false}
-				pauseOnFocusLoss
-				draggable
-				pauseOnHover
-				theme="light"
-			/>
+			<PostHogProvider>
+				<AnalyticsTracker />
+				<SEO />
+				{AppComponent}
+				<ToastContainer
+					position="top-right"
+					autoClose={3000}
+					hideProgressBar={false}
+					newestOnTop={false}
+					closeOnClick
+					rtl={false}
+					pauseOnFocusLoss
+					draggable
+					pauseOnHover
+					theme="light"
+				/>
+			</PostHogProvider>
 		</QueryClientProvider>
 	);
 };

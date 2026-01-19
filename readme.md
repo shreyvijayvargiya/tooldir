@@ -24,27 +24,20 @@ A comprehensive SaaS starter template built with **Next.js**, **Supabase**, and 
    cd buildsaas
    ```
 
-2. **Install dependencies**
-
-   ```bash
    npm install
    # or
    yarn install
-   ```
-
-3. **Set up environment variables**
+   
 
    Create a `.env.local` file in the root directory:
 
-   ```env
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_KEY=your_supabase_key
 
-   # Polar Payments Configuration
-   POLAR_ACCESS_TOKEN=your_polar_access_token
-   POLAR_API_URL=https://api.polar.sh
-   POLAR_WEBHOOK_SECRET=your_polar_webhook_secret
+   # Stripe Payments Configuration
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
    # Resend Email Configuration
    RESEND_API_KEY=your_resend_api_key

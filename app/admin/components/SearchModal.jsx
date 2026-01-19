@@ -704,9 +704,8 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 									</div>
 									<span>
 										{searchQuery.trim()
-											? `${searchResults.length} result${
-													searchResults.length !== 1 ? "s" : ""
-												}`
+											? `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""
+											}`
 											: `${searchData.length} total items`}
 									</span>
 								</div>

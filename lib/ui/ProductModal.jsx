@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	X,
 	Save,
@@ -17,8 +18,8 @@ const ProductModal = ({
 	isOpen,
 	onClose,
 	productToEdit = null,
-	queryClient,
 }) => {
+	const queryClient = useQueryClient();
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
 	const [bannerImages, setBannerImages] = useState([]); // Array of {base64: string, fileName: string, previewUrl: string}
@@ -169,7 +170,7 @@ const ProductModal = ({
 		});
 	};
 
-	// Handle file upload - convert to base64 instead of uploading to Firebase
+	// Handle file upload - convert to base64 instead of uploading to Supabase storage
 	const handleFileUpload = async (files) => {
 		if (!files || files.length === 0) return;
 
@@ -339,9 +340,7 @@ const ProductModal = ({
 			}
 
 			// Invalidate products query to refresh the list
-			if (queryClient) {
-				queryClient.invalidateQueries({ queryKey: ["products"] });
-			}
+			queryClient.invalidateQueries({ queryKey: ["products"] });
 
 			onClose();
 		} catch (error) {
@@ -478,9 +477,8 @@ const ProductModal = ({
 															<Upload className="w-4 h-4" />
 															<span>Upload Images (Multiple)</span>
 															<ChevronDown
-																className={`w-4 h-4 text-zinc-400 transition-transform ml-auto ${
-																	isOpen ? "rotate-180" : ""
-																}`}
+																className={`w-4 h-4 text-zinc-400 transition-transform ml-auto ${isOpen ? "rotate-180" : ""
+																	}`}
 															/>
 														</>
 													)}
@@ -732,7 +730,11 @@ const ProductModal = ({
 								disabled={isSaving}
 								className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<Save className="w-4 h-4" />
+								<Loader2
+									className={`w-4 h-4 animate-spin ${isSaving ? "block" : "hidden"
+										}`}
+								/>
+								<Save className={`w-4 h-4 ${isSaving ? "hidden" : "block"}`} />
 								{isSaving
 									? productToEdit
 										? "Updating..."
