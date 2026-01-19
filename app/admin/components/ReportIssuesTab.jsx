@@ -10,6 +10,7 @@ import {
 	Trash2,
 	CheckCircle2,
 	Clock,
+	Plus,
 } from "lucide-react";
 import {
 	getAllReportIssues,
@@ -20,6 +21,16 @@ import {
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
 import { toast } from "react-toastify";
 
 const ReportIssuesTab = ({ queryClient }) => {
@@ -218,17 +229,39 @@ const ReportIssuesTab = ({ queryClient }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
 				<div>
-					<h1 className="text-2xl font-bold text-zinc-900">Report Issues</h1>
+					<h1 className="text-lg text-zinc-900">Report Issues</h1>
 					<p className="text-sm text-zinc-600 mt-1">
 						Manage reported issues from users
 					</p>
 				</div>
+				<div className="flex items-center gap-2">
+					<ExportDropdown
+						dataType="reportIssues"
+						data={sortedIssues.map((i) => ({
+							...i,
+							createdAt: i.createdAt || i.created_at,
+						}))}
+					/>
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						onClick={() =>
+							toast.info(
+								"Issues are created by users via the report-issue flow. This view is for triage only."
+							)
+						}
+						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+					>
+						<Plus className="w-3.5 h-3.5" />
+						New Issue
+					</motion.button>
+				</div>
 			</div>
 
 			{/* Filters */}
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-4 mx-4">
 				<div className="relative flex-1">
 					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 					<input
@@ -258,166 +291,134 @@ const ReportIssuesTab = ({ queryClient }) => {
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-hidden">
-				<table className="w-full">
-					<thead className="bg-zinc-50 border-b border-zinc-200">
-						<tr>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("id")}
-							>
-								<div className="flex items-center">
-									ID
-									{getSortIcon("id")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("name")}
-							>
-								<div className="flex items-center">
-									Name
-									{getSortIcon("name")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("email")}
-							>
-								<div className="flex items-center">
-									Email
-									{getSortIcon("email")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("username")}
-							>
-								<div className="flex items-center">
-									Username
-									{getSortIcon("username")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("issue")}
-							>
-								<div className="flex items-center">
-									Issue
-									{getSortIcon("issue")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("status")}
-							>
-								<div className="flex items-center">
-									Status
-									{getSortIcon("status")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("createdAt")}
-							>
-								<div className="flex items-center">
-									Date
-									{getSortIcon("createdAt")}
-								</div>
-							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<tr>
-								<td colSpan={8} className="py-8">
-									<TableSkeleton rows={5} columns={8} />
-								</td>
-							</tr>
-						) : error ? (
-							<tr>
-								<td colSpan={8} className="py-8 text-center text-zinc-500">
-									Error loading report issues. Please try again.
-								</td>
-							</tr>
-						) : sortedIssues.length === 0 ? (
-							<tr>
-								<td colSpan={8} className="py-8 text-center text-zinc-500">
-									{searchQuery || statusFilter !== "all"
-										? "No issues found matching your filters."
-										: "No reported issues yet."}
-								</td>
-							</tr>
-						) : (
-							sortedIssues.map((issue, index) => (
-								<tr
-									key={issue.id}
-									className={`${
-										index === sortedIssues.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<code className="text-xs text-zinc-600 font-mono">
-											{issue.id}
-										</code>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="font-medium text-sm text-zinc-900">
-											{issue.name || ""}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-sm text-zinc-600">
-											{issue.email || ""}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-sm text-zinc-600">
-											{issue.username || ""}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-sm text-zinc-900 max-w-xs truncate">
-											{issue.issue || ""}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<button
-											onClick={() => handleStatusToggle(issue)}
-											className="cursor-pointer"
-										>
-											{getStatusBadge(issue.status)}
-										</button>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-xs text-zinc-600 flex items-center gap-1">
-											<Calendar className="w-3 h-3" />
-											{formatDate(issue.createdAt)}
-										</div>
-									</td>
-									<td className="py-3 px-4">
-										<div className="flex items-center gap-2">
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
-												onClick={() => handleDeleteClick(issue)}
-												className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
-												title="Remove"
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={8} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("id")}>
+									<div className="flex items-center gap-2">
+										ID
+										{getSortIcon("id")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("name")}>
+									<div className="flex items-center gap-2">
+										Name
+										{getSortIcon("name")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("email")}>
+									<div className="flex items-center gap-2">
+										Email
+										{getSortIcon("email")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("username")}>
+									<div className="flex items-center gap-2">
+										Username
+										{getSortIcon("username")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("issue")}>
+									<div className="flex items-center gap-2">
+										Issue
+										{getSortIcon("issue")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("status")}>
+									<div className="flex items-center gap-2">
+										Status
+										{getSortIcon("status")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("createdAt")}>
+									<div className="flex items-center gap-2">
+										Date
+										{getSortIcon("createdAt")}
+									</div>
+								</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={8}
+									message="Error loading report issues. Please try again."
+								/>
+							) : sortedIssues.length === 0 ? (
+								<TableEmpty
+									colSpan={8}
+									message={
+										searchQuery || statusFilter !== "all"
+											? "No issues found matching your filters."
+											: "No reported issues yet."
+									}
+								/>
+							) : (
+								sortedIssues.map((issue) => (
+									<TableRow key={issue.id}>
+										<TableCell>
+											<code className="text-xs text-zinc-600 font-mono">
+												{issue.id}
+											</code>
+										</TableCell>
+										<TableCell>
+											<div className="font-medium text-sm text-zinc-900">
+												{issue.name || ""}
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="text-sm text-zinc-600">
+												{issue.email || ""}
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="text-sm text-zinc-600">
+												{issue.username || ""}
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="text-sm text-zinc-900 max-w-xs truncate">
+												{issue.issue || ""}
+											</div>
+										</TableCell>
+										<TableCell>
+											<button
+												onClick={() => handleStatusToggle(issue)}
+												className="cursor-pointer"
 											>
-												<Trash2 className="w-4 h-4" />
-											</motion.button>
-										</div>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+												{getStatusBadge(issue.status)}
+											</button>
+										</TableCell>
+										<TableCell className="text-zinc-600">
+											<div className="text-xs flex items-center gap-1">
+												<Calendar className="w-3 h-3" />
+												{formatDate(issue.createdAt || issue.created_at)}
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-2">
+												<motion.button
+													whileHover={{ scale: 1.1 }}
+													whileTap={{ scale: 0.9 }}
+													onClick={() => handleDeleteClick(issue)}
+													className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
+													title="Remove"
+												>
+													<Trash2 className="w-4 h-4" />
+												</motion.button>
+											</div>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 
 			{/* Delete Confirmation Modal */}
