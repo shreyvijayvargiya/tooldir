@@ -98,7 +98,7 @@ const ProductModal = ({
 				setPriceType(amountType);
 
 				if (amountType === "fixed") {
-					// Handle both Polar format (price_amount in cents) and direct amount
+					// Handle both Stripe format (price_amount in cents) and direct amount
 					const amount = firstPrice.price_amount
 						? (firstPrice.price_amount / 100).toString()
 						: (firstPrice.amount || firstPrice.price || "").toString();
@@ -187,7 +187,7 @@ const ProductModal = ({
 					continue;
 				}
 
-				// Validate file size (max 10MB for Polar)
+				// Validate file size (max 10MB for Stripe)
 				if (file.size > 10 * 1024 * 1024) {
 					toast.error(`${file.name} is too large. Maximum size is 10MB`);
 					continue;
@@ -277,16 +277,16 @@ const ProductModal = ({
 				price_currency: currency.toLowerCase(),
 			};
 
-			// Only include recurring_interval for new products (Polar doesn't allow changing it on update)
+			// Only include recurring_interval for new products (Stripe doesn't allow changing it on update)
 			if (!productToEdit) {
 				priceObj.recurring_interval = billingInterval;
 			} else {
-				// For updates, we don't send recurring_interval as Polar doesn't allow changing it
+				// For updates, we don't send recurring_interval as Stripe doesn't allow changing it
 				// The existing recurring_interval will remain unchanged
 			}
 
 			if (priceType === "fixed") {
-				// Convert price to cents (Polar uses cents)
+				// Convert price to cents (Stripe uses cents)
 				const priceAmountCents = Math.round(parseFloat(priceAmount) * 100);
 				priceObj.price_amount = priceAmountCents;
 			} else {

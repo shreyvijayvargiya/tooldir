@@ -1,10 +1,10 @@
 # SaaS Starter Boilerplate
 
-A comprehensive SaaS starter template built with **Next.js**, **Supabase**, and **Polar**. Features include authentication, payments, admin panel, blog, email management, and comprehensive documentation.
+A comprehensive SaaS starter template built with **Next.js**, **Supabase**, and **Stripe**. Features include authentication, payments, admin panel, blog, email management, and comprehensive documentation.
 
 ## Features
 - 🔐 Authentication with Supabase
-- 💳 Payment processing with Polar
+- 💳 Payment processing with Stripe
 - 📊 Admin dashboard
 - 📝 Blog system
 - 📧 Email management
@@ -82,7 +82,7 @@ The documentation covers:
 
 - **Next.js** - React framework
 - **Supabase** - Backend and database
-- **Polar** - Payment processing
+- **Stripe** - Payment processing
 - **Tailwind CSS** - Styling
 - **Redux** - State management
 

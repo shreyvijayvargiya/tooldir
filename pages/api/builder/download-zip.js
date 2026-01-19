@@ -52,10 +52,10 @@ function shouldIncludeFile(
 		return true;
 	}
 
-	// Exclude lib/utils/polar unless payments module is selected
+	// Exclude lib/utils/Stripe unless payments module is selected
 	const normalizedPath = relativePath.replace(/\\/g, "/");
-	const isPolarUtils = normalizedPath.startsWith("lib/utils/polar");
-	if (isPolarUtils && !selectedModules.includes("payments")) {
+	const isStripeUtils = normalizedPath.startsWith("lib/utils/getStripe");
+	if (isStripeUtils && !selectedModules.includes("payments")) {
 		return false;
 	}
 
@@ -84,7 +84,7 @@ function shouldIncludeFile(
 		"lib/modules", // Entire modules directory (SEO.jsx)
 		"lib/store",
 		"lib/ui",
-		"lib/utils", // Entire utils directory (excludes polar subdirectory unless payments selected)
+		"lib/utils", // Entire utils directory (excludes Stripe subdirectory unless payments selected)
 		"lib/hooks", // Entire hooks directory (useSubscription.js)
 		"styles",
 		"public",
@@ -161,7 +161,7 @@ function shouldIncludeFile(
 		}
 
 		// Check if module file path is a parent directory of this file
-		// e.g., moduleFile: "lib/utils/polar" should match "lib/utils/polar/constants.js"
+		// e.g., moduleFile: "lib/utils/Stripe" should match "lib/utils/Stripe/constants.js"
 		const moduleDir = normalizedModuleFile.endsWith("/")
 			? normalizedModuleFile.slice(0, -1)
 			: normalizedModuleFile;

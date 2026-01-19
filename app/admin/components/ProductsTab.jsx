@@ -96,7 +96,7 @@ const ProductsTab = () => {
 			const getPriceAmount = (product) => {
 				if (!product.prices || product.prices.length === 0) return 0;
 				const price = product.prices[0];
-				// Handle both Polar format (price_amount in cents) and direct amount
+				// Handle both Stripe format (price_amount in cents) and direct amount
 				return price.price_amount || price.amount || price.price || 0;
 			};
 			const priceA = getPriceAmount(a);
@@ -162,7 +162,7 @@ const ProductsTab = () => {
 	const formatPrice = (product) => {
 		if (!product.prices || product.prices.length === 0) return "$0";
 		const price = product.prices[0];
-		// Handle both Polar format (price_amount in cents) and direct amount
+		// Handle both Stripe format (price_amount in cents) and direct amount
 		const amount = price.price_amount
 			? price.price_amount / 100
 			: price.amount || price.price || 0;

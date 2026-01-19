@@ -94,10 +94,10 @@ const PricingPage = () => {
 		}
 	};
 
-	// Replace these with your actual Polar plan IDs
+	// Replace these with your actual stripe plan IDs
 	const plans = [
 		{
-			id: "bf5d934b-da7c-4861-a427-6dcf2b211cff", // Polar plan ID
+			id: "bf5d934b-da7c-4861-a427-6dcf2b211cff", // stripe plan ID
 			name: "Pro",
 			price: "$29",
 			period: "month",
@@ -113,7 +113,7 @@ const PricingPage = () => {
 			type: "subscription",
 		},
 		{
-			id: "pro-yearly", // Polar plan ID
+			id: "pro-yearly", // stripe plan ID
 			name: "Pro",
 			price: "$290",
 			period: "year",
@@ -159,7 +159,7 @@ const PricingPage = () => {
 
 		// User is authenticated, proceed with checkout
 		try {
-			const response = await fetch("/api/polar/checkout", {
+			const response = await fetch("/api/stripe/checkout", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -191,7 +191,7 @@ const PricingPage = () => {
 
 		setIsCancelling(true);
 		try {
-			const response = await fetch("/api/polar/cancel-subscription", {
+			const response = await fetch("/api/stripe/cancel-subscription", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

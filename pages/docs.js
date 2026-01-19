@@ -92,9 +92,9 @@ const FAQ_DATA = [
 	},
 	{
 		id: 3,
-		question: "How do I configure Polar payments?",
+		question: "How do I configure Stripe payments?",
 		answer:
-			"Create a Polar account, set up products and plans, get your API credentials, and add them to `.env.local`. Configure the webhook endpoint at `/api/polar/webhook`. For local testing, use ngrok to forward webhooks to your local server.",
+			"Create a Stripe account, set up products and plans, get your API credentials, and add them to `.env.local`. Configure the webhook endpoint at `/api/stripe/webhook`. For local testing, use ngrok to forward webhooks to your local server.",
 	},
 	{
 		id: 4,
@@ -118,7 +118,7 @@ const FAQ_DATA = [
 		id: 7,
 		question: "How do I test webhooks locally?",
 		answer:
-			"Install ngrok (`npm install -g ngrok`), start your dev server (`npm run dev`), run `ngrok http 3000` in another terminal, copy the ngrok URL, and set it as your webhook URL in Polar dashboard. Webhooks will be forwarded to your local server.",
+			"Install ngrok (`npm install -g ngrok`), start your dev server (`npm run dev`), run `ngrok http 3000` in another terminal, copy the ngrok URL, and set it as your webhook URL in Stripe dashboard. Webhooks will be forwarded to your local server.",
 	},
 	{
 		id: 8,

@@ -50,7 +50,7 @@ const HomePage = () => {
 			icon: CreditCard,
 			title: "Payment Integration",
 			description:
-				"Seamless payment processing with Polar. Subscription management built-in.",
+				"Seamless payment processing with Stripe. Subscription management built-in.",
 		},
 		{
 			icon: Database,
@@ -147,7 +147,7 @@ const HomePage = () => {
 		{
 			question: "What payment methods are supported?",
 			answer:
-				"The template integrates with Polar for payment processing, supporting credit cards and other payment methods through their platform.",
+				"The template integrates with Stripe for payment processing, supporting credit cards and other payment methods through their platform.",
 		},
 	];
 
