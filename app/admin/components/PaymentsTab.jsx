@@ -16,6 +16,18 @@ import { getAllPayments } from "../../../lib/api/payments";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import Fuse from "fuse.js";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
+import { Plus } from "lucide-react";
+import { toast } from "react-toastify";
 
 const PaymentsTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -214,17 +226,43 @@ const PaymentsTab = () => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
 				<div>
-					<h1 className="text-2xl font-bold text-zinc-900">Payments</h1>
+					<h1 className="text-lg text-zinc-900">Payments</h1>
 					<p className="text-sm text-zinc-600 mt-1">
 						Track all payment transactions and revenue
 					</p>
 				</div>
+				<div className="flex items-center gap-2">
+					<ExportDropdown
+						dataType="payments"
+						data={sortedPayments.map((p) => ({
+							...p,
+							paymentId: p.paymentId || p.payment_id || p.id,
+							customerName: p.customerName || p.customer_name || p.name || "N/A",
+							customerEmail: p.customerEmail || p.email || "N/A",
+							planName: p.planName || p.plan_name,
+							createdAt: p.createdAt || p.created_at,
+						}))}
+					/>
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						onClick={() =>
+							toast.info(
+								"Payments are created automatically after checkout. This view is read-only."
+							)
+						}
+						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+					>
+						<Plus className="w-3.5 h-3.5" />
+						Add Payment
+					</motion.button>
+				</div>
 			</div>
 
 			{/* Stats Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4">
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -293,7 +331,7 @@ const PaymentsTab = () => {
 			</div>
 
 			{/* Filters */}
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-4 mx-4">
 				<div className="relative flex-1">
 					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 					<input
@@ -336,138 +374,109 @@ const PaymentsTab = () => {
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-x-auto">
-				<table className="w-full">
-					<thead className="bg-zinc-50 border-b border-zinc-200">
-						<tr>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("paymentId")}
-							>
-								<div className="flex items-center">
-									Payment ID
-									{getSortIcon("paymentId")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("customerName")}
-							>
-								<div className="flex items-center">
-									Customer
-									{getSortIcon("customerName")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("amount")}
-							>
-								<div className="flex items-center">
-									Amount
-									{getSortIcon("amount")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("status")}
-							>
-								<div className="flex items-center">
-									Status
-									{getSortIcon("status")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("date")}
-							>
-								<div className="flex items-center">
-									Date
-									{getSortIcon("date")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("planName")}
-							>
-								<div className="flex items-center">
-									Plan
-									{getSortIcon("planName")}
-								</div>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<tr>
-								<td colSpan={6} className="py-8">
-									<TableSkeleton rows={5} columns={6} />
-								</td>
-							</tr>
-						) : error ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									Error loading payments. Please try again.
-								</td>
-							</tr>
-						) : sortedPayments.length === 0 ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									{searchQuery || statusFilter !== "all"
-										? "No payments found matching your filters."
-										: "No payments yet. Payments will appear here after customers subscribe."}
-								</td>
-							</tr>
-						) : (
-							sortedPayments.map((payment, index) => (
-								<tr
-									key={payment.id}
-									className={`${
-										index === sortedPayments.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<code className="text-xs text-zinc-600 font-mono">
-											{payment.payment_id || payment.paymentId || payment.id}
-										</code>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div>
-											<div className="font-medium text-sm text-zinc-900">
-												{payment.name || payment.customer_name || "N/A"}
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={6} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("paymentId")}>
+									<div className="flex items-center gap-2">
+										Payment ID
+										{getSortIcon("paymentId")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("customerName")}>
+									<div className="flex items-center gap-2">
+										Customer
+										{getSortIcon("customerName")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("amount")}>
+									<div className="flex items-center gap-2">
+										Amount
+										{getSortIcon("amount")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("status")}>
+									<div className="flex items-center gap-2">
+										Status
+										{getSortIcon("status")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("date")}>
+									<div className="flex items-center gap-2">
+										Date
+										{getSortIcon("date")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("planName")}>
+									<div className="flex items-center gap-2">
+										Plan
+										{getSortIcon("planName")}
+									</div>
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={6}
+									message="Error loading payments. Please try again."
+								/>
+							) : sortedPayments.length === 0 ? (
+								<TableEmpty
+									colSpan={6}
+									message={
+										searchQuery || statusFilter !== "all"
+											? "No payments found matching your filters."
+											: "No payments yet. Payments will appear here after customers subscribe."
+									}
+								/>
+							) : (
+								sortedPayments.map((payment) => (
+									<TableRow key={payment.id}>
+										<TableCell>
+											<code className="text-xs text-zinc-600 font-mono">
+												{payment.payment_id || payment.paymentId || payment.id}
+											</code>
+										</TableCell>
+										<TableCell>
+											<div>
+												<div className="font-medium text-sm text-zinc-900">
+													{payment.name || payment.customer_name || "N/A"}
+												</div>
+												<div className="text-xs text-zinc-600">
+													{payment.email || "N/A"}
+												</div>
 											</div>
-											<div className="text-xs text-zinc-600">
-												{payment.email || "N/A"}
+										</TableCell>
+										<TableCell>
+											<span className="font-semibold text-sm text-zinc-900">
+												{payment.amount
+													? formatCurrency(payment.amount, payment.currency)
+													: "$0"}
+											</span>
+										</TableCell>
+										<TableCell>{getStatusBadge(payment.status)}</TableCell>
+										<TableCell className="text-zinc-600">
+											<div className="text-xs flex items-center gap-1">
+												<Calendar className="w-3 h-3" />
+												{formatDate(payment.created_at || payment.createdAt)}
 											</div>
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<span className="font-semibold text-sm text-zinc-900">
-											{payment.amount
-												? formatCurrency(payment.amount, payment.currency)
-												: "$0"}
-										</span>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										{getStatusBadge(payment.status)}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-xs text-zinc-600 flex items-center gap-1">
-											<Calendar className="w-3 h-3" />
-											{formatDate(payment.created_at || payment.createdAt)}
-										</div>
-									</td>
-									<td className="py-3 px-4">
-										<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-900 text-white">
-											{payment.plan_name || payment.planName || "Pro"}
-										</span>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+										</TableCell>
+										<TableCell>
+											<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-900 text-white">
+												{payment.plan_name || payment.planName || "Pro"}
+											</span>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 		</div>
 	);

@@ -17,6 +17,16 @@ import {
 import Fuse from "fuse.js";
 import TiptapEditor from "./TiptapEditor";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
 import {
 	getAllBlogs,
 	createBlog,
@@ -382,24 +392,33 @@ const BlogTab = () => {
 	};
 
 	return (
-		<div>
-			<div className="flex justify-between items-center mb-4">
-				<h2 className="text-xl font-semibold text-zinc-900">Blog Posts</h2>
-				{hasPermission(userRole, "blogs", "create") && (
-					<motion.a
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						href="/admin/editor/blog"
-						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
-					>
-						<Plus className="w-3.5 h-3.5" />
-						Create Blog
-					</motion.a>
-				)}
+		<div className="space-y-4">
+			{/* Header */}
+			<div className="flex justify-between items-center border-b border-zinc-200 py-2 px-4">
+				<div>
+					<h2 className="text-lg text-zinc-900">Blog Posts</h2>
+					<p className="text-sm text-zinc-600 mt-1">
+						Manage your blog posts and content
+					</p>
+				</div>
+				<div className="flex items-center gap-2">
+					<ExportDropdown dataType="blogs" data={sortedBlogs} />
+					{hasPermission(userRole, "blogs", "create") && (
+						<motion.a
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							href="/admin/editor/blog"
+							className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+						>
+							<Plus className="w-3.5 h-3.5" />
+							Create New Blog
+						</motion.a>
+					)}
+				</div>
 			</div>
 
 			{/* Search */}
-			<div className="relative mb-4">
+			<div className="relative mx-4">
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 				<input
 					type="text"
@@ -410,159 +429,136 @@ const BlogTab = () => {
 				/>
 			</div>
 
-			<div className="overflow-x-auto border border-zinc-200 rounded-xl">
-				<table className="w-full">
-					<thead>
-						<tr className="border-b border-zinc-200 bg-zinc-50">
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("title")}
-							>
-								<div className="flex items-center">
-									Title
-									{getSortIcon("title")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("author")}
-							>
-								<div className="flex items-center">
-									Author
-									{getSortIcon("author")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("status")}
-							>
-								<div className="flex items-center">
-									Status
-									{getSortIcon("status")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("createdAt")}
-							>
-								<div className="flex items-center">
-									Created
-									{getSortIcon("createdAt")}
-								</div>
-							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Copy
-							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<TableSkeleton rows={5} columns={6} />
-						) : error ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									Error loading blogs. Please try again.
-								</td>
-							</tr>
-						) : sortedBlogs.length === 0 ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									{searchQuery
-										? "No blogs found matching your search."
-										: "No blogs found. Create your first blog!"}
-								</td>
-							</tr>
-						) : (
-							sortedBlogs.map((blog, index) => (
-								<tr
-									key={blog.id}
-									className={`${
-										index === sortedBlogs.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td
-										className="py-3 px-4 border-l border-r border-zinc-200 cursor-pointer"
-										onClick={() => handleEditBlog(blog)}
-									>
-										<div className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors">
-											{blog.title}
-										</div>
-										<div className="text-sm text-zinc-500">{blog.slug}</div>
-									</td>
-									<td className="py-3 px-4 text-zinc-600 border-r border-zinc-200">
-										{blog.author}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<span
-											className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-												blog.status === "published"
-													? "bg-green-100 text-green-800"
-													: blog.status === "scheduled"
-														? "bg-blue-100 text-blue-800"
-														: "bg-yellow-100 text-yellow-800"
-											}`}
+			{/* Table */}
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={6} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("title")}>
+									<div className="flex items-center gap-2">
+										Title
+										{getSortIcon("title")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("author")}>
+									<div className="flex items-center gap-2">
+										Author
+										{getSortIcon("author")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("status")}>
+									<div className="flex items-center gap-2">
+										Status
+										{getSortIcon("status")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("createdAt")}>
+									<div className="flex items-center gap-2">
+										Created
+										{getSortIcon("createdAt")}
+									</div>
+								</TableHead>
+								<TableHead>Copy</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={6}
+									message="Error loading blogs. Please try again."
+								/>
+							) : sortedBlogs.length === 0 ? (
+								<TableEmpty
+									colSpan={6}
+									message={
+										searchQuery
+											? "No blogs found matching your search."
+											: "No blogs found. Create your first blog!"
+									}
+								/>
+							) : (
+								sortedBlogs.map((blog) => (
+									<TableRow key={blog.id}>
+										<TableCell
+											onClick={() => handleEditBlog(blog)}
+											className="cursor-pointer"
 										>
-											{blog.status}
-										</span>
-									</td>
-									<td className="py-3 px-4 text-sm text-zinc-600 border-r border-zinc-200">
-										{formatDate(blog.createdAt)}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="flex items-center gap-2">
-											<motion.button
-												whileHover={{ scale: 1.05 }}
-												whileTap={{ scale: 0.95 }}
-												onClick={(e) => {
-													e.stopPropagation();
-													handleCopyHTML(blog.content || "");
-												}}
-												className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
-												title="Copy HTML"
+											<div className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors">
+												{blog.title}
+											</div>
+											<div className="text-sm text-zinc-500">{blog.slug}</div>
+										</TableCell>
+										<TableCell className="text-zinc-600">{blog.author}</TableCell>
+										<TableCell>
+											<span
+												className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+													blog.status === "published"
+														? "bg-green-100 text-green-800"
+														: blog.status === "scheduled"
+															? "bg-blue-100 text-blue-800"
+															: "bg-yellow-100 text-yellow-800"
+												}`}
 											>
-												<Copy className="w-4 h-4" />
-											</motion.button>
-											<motion.button
-												whileHover={{ scale: 1.05 }}
-												whileTap={{ scale: 0.95 }}
-												onClick={(e) => {
-													e.stopPropagation();
-													handleCopyMarkdown(blog.content || "");
-												}}
-												className="p-2 text-zinc-400 hover:text-purple-600 transition-colors"
-												title="Copy Markdown"
-											>
-												<FileText className="w-4 h-4" />
-											</motion.button>
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="flex items-center gap-2">
-											{/* Always show delete button with confirmation modal */}
-											<motion.button
-												whileHover={{ scale: 1.05 }}
-												whileTap={{ scale: 0.95 }}
-												onClick={(e) => {
-													e.stopPropagation();
-													handleDeleteBlog(blog.id);
-												}}
-												className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
-												title="Delete"
-											>
-												<Trash2 className="w-4 h-4" />
-											</motion.button>
-										</div>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+												{blog.status}
+											</span>
+										</TableCell>
+										<TableCell className="text-sm text-zinc-600">
+											{formatDate(blog.createdAt)}
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-2">
+												<motion.button
+													whileHover={{ scale: 1.05 }}
+													whileTap={{ scale: 0.95 }}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleCopyHTML(blog.content || "");
+													}}
+													className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+													title="Copy HTML"
+												>
+													<Copy className="w-4 h-4" />
+												</motion.button>
+												<motion.button
+													whileHover={{ scale: 1.05 }}
+													whileTap={{ scale: 0.95 }}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleCopyMarkdown(blog.content || "");
+													}}
+													className="p-2 text-zinc-400 hover:text-purple-600 transition-colors"
+													title="Copy Markdown"
+												>
+													<FileText className="w-4 h-4" />
+												</motion.button>
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-2">
+												<motion.button
+													whileHover={{ scale: 1.05 }}
+													whileTap={{ scale: 0.95 }}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleDeleteBlog(blog.id);
+													}}
+													className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+													title="Delete"
+												>
+													<Trash2 className="w-4 h-4" />
+												</motion.button>
+											</div>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 
 			{/* Blog Modal */}

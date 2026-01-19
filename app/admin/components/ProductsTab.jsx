@@ -18,6 +18,16 @@ import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import ProductModal from "../../../lib/ui/ProductModal";
 import ProductDetailsModal from "../../../lib/ui/ProductDetailsModal";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
 import { toast } from "react-toastify";
 
 const ProductsTab = ({ queryClient }) => {
@@ -261,147 +271,94 @@ const ProductsTab = ({ queryClient }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
 				<div>
-					<h1 className="text-2xl font-bold text-zinc-900">Products</h1>
+					<h1 className="text-lg text-zinc-900">Products</h1>
 					<p className="text-sm text-zinc-600 mt-1">
 						Manage your digital products and checkout links
 					</p>
 				</div>
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
-					onClick={handleCreateClick}
-					className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl font-medium transition-colors"
-				>
-					<Plus className="w-4 h-4" />
-					Create New Product
-				</motion.button>
-			</div>
-
-			{/* Search */}
-			<div className="flex items-center gap-4">
-				<div className="relative flex-1 max-w-md">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
-					<input
-						type="text"
-						placeholder="Search products..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-10 pr-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-100 focus:outline-none text-sm"
-					/>
+				<div className="flex items-center gap-2">
+					<ExportDropdown dataType="products" data={sortedProducts} />
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						onClick={handleCreateClick}
+						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+					>
+						<Plus className="w-3.5 h-3.5" />
+						Create New Product
+					</motion.button>
 				</div>
 			</div>
 
+			{/* Search */}
+			<div className="relative mx-4">
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<input
+					type="text"
+					placeholder="Search products..."
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+				/>
+			</div>
+
 			{/* Table */}
-			<div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+			<div className="overflow-x-auto px-4">
 				{isLoading ? (
-					<table className="w-full">
-						<thead className="bg-zinc-50 border-b border-zinc-200">
-							<tr>
-								<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-									Images
-								</th>
-								<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-									Name
-								</th>
-								<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-									Description
-								</th>
-								<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-									Price
-								</th>
-								<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-									Billing
-								</th>
-								<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-									Checkout Link
-								</th>
-								<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-									Created
-								</th>
-								<th className="px-4 py-3 text-right text-xs font-semibold text-zinc-700">
-									Actions
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							<TableSkeleton columns={8} rows={5} />
-						</tbody>
-					</table>
-				) : sortedProducts.length === 0 ? (
-					<div className="p-8 text-center">
-						<ShoppingBag className="w-12 h-12 text-zinc-400 mx-auto mb-3" />
-						<p className="text-sm text-zinc-600">
-							{searchQuery
-								? "No products found matching your search"
-								: "No products yet. Create your first product to get started."}
-						</p>
-					</div>
+					<TableSkeleton rows={5} columns={8} />
 				) : (
-					<div className="overflow-x-auto">
-						<table className="w-full">
-							<thead className="bg-zinc-50 border-b border-zinc-200">
-								<tr>
-									<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-										Images
-									</th>
-									<th
-										className="px-4 py-3 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
-										onClick={() => handleSort("name")}
-									>
-										<div className="flex items-center">
-											Name
-											{getSortIcon("name")}
-										</div>
-									</th>
-									<th
-										className="px-4 py-3 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
-										onClick={() => handleSort("description")}
-									>
-										<div className="flex items-center">
-											Description
-											{getSortIcon("description")}
-										</div>
-									</th>
-									<th
-										className="px-4 py-3 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
-										onClick={() => handleSort("price")}
-									>
-										<div className="flex items-center">
-											Price
-											{getSortIcon("price")}
-										</div>
-									</th>
-									<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-										Billing
-									</th>
-									<th className="px-4 py-3 text-left text-xs font-semibold text-zinc-700">
-										Checkout Link
-									</th>
-									<th
-										className="px-4 py-3 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
-										onClick={() => handleSort("created_at")}
-									>
-										<div className="flex items-center">
-											Created
-											{getSortIcon("created_at")}
-										</div>
-									</th>
-									<th className="px-4 py-3 text-right text-xs font-semibold text-zinc-700">
-										Actions
-									</th>
-								</tr>
-							</thead>
-							<tbody className="divide-y divide-zinc-200">
-								{sortedProducts.map((product) => {
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Images</TableHead>
+								<TableHead sortable onClick={() => handleSort("name")}>
+									<div className="flex items-center gap-2">
+										Name
+										{getSortIcon("name")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("description")}>
+									<div className="flex items-center gap-2">
+										Description
+										{getSortIcon("description")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("price")}>
+									<div className="flex items-center gap-2">
+										Price
+										{getSortIcon("price")}
+									</div>
+								</TableHead>
+								<TableHead>Billing</TableHead>
+								<TableHead>Checkout Link</TableHead>
+								<TableHead sortable onClick={() => handleSort("created_at")}>
+									<div className="flex items-center gap-2">
+										Created
+										{getSortIcon("created_at")}
+									</div>
+								</TableHead>
+								<TableHead className="text-right">Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{sortedProducts.length === 0 ? (
+								<TableEmpty
+									colSpan={8}
+									icon={ShoppingBag}
+									message={
+										searchQuery
+											? "No products found matching your search"
+											: "No products yet. Create your first product to get started."
+									}
+								/>
+							) : (
+								sortedProducts.map((product) => {
 									const bannerImages = getBannerImages(product);
 									return (
-										<tr
-											key={product.id}
-											className="hover:bg-zinc-50 transition-colors"
-										>
-											<td className="px-4 py-3">
+										<TableRow key={product.id}>
+											<TableCell>
 												{bannerImages.length > 0 ? (
 													<div className="flex items-center gap-1.5">
 														{bannerImages.slice(0, 3).map((imgUrl, idx) => (
@@ -415,15 +372,11 @@ const ProductsTab = ({ queryClient }) => {
 																	className="w-full h-full object-cover relative z-10"
 																	onError={(e) => {
 																		e.target.style.display = "none";
-																		// Show fallback icon when image fails
 																		const fallback =
 																			e.target.nextElementSibling;
-																		if (fallback) {
-																			fallback.style.display = "flex";
-																		}
+																		if (fallback) fallback.style.display = "flex";
 																	}}
 																/>
-																{/* Fallback icon - hidden by default, shown if image fails to load */}
 																<div className="absolute inset-0 hidden items-center justify-center bg-zinc-100 z-0">
 																	<ImageIcon className="w-4 h-4 text-zinc-400" />
 																</div>
@@ -440,8 +393,8 @@ const ProductsTab = ({ queryClient }) => {
 														<ImageIcon className="w-4 h-4 text-zinc-400" />
 													</div>
 												)}
-											</td>
-											<td className="px-4 py-3">
+											</TableCell>
+											<TableCell>
 												<button
 													onClick={() => handleViewClick(product)}
 													className="text-left w-full hover:text-zinc-600 transition-colors cursor-pointer"
@@ -453,8 +406,8 @@ const ProductsTab = ({ queryClient }) => {
 														ID: {product.id?.substring(0, 8)}...
 													</div>
 												</button>
-											</td>
-											<td className="px-4 py-3">
+											</TableCell>
+											<TableCell>
 												<button
 													onClick={() => handleViewClick(product)}
 													className="text-left w-full hover:text-zinc-600 transition-colors cursor-pointer"
@@ -463,18 +416,18 @@ const ProductsTab = ({ queryClient }) => {
 														{product.description || "No description"}
 													</div>
 												</button>
-											</td>
-											<td className="px-4 py-3">
+											</TableCell>
+											<TableCell>
 												<div className="text-sm font-medium text-zinc-900">
 													{formatPrice(product)}
 												</div>
-											</td>
-											<td className="px-4 py-3">
+											</TableCell>
+											<TableCell>
 												<div className="text-sm text-zinc-600">
 													{getBillingInterval(product)}
 												</div>
-											</td>
-											<td className="px-4 py-3">
+											</TableCell>
+											<TableCell>
 												{product.checkout_link || product.checkoutLink ? (
 													<a
 														href={product.checkout_link || product.checkoutLink}
@@ -490,15 +443,13 @@ const ProductsTab = ({ queryClient }) => {
 												) : (
 													<span className="text-sm text-zinc-400">No link</span>
 												)}
-											</td>
-											<td className="px-4 py-3">
-												<div className="text-sm text-zinc-600">
-													{formatDate(
-														product.created_at || product.createdAt
-													)}
+											</TableCell>
+											<TableCell className="text-zinc-600">
+												<div className="text-sm">
+													{formatDate(product.created_at || product.createdAt)}
 												</div>
-											</td>
-											<td className="px-4 py-3">
+											</TableCell>
+											<TableCell className="text-right">
 												<div className="flex items-center justify-end gap-2">
 													<motion.button
 														whileHover={{ scale: 1.1 }}
@@ -519,13 +470,13 @@ const ProductsTab = ({ queryClient }) => {
 														<Trash2 className="w-4 h-4" />
 													</motion.button>
 												</div>
-											</td>
-										</tr>
+											</TableCell>
+										</TableRow>
 									);
-								})}
-							</tbody>
-						</table>
-					</div>
+								})
+							)}
+						</TableBody>
+					</Table>
 				)}
 			</div>
 

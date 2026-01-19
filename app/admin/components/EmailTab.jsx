@@ -16,6 +16,16 @@ import {
 import Fuse from "fuse.js";
 import TiptapEditor from "./TiptapEditor";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
 import {
 	getAllEmails,
 	createEmail,
@@ -378,24 +388,33 @@ const EmailTab = ({ onSendEmail }) => {
 	};
 
 	return (
-		<div>
-			<div className="flex justify-between items-center mb-4">
-				<h2 className="text-xl font-semibold text-zinc-900">Email Campaigns</h2>
-				{hasPermission(userRole, "emails", "create") && (
-					<motion.a
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						href="/admin/editor/email"
-						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
-					>
-						<Plus className="w-3.5 h-3.5" />
-						Create Email
-					</motion.a>
-				)}
+		<div className="space-y-4">
+			{/* Header */}
+			<div className="flex justify-between items-center border-b border-zinc-200 py-2 px-4">
+				<div>
+					<h2 className="text-lg text-zinc-900">Email Campaigns</h2>
+					<p className="text-sm text-zinc-600 mt-1">
+						Manage your email drafts and campaigns
+					</p>
+				</div>
+				<div className="flex items-center gap-2">
+					<ExportDropdown dataType="emails" data={sortedEmails} />
+					{hasPermission(userRole, "emails", "create") && (
+						<motion.a
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							href="/admin/editor/email"
+							className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+						>
+							<Plus className="w-3.5 h-3.5" />
+							Create New Email
+						</motion.a>
+					)}
+				</div>
 			</div>
 
 			{/* Search */}
-			<div className="relative mb-4">
+			<div className="relative mx-4">
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 				<input
 					type="text"
@@ -406,164 +425,145 @@ const EmailTab = ({ onSendEmail }) => {
 				/>
 			</div>
 
-			<div className="overflow-x-auto border border-zinc-200 rounded-xl">
-				<table className="w-full">
-					<thead>
-						<tr className="border-b border-zinc-200 bg-zinc-50">
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("subject")}
-							>
-								<div className="flex items-center">
-									Subject
-									{getSortIcon("subject")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("status")}
-							>
-								<div className="flex items-center">
-									Status
-									{getSortIcon("status")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("recipients")}
-							>
-								<div className="flex items-center">
-									Recipients
-									{getSortIcon("recipients")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("createdAt")}
-							>
-								<div className="flex items-center">
-									Created
-									{getSortIcon("createdAt")}
-								</div>
-							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<TableSkeleton rows={5} columns={5} />
-						) : error ? (
-							<tr>
-								<td colSpan={5} className="py-8 text-center text-zinc-500">
-									Error loading emails. Please try again.
-								</td>
-							</tr>
-						) : sortedEmails.length === 0 ? (
-							<tr>
-								<td colSpan={5} className="py-8 text-center text-zinc-500">
-									{searchQuery
-										? "No emails found matching your search."
-										: "No emails found. Create your first email campaign!"}
-								</td>
-							</tr>
-						) : (
-							sortedEmails.map((email, index) => (
-								<tr
-									key={email.id}
-									className={`${
-										index === sortedEmails.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td
-										className="py-3 px-4 border-l border-r border-zinc-200 cursor-pointer"
-										onClick={() => handleEditEmail(email)}
-									>
-										<div className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors">
-											{email.subject}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<span
-											className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-												email.status === "published"
-													? "bg-green-100 text-green-800"
-													: email.status === "scheduled"
-														? "bg-blue-100 text-blue-800"
-														: "bg-yellow-100 text-yellow-800"
-											}`}
+			{/* Table */}
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={5} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("subject")}>
+									<div className="flex items-center gap-2">
+										Subject
+										{getSortIcon("subject")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("status")}>
+									<div className="flex items-center gap-2">
+										Status
+										{getSortIcon("status")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("recipients")}>
+									<div className="flex items-center gap-2">
+										Recipients
+										{getSortIcon("recipients")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("createdAt")}>
+									<div className="flex items-center gap-2">
+										Created
+										{getSortIcon("createdAt")}
+									</div>
+								</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={5}
+									message="Error loading emails. Please try again."
+								/>
+							) : sortedEmails.length === 0 ? (
+								<TableEmpty
+									colSpan={5}
+									message={
+										searchQuery
+											? "No emails found matching your search."
+											: "No emails found. Create your first email campaign!"
+									}
+								/>
+							) : (
+								sortedEmails.map((email) => (
+									<TableRow key={email.id}>
+										<TableCell
+											onClick={() => handleEditEmail(email)}
+											className="cursor-pointer"
 										>
-											{email.status || "draft"}
-										</span>
-									</td>
-									<td className="py-3 px-4 text-zinc-600 border-r border-zinc-200">
-										{email.recipients || 0}
-									</td>
-									<td className="py-3 px-4 text-sm text-zinc-600 border-r border-zinc-200">
-										{formatDate(email.createdAt)}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="flex items-center gap-2">
-											{allowedActions.map((action) => {
-												if (action === "send" && email.status === "draft") {
-													return (
-														<motion.button
-															key="send"
-															whileHover={{ scale: 1.05 }}
-															whileTap={{ scale: 0.95 }}
-															onClick={(e) => {
-																e.stopPropagation();
-																handleSendEmail(email);
-															}}
-															className="p-2 text-zinc-400 hover:text-green-600 transition-colors"
-															title="Send to Subscribers"
-														>
-															<Mail className="w-4 h-4" />
-														</motion.button>
-													);
-												}
-												if (action === "view") {
-													return (
-														<motion.button
-															key="preview"
-															whileHover={{ scale: 1.05 }}
-															whileTap={{ scale: 0.95 }}
-															onClick={(e) => {
-																e.stopPropagation();
-																handlePreviewEmail(email);
-															}}
-															className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
-															title="Preview"
-														>
-															<Eye className="w-4 h-4" />
-														</motion.button>
-													);
-												}
-												return null;
-											})}
-											{/* Always show delete button with confirmation modal */}
-											<motion.button
-												whileHover={{ scale: 1.05 }}
-												whileTap={{ scale: 0.95 }}
-												onClick={(e) => {
-													e.stopPropagation();
-													handleDeleteEmail(email.id);
-												}}
-												className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
-												title="Delete"
+											<div className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors">
+												{email.subject}
+											</div>
+										</TableCell>
+										<TableCell>
+											<span
+												className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+													email.status === "published"
+														? "bg-green-100 text-green-800"
+														: email.status === "scheduled"
+															? "bg-blue-100 text-blue-800"
+															: "bg-yellow-100 text-yellow-800"
+												}`}
 											>
-												<Trash2 className="w-4 h-4" />
-											</motion.button>
-										</div>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+												{email.status || "draft"}
+											</span>
+										</TableCell>
+										<TableCell className="text-zinc-600">
+											{email.recipients || 0}
+										</TableCell>
+										<TableCell className="text-sm text-zinc-600">
+											{formatDate(email.createdAt)}
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-2">
+												{allowedActions.map((action) => {
+													if (action === "send" && email.status === "draft") {
+														return (
+															<motion.button
+																key="send"
+																whileHover={{ scale: 1.05 }}
+																whileTap={{ scale: 0.95 }}
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleSendEmail(email);
+																}}
+																className="p-2 text-zinc-400 hover:text-green-600 transition-colors"
+																title="Send to Subscribers"
+															>
+																<Mail className="w-4 h-4" />
+															</motion.button>
+														);
+													}
+													if (action === "view") {
+														return (
+															<motion.button
+																key="preview"
+																whileHover={{ scale: 1.05 }}
+																whileTap={{ scale: 0.95 }}
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handlePreviewEmail(email);
+																}}
+																className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+																title="Preview"
+															>
+																<Eye className="w-4 h-4" />
+															</motion.button>
+														);
+													}
+													return null;
+												})}
+												<motion.button
+													whileHover={{ scale: 1.05 }}
+													whileTap={{ scale: 0.95 }}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleDeleteEmail(email.id);
+													}}
+													className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+													title="Delete"
+												>
+													<Trash2 className="w-4 h-4" />
+												</motion.button>
+											</div>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 
 			{/* Email Modal */}

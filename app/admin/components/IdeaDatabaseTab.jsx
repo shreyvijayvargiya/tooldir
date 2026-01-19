@@ -12,7 +12,6 @@ import {
 	ArrowUp,
 	ArrowDown,
 	ExternalLink,
-	LayoutGrid,
 } from "lucide-react";
 import TiptapEditor from "./TiptapEditor";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";

@@ -27,6 +27,16 @@ import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
 import CreateInvoiceModal from "../../../lib/ui/CreateInvoiceModal";
 import InvoiceModal from "../../../lib/ui/InvoiceModal";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
 import { toast } from "react-toastify";
 
 const InvoiceTab = ({ queryClient }) => {
@@ -279,26 +289,38 @@ const InvoiceTab = ({ queryClient }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
 				<div>
-					<h1 className="text-2xl font-bold text-zinc-900">Invoices</h1>
+					<h1 className="text-lg text-zinc-900">Invoices</h1>
 					<p className="text-sm text-zinc-600 mt-1">
 						Create and manage invoices for your clients
 					</p>
 				</div>
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
-					onClick={handleCreateClick}
-					className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl font-medium transition-colors"
-				>
-					<Plus className="w-4 h-4" />
-					Create New Invoice
-				</motion.button>
+				<div className="flex items-center gap-2">
+					<ExportDropdown
+						dataType="invoices"
+						data={sortedInvoices.map((inv) => ({
+							...inv,
+							invoiceNumber: inv.invoiceNumber || inv.id,
+							clientName: inv.to?.name || "",
+							clientEmail: inv.to?.email || "",
+							createdAt: inv.createdAt || inv.invoiceDate,
+						}))}
+					/>
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						onClick={handleCreateClick}
+						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+					>
+						<Plus className="w-3.5 h-3.5" />
+						Create New Invoice
+					</motion.button>
+				</div>
 			</div>
 
 			{/* Stats Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4">
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -363,7 +385,7 @@ const InvoiceTab = ({ queryClient }) => {
 			</div>
 
 			{/* Filters */}
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-4 mx-4">
 				<div className="relative flex-1">
 					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 					<input
@@ -393,183 +415,153 @@ const InvoiceTab = ({ queryClient }) => {
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-hidden">
-				<table className="w-full">
-					<thead className="bg-zinc-50 border-b border-zinc-200">
-						<tr>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("invoiceNumber")}
-							>
-								<div className="flex items-center">
-									Invoice #{getSortIcon("invoiceNumber")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("toName")}
-							>
-								<div className="flex items-center">
-									Client
-									{getSortIcon("toName")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("total")}
-							>
-								<div className="flex items-center">
-									Amount
-									{getSortIcon("total")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("status")}
-							>
-								<div className="flex items-center">
-									Status
-									{getSortIcon("status")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("createdAt")}
-							>
-								<div className="flex items-center">
-									Date
-									{getSortIcon("createdAt")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("dueDate")}
-							>
-								<div className="flex items-center">
-									Due Date
-									{getSortIcon("dueDate")}
-								</div>
-							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<tr>
-								<td colSpan={7} className="py-8">
-									<TableSkeleton rows={5} columns={7} />
-								</td>
-							</tr>
-						) : error ? (
-							<tr>
-								<td colSpan={7} className="py-8 text-center text-zinc-500">
-									Error loading invoices. Please try again.
-								</td>
-							</tr>
-						) : sortedInvoices.length === 0 ? (
-							<tr>
-								<td colSpan={7} className="py-8 text-center text-zinc-500">
-									{searchQuery || statusFilter !== "all"
-										? "No invoices found matching your filters."
-										: "No invoices yet. Click 'Create New Invoice' to get started."}
-								</td>
-							</tr>
-						) : (
-							sortedInvoices.map((invoice, index) => (
-								<tr
-									key={invoice.id}
-									className={`${
-										index === sortedInvoices.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<code className="text-xs text-zinc-600 font-mono">
-											{invoice.invoiceNumber || invoice.id}
-										</code>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div>
-											<div className="font-medium text-sm text-zinc-900">
-												{invoice.to?.name || ""}
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={7} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("invoiceNumber")}>
+									<div className="flex items-center gap-2">
+										Invoice #
+										{getSortIcon("invoiceNumber")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("toName")}>
+									<div className="flex items-center gap-2">
+										Client
+										{getSortIcon("toName")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("total")}>
+									<div className="flex items-center gap-2">
+										Amount
+										{getSortIcon("total")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("status")}>
+									<div className="flex items-center gap-2">
+										Status
+										{getSortIcon("status")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("createdAt")}>
+									<div className="flex items-center gap-2">
+										Date
+										{getSortIcon("createdAt")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("dueDate")}>
+									<div className="flex items-center gap-2">
+										Due Date
+										{getSortIcon("dueDate")}
+									</div>
+								</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={7}
+									message="Error loading invoices. Please try again."
+								/>
+							) : sortedInvoices.length === 0 ? (
+								<TableEmpty
+									colSpan={7}
+									message={
+										searchQuery || statusFilter !== "all"
+											? "No invoices found matching your filters."
+											: "No invoices yet. Click 'Create New Invoice' to get started."
+									}
+								/>
+							) : (
+								sortedInvoices.map((invoice) => (
+									<TableRow key={invoice.id}>
+										<TableCell>
+											<code className="text-xs text-zinc-600 font-mono">
+												{invoice.invoiceNumber || invoice.id}
+											</code>
+										</TableCell>
+										<TableCell>
+											<div>
+												<div className="font-medium text-sm text-zinc-900">
+													{invoice.to?.name || ""}
+												</div>
+												<div className="text-xs text-zinc-600">
+													{invoice.to?.email || ""}
+												</div>
 											</div>
-											<div className="text-xs text-zinc-600">
-												{invoice.to?.email || ""}
+										</TableCell>
+										<TableCell>
+											<span className="font-semibold text-sm text-zinc-900">
+												{formatCurrency(invoice.total)}
+											</span>
+										</TableCell>
+										<TableCell>
+											<button
+												onClick={() => handleStatusToggle(invoice)}
+												className="cursor-pointer"
+											>
+												{getStatusBadge(invoice.status)}
+											</button>
+										</TableCell>
+										<TableCell className="text-zinc-600">
+											<div className="text-xs flex items-center gap-1">
+												<Calendar className="w-3 h-3" />
+												{formatDate(invoice.invoiceDate || invoice.createdAt)}
 											</div>
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<span className="font-semibold text-sm text-zinc-900">
-											{formatCurrency(invoice.total)}
-										</span>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<button
-											onClick={() => handleStatusToggle(invoice)}
-											className="cursor-pointer"
-										>
-											{getStatusBadge(invoice.status)}
-										</button>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-xs text-zinc-600 flex items-center gap-1">
-											<Calendar className="w-3 h-3" />
-											{formatDate(invoice.invoiceDate || invoice.createdAt)}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-xs text-zinc-600">
-											{formatDate(invoice.dueDate)}
-										</div>
-									</td>
-									<td className="py-3 px-4">
-										<div className="flex items-center gap-2">
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
-												onClick={() => handleViewClick(invoice)}
-												className="p-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
-												title="View Invoice"
-											>
-												<Eye className="w-4 h-4" />
-											</motion.button>
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
-												onClick={() => handleEditClick(invoice)}
-												className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-colors"
-												title="Edit Invoice"
-											>
-												<Edit className="w-4 h-4" />
-											</motion.button>
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
-												onClick={() => handleSendInvoice(invoice)}
-												className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-xl transition-colors"
-												title="Send Invoice"
-											>
-												<Send className="w-4 h-4" />
-											</motion.button>
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
-												onClick={() => handleDeleteClick(invoice)}
-												className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
-												title="Delete Invoice"
-											>
-												<Trash2 className="w-4 h-4" />
-											</motion.button>
-										</div>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+										</TableCell>
+										<TableCell className="text-zinc-600">
+											<div className="text-xs">{formatDate(invoice.dueDate)}</div>
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-2">
+												<motion.button
+													whileHover={{ scale: 1.1 }}
+													whileTap={{ scale: 0.9 }}
+													onClick={() => handleViewClick(invoice)}
+													className="p-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
+													title="View Invoice"
+												>
+													<Eye className="w-4 h-4" />
+												</motion.button>
+												<motion.button
+													whileHover={{ scale: 1.1 }}
+													whileTap={{ scale: 0.9 }}
+													onClick={() => handleEditClick(invoice)}
+													className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-colors"
+													title="Edit Invoice"
+												>
+													<Edit className="w-4 h-4" />
+												</motion.button>
+												<motion.button
+													whileHover={{ scale: 1.1 }}
+													whileTap={{ scale: 0.9 }}
+													onClick={() => handleSendInvoice(invoice)}
+													className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-xl transition-colors"
+													title="Send Invoice"
+												>
+													<Send className="w-4 h-4" />
+												</motion.button>
+												<motion.button
+													whileHover={{ scale: 1.1 }}
+													whileTap={{ scale: 0.9 }}
+													onClick={() => handleDeleteClick(invoice)}
+													className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
+													title="Delete Invoice"
+												>
+													<Trash2 className="w-4 h-4" />
+												</motion.button>
+											</div>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 
 			{/* Delete Confirmation Modal */}

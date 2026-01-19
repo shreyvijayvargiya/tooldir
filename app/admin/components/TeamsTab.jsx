@@ -30,6 +30,16 @@ import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
 import { toast } from "react-toastify";
 import { ROLE_LABELS } from "../../../lib/config/roles-config";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
 
 const TeamsTab = ({ queryClient }) => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -366,10 +376,10 @@ const TeamsTab = ({ queryClient }) => {
 	];
 
 	return (
-		<div>
-			<div className="flex justify-between items-center mb-4">
+		<div className="space-y-4">
+			<div className="flex justify-between items-center border-b border-zinc-200 py-2 px-4">
 				<div>
-					<h2 className="text-xl font-semibold text-zinc-900">Team Members</h2>
+					<h2 className="text-lg text-zinc-900">Team Members</h2>
 					<p className="text-sm text-zinc-600">
 						Manage team members and their roles
 						{/* Debug: Show current role */}
@@ -382,18 +392,28 @@ const TeamsTab = ({ queryClient }) => {
 						)}
 					</p>
 				</div>
-				{(hasPermission(effectiveUserRole, "teams", "create") ||
-					canAddSelf) && (
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						onClick={handleCreateTeamMember}
-						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
-					>
-						<Plus className="w-3.5 h-3.5" />
-						Add Team Member
-					</motion.button>
-				)}
+				<div className="flex items-center gap-2">
+					<ExportDropdown
+						dataType="teams"
+						data={sortedTeamMembers.map((m) => ({
+							...m,
+							createdAt: m.createdAt || m.created_at,
+							updatedAt: m.updatedAt || m.updated_at,
+						}))}
+					/>
+					{(hasPermission(effectiveUserRole, "teams", "create") ||
+						canAddSelf) && (
+						<motion.button
+							whileHover={{ scale: 1.02 }}
+							whileTap={{ scale: 0.98 }}
+							onClick={handleCreateTeamMember}
+							className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+						>
+							<Plus className="w-3.5 h-3.5" />
+							Add Team Member
+						</motion.button>
+					)}
+				</div>
 			</div>
 
 			{/* Warning if user not in teams */}
@@ -407,7 +427,7 @@ const TeamsTab = ({ queryClient }) => {
 			)}
 
 			{/* Search */}
-			<div className="relative mb-4">
+			<div className="relative mx-4">
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 				<input
 					type="text"
@@ -418,153 +438,132 @@ const TeamsTab = ({ queryClient }) => {
 				/>
 			</div>
 
-			<div className="overflow-x-auto border border-zinc-200 rounded-xl">
-				<table className="w-full">
-					<thead>
-						<tr className="border-b border-zinc-200 bg-zinc-50">
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("email")}
-							>
-								<div className="flex items-center">
-									Email
-									{getSortIcon("email")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("username")}
-							>
-								<div className="flex items-center">
-									Username
-									{getSortIcon("username")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("role")}
-							>
-								<div className="flex items-center">
-									Role
-									{getSortIcon("role")}
-								</div>
-							</th>
-							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("createdAt")}
-							>
-								<div className="flex items-center">
-									Created
-									{getSortIcon("createdAt")}
-								</div>
-							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<TableSkeleton rows={5} columns={5} />
-						) : error ? (
-							<tr>
-								<td colSpan={5} className="py-8 text-center text-zinc-500">
-									Error loading team members. Please try again.
-								</td>
-							</tr>
-						) : sortedTeamMembers.length === 0 ? (
-							<tr>
-								<td colSpan={5} className="py-8 text-center text-zinc-500">
-									{searchQuery
-										? "No team members found matching your search."
-										: "No team members found. Add your first team member!"}
-								</td>
-							</tr>
-						) : (
-							sortedTeamMembers.map((member, index) => (
-								<tr
-									key={member.id}
-									className={`${
-										index === sortedTeamMembers.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td className="py-3 px-4 border-l border-r border-zinc-200">
-										<div className="font-medium text-zinc-900">
-											{member.email}
-										</div>
-									</td>
-									<td className="py-3 px-4 text-zinc-600 border-r border-zinc-200">
-										{member.username || ""}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<span
-											className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-												ROLE_LABELS[member.role]?.color ||
-												"bg-zinc-100 text-zinc-800"
-											}`}
-										>
-											{ROLE_LABELS[member.role]?.label || member.role}
-										</span>
-									</td>
-									<td className="py-3 px-4 text-sm text-zinc-600 border-r border-zinc-200">
-										{formatDate(member.createdAt)}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="flex items-center gap-2">
-											{(hasPermission(effectiveUserRole, "teams", "view") ||
-												canAddSelf) && (
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
-													onClick={(e) => {
-														e.stopPropagation();
-														handleViewTeamMember(member);
-													}}
-													className="p-2 text-zinc-400 hover:text-blue-600 transition-colors"
-													title="View"
-												>
-													<Eye className="w-4 h-4" />
-												</motion.button>
-											)}
-											{(hasPermission(effectiveUserRole, "teams", "edit") ||
-												canAddSelf) && (
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
-													onClick={(e) => {
-														e.stopPropagation();
-														handleEditTeamMember(member);
-													}}
-													className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
-													title="Edit"
-												>
-													<Edit2 className="w-4 h-4" />
-												</motion.button>
-											)}
-											{(hasPermission(effectiveUserRole, "teams", "delete") ||
-												canAddSelf) && (
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
-													onClick={(e) => {
-														e.stopPropagation();
-														handleDeleteTeamMember(member.id);
-													}}
-													className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
-													title="Delete"
-												>
-													<Trash2 className="w-4 h-4" />
-												</motion.button>
-											)}
-										</div>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={5} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("email")}>
+									<div className="flex items-center gap-2">
+										Email
+										{getSortIcon("email")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("username")}>
+									<div className="flex items-center gap-2">
+										Username
+										{getSortIcon("username")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("role")}>
+									<div className="flex items-center gap-2">
+										Role
+										{getSortIcon("role")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("createdAt")}>
+									<div className="flex items-center gap-2">
+										Created
+										{getSortIcon("createdAt")}
+									</div>
+								</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={5}
+									message="Error loading team members. Please try again."
+								/>
+							) : sortedTeamMembers.length === 0 ? (
+								<TableEmpty
+									colSpan={5}
+									message={
+										searchQuery
+											? "No team members found matching your search."
+											: "No team members found. Add your first team member!"
+									}
+								/>
+							) : (
+								sortedTeamMembers.map((member) => (
+									<TableRow key={member.id}>
+										<TableCell>
+											<div className="font-medium text-zinc-900">{member.email}</div>
+										</TableCell>
+										<TableCell className="text-zinc-600">
+											{member.username || ""}
+										</TableCell>
+										<TableCell>
+											<span
+												className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+													ROLE_LABELS[member.role]?.color ||
+													"bg-zinc-100 text-zinc-800"
+												}`}
+											>
+												{ROLE_LABELS[member.role]?.label || member.role}
+											</span>
+										</TableCell>
+										<TableCell className="text-sm text-zinc-600">
+											{formatDate(member.createdAt || member.created_at)}
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-2">
+												{(hasPermission(effectiveUserRole, "teams", "view") ||
+													canAddSelf) && (
+													<motion.button
+														whileHover={{ scale: 1.05 }}
+														whileTap={{ scale: 0.95 }}
+														onClick={(e) => {
+															e.stopPropagation();
+															handleViewTeamMember(member);
+														}}
+														className="p-2 text-zinc-400 hover:text-blue-600 transition-colors"
+														title="View"
+													>
+														<Eye className="w-4 h-4" />
+													</motion.button>
+												)}
+												{(hasPermission(effectiveUserRole, "teams", "edit") ||
+													canAddSelf) && (
+													<motion.button
+														whileHover={{ scale: 1.05 }}
+														whileTap={{ scale: 0.95 }}
+														onClick={(e) => {
+															e.stopPropagation();
+															handleEditTeamMember(member);
+														}}
+														className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+														title="Edit"
+													>
+														<Edit2 className="w-4 h-4" />
+													</motion.button>
+												)}
+												{(hasPermission(effectiveUserRole, "teams", "delete") ||
+													canAddSelf) && (
+													<motion.button
+														whileHover={{ scale: 1.05 }}
+														whileTap={{ scale: 0.95 }}
+														onClick={(e) => {
+															e.stopPropagation();
+															handleDeleteTeamMember(member.id);
+														}}
+														className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+														title="Delete"
+													>
+														<Trash2 className="w-4 h-4" />
+													</motion.button>
+												)}
+											</div>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 
 			{/* Team Member Modal */}

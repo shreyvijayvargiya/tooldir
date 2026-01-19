@@ -9,6 +9,7 @@ import {
 	Eye,
 	Send,
 	X,
+	Plus,
 	ArrowUpDown,
 	ArrowUp,
 	ArrowDown,
@@ -21,6 +22,16 @@ import {
 import { CheckCircle2 } from "lucide-react";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
 import { toast } from "react-toastify";
 
 const MessagesTab = () => {
@@ -236,22 +247,44 @@ const MessagesTab = () => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
 				<div>
-					<h1 className="text-2xl font-bold text-zinc-900">Messages</h1>
+					<h1 className="text-lg text-zinc-900">Messages</h1>
 					<p className="text-sm text-zinc-600 mt-1">
 						Manage customer inquiries and support messages
 					</p>
 				</div>
-				{unreadCount > 0 && (
-					<div className="px-3 py-1 bg-zinc-900 text-white rounded-xl text-xs font-semibold">
-						{unreadCount} Unread
-					</div>
-				)}
+				<div className="flex items-center gap-2">
+					{unreadCount > 0 && (
+						<div className="px-3 py-1 bg-zinc-900 text-white rounded-xl text-xs font-semibold">
+							{unreadCount} Unread
+						</div>
+					)}
+					<ExportDropdown
+						dataType="messages"
+						data={sortedMessages.map((m) => ({
+							...m,
+							status: m.replied ? "replied" : m.read ? "read" : "unread",
+						}))}
+					/>
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						onClick={() =>
+							toast.info(
+								"Messages are created from the contact form. Reply to a message from the Actions column."
+							)
+						}
+						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+					>
+						<Plus className="w-3.5 h-3.5" />
+						New Message
+					</motion.button>
+				</div>
 			</div>
 
 			{/* Filters */}
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-4 mx-4">
 				<div className="relative flex-1">
 					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 					<input
@@ -295,180 +328,156 @@ const MessagesTab = () => {
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-x-auto">
-				<table className="w-full">
-					<thead className="bg-zinc-50 border-b border-zinc-200">
-						<tr>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("from")}
-							>
-								<div className="flex items-center">
-									From
-									{getSortIcon("from")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("subject")}
-							>
-								<div className="flex items-center">
-									Subject
-									{getSortIcon("subject")}
-								</div>
-							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200">
-								Message
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("date")}
-							>
-								<div className="flex items-center">
-									Date
-									{getSortIcon("date")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("status")}
-							>
-								<div className="flex items-center">
-									Status
-									{getSortIcon("status")}
-								</div>
-							</th>
-							<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<tr>
-								<td colSpan={6} className="py-8">
-									<TableSkeleton rows={5} columns={6} />
-								</td>
-							</tr>
-						) : error ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									Error loading messages. Please try again.
-								</td>
-							</tr>
-						) : sortedMessages.length === 0 ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									{searchQuery ||
-									readFilter !== "all" ||
-									repliedFilter !== "all"
-										? "No messages found matching your filters."
-										: "No messages yet. Messages from the contact form will appear here."}
-								</td>
-							</tr>
-						) : (
-							sortedMessages.map((message, index) => (
-								<tr
-									key={message.id}
-									className={`${
-										index === sortedMessages.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} ${
-										!message.read ? "bg-blue-50/50" : ""
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div>
-											<div className="font-medium text-sm text-zinc-900 flex items-center gap-2">
-												{!message.read && (
-													<span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={6} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("from")}>
+									<div className="flex items-center gap-2">
+										From
+										{getSortIcon("from")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("subject")}>
+									<div className="flex items-center gap-2">
+										Subject
+										{getSortIcon("subject")}
+									</div>
+								</TableHead>
+								<TableHead>Message</TableHead>
+								<TableHead sortable onClick={() => handleSort("date")}>
+									<div className="flex items-center gap-2">
+										Date
+										{getSortIcon("date")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("status")}>
+									<div className="flex items-center gap-2">
+										Status
+										{getSortIcon("status")}
+									</div>
+								</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={6}
+									message="Error loading messages. Please try again."
+								/>
+							) : sortedMessages.length === 0 ? (
+								<TableEmpty
+									colSpan={6}
+									message={
+										searchQuery ||
+										readFilter !== "all" ||
+										repliedFilter !== "all"
+											? "No messages found matching your filters."
+											: "No messages yet. Messages from the contact form will appear here."
+									}
+								/>
+							) : (
+								sortedMessages.map((message) => (
+									<TableRow
+										key={message.id}
+										className={!message.read ? "bg-blue-50/50" : ""}
+									>
+										<TableCell>
+											<div>
+												<div className="font-medium text-sm text-zinc-900 flex items-center gap-2">
+													{!message.read && (
+														<span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+													)}
+													{message.name || "Anonymous"}
+												</div>
+												<div className="text-xs text-zinc-600 flex items-center gap-1 mt-1">
+													<Mail className="w-3 h-3" />
+													{message.email}
+												</div>
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="font-medium text-sm text-zinc-900">
+												{message.subject}
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="text-xs text-zinc-600 line-clamp-2 max-w-md">
+												{message.message}
+											</div>
+										</TableCell>
+										<TableCell className="text-zinc-600">
+											<div className="text-xs flex items-center gap-1">
+												<Calendar className="w-3 h-3" />
+												{formatDate(message.createdAt)}
+											</div>
+										</TableCell>
+										<TableCell>
+											<div className="flex flex-col gap-1">
+												{message.replied ? (
+													<div className="flex items-center gap-1.5 text-xs text-green-600">
+														<CheckCircle2 className="w-3.5 h-3.5" />
+														<span className="font-medium">Replied</span>
+													</div>
+												) : (
+													<div className="flex items-center gap-1.5 text-xs text-zinc-500">
+														<span>Not replied</span>
+													</div>
 												)}
-												{message.name || "Anonymous"}
+												{message.read ? (
+													<div className="text-xs text-zinc-500">Read</div>
+												) : (
+													<div className="text-xs text-blue-600 font-medium">
+														Unread
+													</div>
+												)}
 											</div>
-											<div className="text-xs text-zinc-600 flex items-center gap-1 mt-1">
-												<Mail className="w-3 h-3" />
-												{message.email}
-											</div>
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="font-medium text-sm text-zinc-900">
-											{message.subject}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-xs text-zinc-600 line-clamp-2 max-w-md">
-											{message.message}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-xs text-zinc-600 flex items-center gap-1">
-											<Calendar className="w-3 h-3" />
-											{formatDate(message.createdAt)}
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="flex flex-col gap-1">
-											{message.replied ? (
-												<div className="flex items-center gap-1.5 text-xs text-green-600">
-													<CheckCircle2 className="w-3.5 h-3.5" />
-													<span className="font-medium">Replied</span>
-												</div>
-											) : (
-												<div className="flex items-center gap-1.5 text-xs text-zinc-500">
-													<span>Not replied</span>
-												</div>
-											)}
-											{message.read ? (
-												<div className="text-xs text-zinc-500">Read</div>
-											) : (
-												<div className="text-xs text-blue-600 font-medium">
-													Unread
-												</div>
-											)}
-										</div>
-									</td>
-									<td className="py-3 px-4">
-										<div className="flex items-center gap-2">
-											<button
-												onClick={() => handleReplyClick(message)}
-												className="p-1.5 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-xl transition-colors"
-												title="Reply to message"
-											>
-												<Send className="w-4 h-4" />
-											</button>
-											{!message.read && (
+										</TableCell>
+										<TableCell>
+											<div className="flex items-center gap-2">
 												<button
-													onClick={() => markAsReadMutation.mutate(message.id)}
-													className="p-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
-													title="Mark as read"
+													onClick={() => handleReplyClick(message)}
+													className="p-1.5 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-xl transition-colors"
+													title="Reply to message"
 												>
-													<Eye className="w-4 h-4" />
+													<Send className="w-4 h-4" />
 												</button>
-											)}
-											<button
-												onClick={() => {
-													if (
-														confirm(
-															"Are you sure you want to delete this message?"
-														)
-													) {
-														deleteMessageMutation.mutate(message.id);
-													}
-												}}
-												className="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-xl transition-colors"
-												title="Delete message"
-											>
-												<Trash2 className="w-4 h-4" />
-											</button>
-										</div>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+												{!message.read && (
+													<button
+														onClick={() => markAsReadMutation.mutate(message.id)}
+														className="p-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
+														title="Mark as read"
+													>
+														<Eye className="w-4 h-4" />
+													</button>
+												)}
+												<button
+													onClick={() => {
+														if (
+															confirm(
+																"Are you sure you want to delete this message?"
+															)
+														) {
+															deleteMessageMutation.mutate(message.id);
+														}
+													}}
+													className="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-xl transition-colors"
+													title="Delete message"
+												>
+													<Trash2 className="w-4 h-4" />
+												</button>
+											</div>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 
 			{/* Reply Modal */}

@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import {
 	Search,
 	Mail,
 	Calendar,
 	CheckCircle2,
 	XCircle,
+	Plus,
 	ArrowUpDown,
 	ArrowUp,
 	ArrowDown,
@@ -13,6 +15,17 @@ import {
 import { getAllCustomers } from "../../../lib/api/customers";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import Fuse from "fuse.js";
+import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableHead,
+	TableCell,
+	TableEmpty,
+} from "../../../lib/ui/Table";
+import { toast } from "react-toastify";
 
 const CustomersTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -144,17 +157,42 @@ const CustomersTab = () => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
 				<div>
-					<h1 className="text-2xl font-bold text-zinc-900">Customers</h1>
+					<h1 className="text-lg text-zinc-900">Customers</h1>
 					<p className="text-sm text-zinc-600 mt-1">
 						Manage your paid customers and subscriptions
 					</p>
 				</div>
+				<div className="flex items-center gap-2">
+					<ExportDropdown
+						dataType="customers"
+						data={sortedCustomers.map((c) => ({
+							...c,
+							customerId: c.customerId || c.customer_id || c.id,
+							subscriptionId: c.subscriptionId || c.subscription_id,
+							planName: c.planName || c.plan_name,
+							createdAt: c.createdAt || c.created_at,
+						}))}
+					/>
+					<motion.button
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						onClick={() =>
+							toast.info(
+								"Customers are created after checkout/subscription. This list is read-only."
+							)
+						}
+						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+					>
+						<Plus className="w-3.5 h-3.5" />
+						Add New Customer
+					</motion.button>
+				</div>
 			</div>
 
 			{/* Search */}
-			<div className="relative">
+			<div className="relative mx-4">
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
 				<input
 					type="text"
@@ -166,150 +204,123 @@ const CustomersTab = () => {
 			</div>
 
 			{/* Table */}
-			<div className="border border-zinc-200 rounded-xl overflow-x-auto">
-				<table className="w-full">
-					<thead className="bg-zinc-50 border-b border-zinc-200">
-						<tr>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("name")}
-							>
-								<div className="flex items-center">
-									Customer
-									{getSortIcon("name")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("planName")}
-							>
-								<div className="flex items-center">
-									Plan
-									{getSortIcon("planName")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("status")}
-							>
-								<div className="flex items-center">
-									Status
-									{getSortIcon("status")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("amount")}
-							>
-								<div className="flex items-center">
-									Amount
-									{getSortIcon("amount")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("createdAt")}
-							>
-								<div className="flex items-center">
-									Joined
-									{getSortIcon("createdAt")}
-								</div>
-							</th>
-							<th
-								className="py-3 px-4 text-left text-xs font-semibold text-zinc-700 cursor-pointer hover:bg-zinc-100 transition-colors"
-								onClick={() => handleSort("customerId")}
-							>
-								<div className="flex items-center">
-									Customer ID
-									{getSortIcon("customerId")}
-								</div>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{isLoading ? (
-							<tr>
-								<td colSpan={6} className="py-8">
-									<TableSkeleton rows={5} columns={6} />
-								</td>
-							</tr>
-						) : error ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									Error loading customers. Please try again.
-								</td>
-							</tr>
-						) : sortedCustomers.length === 0 ? (
-							<tr>
-								<td colSpan={6} className="py-8 text-center text-zinc-500">
-									{searchQuery
-										? "No customers found matching your search."
-										: "No customers yet. Customers will appear here after they subscribe."}
-								</td>
-							</tr>
-						) : (
-							sortedCustomers.map((customer, index) => (
-								<tr
-									key={customer.id}
-									className={`${
-										index === sortedCustomers.length - 1
-											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
-								>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div>
-											<div className="font-medium text-sm text-zinc-900">
-												{customer.name || "N/A"}
+			<div className="overflow-x-auto px-4">
+				{isLoading ? (
+					<TableSkeleton rows={5} columns={6} />
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead sortable onClick={() => handleSort("name")}>
+									<div className="flex items-center gap-2">
+										Customer
+										{getSortIcon("name")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("planName")}>
+									<div className="flex items-center gap-2">
+										Plan
+										{getSortIcon("planName")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("status")}>
+									<div className="flex items-center gap-2">
+										Status
+										{getSortIcon("status")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("amount")}>
+									<div className="flex items-center gap-2">
+										Amount
+										{getSortIcon("amount")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("createdAt")}>
+									<div className="flex items-center gap-2">
+										Joined
+										{getSortIcon("createdAt")}
+									</div>
+								</TableHead>
+								<TableHead sortable onClick={() => handleSort("customerId")}>
+									<div className="flex items-center gap-2">
+										Customer ID
+										{getSortIcon("customerId")}
+									</div>
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{error ? (
+								<TableEmpty
+									colSpan={6}
+									message="Error loading customers. Please try again."
+								/>
+							) : sortedCustomers.length === 0 ? (
+								<TableEmpty
+									colSpan={6}
+									message={
+										searchQuery
+											? "No customers found matching your search."
+											: "No customers yet. Customers will appear here after they subscribe."
+									}
+								/>
+							) : (
+								sortedCustomers.map((customer) => (
+									<TableRow key={customer.id} hover>
+										<TableCell>
+											<div>
+												<div className="font-medium text-sm text-zinc-900">
+													{customer.name || "N/A"}
+												</div>
+												<div className="text-xs text-zinc-600 flex items-center gap-1 mt-1">
+													<Mail className="w-3 h-3" />
+													{customer.email || "N/A"}
+												</div>
 											</div>
-											<div className="text-xs text-zinc-600 flex items-center gap-1 mt-1">
-												<Mail className="w-3 h-3" />
-												{customer.email || "N/A"}
+										</TableCell>
+										<TableCell>
+											<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-900 text-white">
+												{customer.plan_name || customer.planName || "Pro"}
+											</span>
+										</TableCell>
+										<TableCell>
+											{customer.status === "active" ? (
+												<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+													<CheckCircle2 className="w-3 h-3" />
+													Active
+												</span>
+											) : (
+												<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+													<XCircle className="w-3 h-3" />
+													{customer.status || "Inactive"}
+												</span>
+											)}
+										</TableCell>
+										<TableCell>
+											{formatCurrency(
+												customer.amount || 0,
+												customer.currency || "usd"
+											)}
+										</TableCell>
+										<TableCell className="text-zinc-600">
+											<div className="text-xs flex items-center gap-1">
+												<Calendar className="w-3 h-3" />
+												{formatDate(customer.created_at || customer.createdAt)}
 											</div>
-										</div>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-900 text-white">
-											{customer.plan_name || customer.planName || "Pro"}
-										</span>
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										{customer.status === "active" ? (
-											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-												<CheckCircle2 className="w-3 h-3" />
-												Active
-											</span>
-										) : (
-											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-												<XCircle className="w-3 h-3" />
-												{customer.status || "Inactive"}
-											</span>
-										)}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										{formatCurrency(
-											customer.amount || 0,
-											customer.currency || "usd"
-										)}
-									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
-										<div className="text-xs text-zinc-600 flex items-center gap-1">
-											<Calendar className="w-3 h-3" />
-											{formatDate(customer.created_at || customer.createdAt)}
-										</div>
-									</td>
-									<td className="py-3 px-4">
-										<code className="text-xs text-zinc-600 font-mono">
-											{customer.customer_id ||
-												customer.customerId ||
-												customer.id}
-										</code>
-									</td>
-								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+										</TableCell>
+										<TableCell>
+											<code className="text-xs text-zinc-600 font-mono">
+												{customer.customer_id ||
+													customer.customerId ||
+													customer.id}
+											</code>
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					</Table>
+				)}
 			</div>
 		</div>
 	);
