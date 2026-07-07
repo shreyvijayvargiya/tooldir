@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -20,7 +19,6 @@ import {
 	Check,
 	HelpCircle,
 	Search,
-	X,
 	RocketIcon,
 	Wrench,
 	Download,
@@ -33,8 +31,19 @@ import {
 	ChevronDown,
 	ChevronRight as ChevronRightIcon,
 } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import Fuse from "fuse.js";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 
 // Documentation sections configuration
 const DOC_SECTIONS = [
@@ -164,15 +173,11 @@ const CodeBlock = ({ language, children, ...props }) => {
 	return (
 		<div className="relative group mb-3">
 			<div className="absolute top-2 right-2 z-10">
-				<motion.button
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
+				<Button
+					size="sm"
+					variant={copied ? "secondary" : "outline"}
 					onClick={handleCopyCode}
-					className={`flex items-center gap-1.5 px-2 py-1.5 rounded text-xs font-medium transition-colors ${
-						copied
-							? "bg-green-100 text-green-700"
-							: "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
-					}`}
+					className="h-7 gap-1.5 text-xs"
 				>
 					{copied ? (
 						<>
@@ -185,19 +190,19 @@ const CodeBlock = ({ language, children, ...props }) => {
 							Copy
 						</>
 					)}
-				</motion.button>
+				</Button>
 			</div>
 			<SyntaxHighlighter
 				language={language || "javascript"}
 				style={lightTheme}
 				PreTag="div"
-				className="rounded border border-zinc-200 !bg-white"
+				className="rounded border border-border !bg-background"
 				customStyle={{
-					background: "#ffffff",
+					background: "hsl(var(--background))",
 					padding: "1rem",
 					margin: 0,
 					fontSize: "0.75rem",
-					border: "1px solid #e4e4e7",
+					border: "1px solid hsl(var(--border))",
 				}}
 				{...props}
 			>
@@ -427,9 +432,9 @@ export default function DocsPage() {
 		if (functionInfo.found) {
 			return (
 				<div className="flex items-start gap-2 group/item">
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+					<Button
+						size="sm"
+						variant={copied ? "secondary" : "ghost"}
 						onClick={async () => {
 							try {
 								await navigator.clipboard.writeText(functionInfo.functionName);
@@ -440,23 +445,19 @@ export default function DocsPage() {
 								toast.error("Failed to copy");
 							}
 						}}
-						className={`flex-shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-xs font-medium transition-all ${
-							copied
-								? "bg-green-100 text-green-700 opacity-100"
-								: "bg-zinc-100 hover:bg-zinc-200 text-zinc-600 opacity-0 group-hover/item:opacity-100"
-						}`}
+						className={`flex-shrink-0 mt-0.5 h-6 w-6 p-0 ${copied ? "opacity-100" : "opacity-0 group-hover/item:opacity-100"}`}
 					>
 						{copied ? (
 							<Check className="w-3 h-3" />
 						) : (
 							<Copy className="w-3 h-3" />
 						)}
-					</motion.button>
+					</Button>
 					<div className="flex-1">
-						<code className="text-zinc-900 font-mono text-xs font-semibold bg-zinc-100 px-1 py-0.5 rounded">
+						<code className="text-foreground font-mono text-xs font-semibold bg-muted px-1 py-0.5 rounded">
 							{functionInfo.functionName}
 						</code>
-						<span className="text-zinc-700 text-sm ml-1">
+						<span className="text-muted-foreground text-sm ml-1">
 							: {functionInfo.description}
 						</span>
 					</div>
@@ -468,45 +469,48 @@ export default function DocsPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-zinc-50 flex">
+		<div className="min-h-screen bg-background flex">
 			{/* Sidebar */}
-			<aside className="hidden md:flex w-64 bg-white border-r border-zinc-200 flex-col h-screen sticky top-0 font-mono">
-				<div className="p-4 border-b border-zinc-200">
+			<aside className="hidden md:flex w-64 bg-background border-r border-border flex-col h-screen sticky top-0 font-mono">
+				<div className="p-4">
 					<div className="flex items-center gap-2">
-						<RocketIcon className="w-5 h-5 text-zinc-900" />
-						<h1 className="text-lg font-bold text-zinc-900 font-mono">
+						<RocketIcon className="w-5 h-5 text-foreground" />
+						<h1 className="text-lg font-bold text-foreground font-mono">
 							SAAS Starter
 						</h1>
 					</div>
 				</div>
+				<Separator />
 				<nav className="flex-1 overflow-y-auto p-3">
 					{/* Search Button */}
-					<button
+					<Button
+						variant="outline"
+						size="sm"
 						onClick={() => setShowSearchModal(true)}
-						className="w-full px-3 py-1.5 mb-2 text-xs font-medium transition-colors rounded flex items-center justify-between bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-300 font-mono"
+						className="w-full mb-2 text-xs font-mono justify-between"
 					>
 						<div className="flex items-center gap-2">
 							<Search className="w-3.5 h-3.5" />
 							<span>Search</span>
 						</div>
-						<span className="text-[10px] text-zinc-500">CMD/CTRL + K</span>
-					</button>
+						<Badge variant="secondary" className="text-[10px] font-normal">
+							CMD/CTRL + K
+						</Badge>
+					</Button>
 					<ul className="space-y-0.5">
 						{DOC_SECTIONS.map((section) => {
 							const IconComponent = section.icon;
 							return (
 								<li key={section.id}>
-									<button
+									<Button
+										variant={activeSection === section.id ? "secondary" : "ghost"}
+										size="sm"
 										onClick={() => setActiveSection(section.id)}
-										className={`w-full text-left px-3 py-1.5 rounded text-xs font-medium transition-colors font-mono flex items-center gap-2 ${
-											activeSection === section.id
-												? "bg-zinc-100 text-zinc-900"
-												: "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-										}`}
+										className="w-full justify-start text-xs font-mono"
 									>
 										<IconComponent className="w-3.5 h-3.5 flex-shrink-0" />
 										<span>{section.title}</span>
-									</button>
+									</Button>
 								</li>
 							);
 						})}
@@ -518,19 +522,19 @@ export default function DocsPage() {
 			<main className="flex-1 flex flex-col">
 				{/* Header with Copy Button */}
 				<div className="max-w-4xl mx-auto w-full px-4 mt-4 flex items-center justify-between z-10">
-					<h2 className="text-xl font-bold text-zinc-900">
+					<h2 className="text-xl font-bold text-foreground">
 						{DOC_SECTIONS.find((s) => s.id === activeSection)?.title ||
 							"Documentation"}
 					</h2>
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+					<Button
+						variant="outline"
+						size="sm"
 						onClick={handleCopyMarkdown}
-						className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded transition-colors text-xs font-medium"
+						className="text-xs"
 					>
 						<Copy className="w-3.5 h-3.5" />
 						Copy Markdown
-					</motion.button>
+					</Button>
 				</div>
 
 				{/* Content Area */}
@@ -538,73 +542,72 @@ export default function DocsPage() {
 					<div className="max-w-4xl mx-auto px-4">
 						{isLoading ? (
 							<div className="flex items-center justify-center py-20">
-								<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-900"></div>
+								<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground"></div>
 							</div>
 						) : activeSection === "faq" ? (
 							<div className="space-y-6">
-								<h1 className="text-3xl font-bold text-zinc-900 mb-6">
+								<h1 className="text-3xl font-bold text-foreground mb-6">
 									Frequently Asked Questions
 								</h1>
 								<div className="space-y-4">
 									{FAQ_DATA.map((faq) => (
-										<div
-											key={faq.id}
-											className="bg-white border border-zinc-200 rounded p-4"
-										>
-											<h3 className="text-lg font-semibold text-zinc-900 mb-2">
-												{faq.question}
-											</h3>
-											<p className="text-zinc-700 text-sm leading-6">
-												{faq.answer}
-											</p>
-										</div>
+										<Card key={faq.id}>
+											<CardContent className="p-4">
+												<h3 className="text-lg font-semibold text-foreground mb-2">
+													{faq.question}
+												</h3>
+												<p className="text-muted-foreground text-sm leading-6">
+													{faq.answer}
+												</p>
+											</CardContent>
+										</Card>
 									))}
 								</div>
 							</div>
 						) : (
-							<div className="prose prose-zinc max-w-none prose-sm">
+							<div className="prose prose-zinc max-w-none prose-sm dark:prose-invert">
 								<ReactMarkdown
 									components={{
 										h1: ({ node, ...props }) => (
 											<h1
-												className="text-3xl font-bold text-zinc-900 mb-4 mt-6"
+												className="text-3xl font-bold text-foreground mb-4 mt-6"
 												{...props}
 											/>
 										),
 										h2: ({ node, ...props }) => (
 											<h2
-												className="text-2xl font-bold text-zinc-900 mb-3 mt-6"
+												className="text-2xl font-bold text-foreground mb-3 mt-6"
 												{...props}
 											/>
 										),
 										h3: ({ node, ...props }) => (
 											<h3
-												className="text-xl font-semibold text-zinc-900 mb-2 mt-4"
+												className="text-xl font-semibold text-foreground mb-2 mt-4"
 												{...props}
 											/>
 										),
 										h4: ({ node, ...props }) => (
 											<h4
-												className="text-lg font-semibold text-zinc-900 mb-2 mt-3"
+												className="text-lg font-semibold text-foreground mb-2 mt-3"
 												{...props}
 											/>
 										),
 										p: ({ node, ...props }) => (
 											<p
-												className="text-zinc-700 mb-3 leading-6 text-sm"
+												className="text-muted-foreground mb-3 leading-6 text-sm"
 												{...props}
 											/>
 										),
 										ul: ({ node, ...props }) => (
 											<ul
-												className="list-disc mb-3 space-y-1.5 text-zinc-700 text-sm ml-6 pl-0"
+												className="list-disc mb-3 space-y-1.5 text-muted-foreground text-sm ml-6 pl-0"
 												style={{ listStylePosition: "outside" }}
 												{...props}
 											/>
 										),
 										ol: ({ node, ...props }) => (
 											<ol
-												className="list-decimal mb-3 space-y-1.5 text-zinc-700 text-sm ml-6 pl-0"
+												className="list-decimal mb-3 space-y-1.5 text-muted-foreground text-sm ml-6 pl-0"
 												style={{ listStylePosition: "outside" }}
 												{...props}
 											/>
@@ -625,7 +628,7 @@ export default function DocsPage() {
 											if (inline) {
 												return (
 													<code
-														className="text-zinc-900 px-1 py-0.5 rounded text-xs font-mono"
+														className="text-foreground bg-muted px-1 py-0.5 rounded text-xs font-mono"
 														{...props}
 													>
 														{children}
@@ -645,13 +648,13 @@ export default function DocsPage() {
 										},
 										blockquote: ({ node, ...props }) => (
 											<blockquote
-												className="border-l-4 border-zinc-300 pl-3 italic text-zinc-600 my-3 text-sm"
+												className="border-l-4 border-border pl-3 italic text-muted-foreground my-3 text-sm"
 												{...props}
 											/>
 										),
 										a: ({ node, ...props }) => (
 											<a
-												className="text-blue-600 hover:text-blue-800 underline"
+												className="text-primary hover:underline"
 												target="_blank"
 												rel="noopener noreferrer"
 												{...props}
@@ -659,30 +662,30 @@ export default function DocsPage() {
 										),
 										strong: ({ node, ...props }) => (
 											<strong
-												className="font-semibold text-zinc-900"
+												className="font-semibold text-foreground"
 												{...props}
 											/>
 										),
 										table: ({ node, ...props }) => (
 											<div className="overflow-x-auto my-4">
 												<table
-													className="min-w-full border border-zinc-200 rounded"
+													className="min-w-full border border-border rounded"
 													{...props}
 												/>
 											</div>
 										),
 										thead: ({ node, ...props }) => (
-											<thead className="bg-zinc-100" {...props} />
+											<thead className="bg-muted" {...props} />
 										),
 										th: ({ node, ...props }) => (
 											<th
-												className="px-3 py-1.5 text-left font-semibold text-zinc-900 border-b border-zinc-200 text-sm"
+												className="px-3 py-1.5 text-left font-semibold text-foreground border-b border-border text-sm"
 												{...props}
 											/>
 										),
 										td: ({ node, ...props }) => (
 											<td
-												className="px-3 py-1.5 text-zinc-700 border-b border-zinc-200 text-sm"
+												className="px-3 py-1.5 text-muted-foreground border-b border-border text-sm"
 												{...props}
 											/>
 										),
@@ -693,152 +696,123 @@ export default function DocsPage() {
 							</div>
 						)}
 						{/* Navigation Footer */}
-						<div className="w-fit my-10 p-1 bg-white gap-1 rounded flex items-center justify-around">
-							<motion.button
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								onClick={handlePrevious}
-								disabled={!hasPrevious}
-								className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-xs font-medium ${
-									hasPrevious
-										? "bg-zinc-100/50 hover:bg-zinc-100 text-zinc-700"
-										: "bg-zinc-50 text-zinc-400 cursor-not-allowed"
-								}`}
-							>
-								<ChevronLeft className="w-3.5 h-3.5" />
-								Previous
-							</motion.button>
-							<motion.button
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								onClick={handleNext}
-								disabled={!hasNext}
-								className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors text-xs font-medium ${
-									hasNext
-										? "bg-zinc-100/50 hover:bg-zinc-100 text-zinc-700"
-										: "bg-zinc-50 text-zinc-400 cursor-not-allowed"
-								}`}
-							>
-								Next
-								<ChevronRight className="w-3.5 h-3.5" />
-							</motion.button>
-						</div>
+						<Card className="w-fit my-10 shadow-none">
+							<CardContent className="p-1 flex items-center gap-1">
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={handlePrevious}
+									disabled={!hasPrevious}
+									className="text-xs"
+								>
+									<ChevronLeft className="w-3.5 h-3.5" />
+									Previous
+								</Button>
+								<Separator orientation="vertical" className="h-6" />
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={handleNext}
+									disabled={!hasNext}
+									className="text-xs"
+								>
+									Next
+									<ChevronRight className="w-3.5 h-3.5" />
+								</Button>
+							</CardContent>
+						</Card>
 					</div>
 				</div>
 			</main>
 
 			{/* Search Modal */}
-			<AnimatePresence>
-				{showSearchModal && (
-					<div
-						className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-20 px-4"
-						onClick={() => {
-							setShowSearchModal(false);
-							setSearchQuery("");
-							setSearchResults([]);
-						}}
-					>
-						<motion.div
-							initial={{ opacity: 0, scale: 0.95, y: -20 }}
-							animate={{ opacity: 1, scale: 1, y: 0 }}
-							exit={{ opacity: 0, scale: 0.95, y: -20 }}
-							onClick={(e) => e.stopPropagation()}
-							className="bg-white rounded shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col"
-						>
-							{/* Modal Header */}
-							<div className="p-4 border-b border-zinc-200 flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<Search className="w-5 h-5 text-zinc-600" />
-									<h3 className="text-lg font-semibold text-zinc-900 font-mono">
-										Search & Ask
-									</h3>
-								</div>
-								<button
-									onClick={() => {
-										setShowSearchModal(false);
-										setSearchQuery("");
-										setSearchResults([]);
-									}}
-									className="p-1 hover:bg-zinc-100 rounded transition-colors"
-								>
-									<X className="w-5 h-5 text-zinc-600" />
-								</button>
-							</div>
+			<Dialog
+				open={showSearchModal}
+				onOpenChange={(open) => {
+					setShowSearchModal(open);
+					if (!open) {
+						setSearchQuery("");
+						setSearchResults([]);
+					}
+				}}
+			>
+				<DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0 gap-0">
+					<DialogHeader className="p-4 border-b border-border">
+						<DialogTitle className="flex items-center gap-2 font-mono">
+							<Search className="w-5 h-5 text-muted-foreground" />
+							Search & Ask
+						</DialogTitle>
+					</DialogHeader>
 
-							{/* Search Input */}
-							<div className="p-4 border-b border-zinc-200">
-								<input
-									type="text"
-									value={searchQuery}
-									onChange={(e) => setSearchQuery(e.target.value)}
-									placeholder="Search sections, FAQs, and content..."
-									className="w-full px-4 py-2 border border-zinc-300 rounded focus:outline-none focus:ring-2 focus:ring-zinc-500 text-sm font-mono"
-									autoFocus
-								/>
-							</div>
-
-							{/* Search Results */}
-							<div className="flex-1 overflow-y-auto p-4">
-								{searchQuery.trim() ? (
-									searchResults.length > 0 ? (
-										<div className="space-y-2">
-											{searchResults.map((result, index) => (
-												<motion.button
-													key={index}
-													whileHover={{ scale: 1.01 }}
-													whileTap={{ scale: 0.99 }}
-													onClick={() => {
-														if (result.type === "section") {
-															setActiveSection(result.id);
-														} else if (result.type === "faq") {
-															setActiveSection("faq");
-														}
-														setShowSearchModal(false);
-														setSearchQuery("");
-														setSearchResults([]);
-													}}
-													className="w-full text-left p-3 bg-zinc-50 hover:bg-zinc-100 rounded transition-colors border border-zinc-200"
-												>
-													<div className="flex items-start gap-2">
-														{result.type === "faq" ? (
-															<HelpCircle className="w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0" />
-														) : (
-															<BookOpen className="w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0" />
-														)}
-														<div className="flex-1">
-															<div className="text-sm font-semibold text-zinc-900 font-mono">
-																{result.title}
-															</div>
-															{result.content && (
-																<div className="text-xs text-zinc-600 mt-1 line-clamp-2">
-																	{result.content}
-																</div>
-															)}
-															{result.type === "faq" && (
-																<div className="text-xs text-zinc-500 mt-1">
-																	FAQ
-																</div>
-															)}
-														</div>
-													</div>
-												</motion.button>
-											))}
-										</div>
-									) : (
-										<div className="text-center py-8 text-zinc-500 text-sm">
-											No results found for "{searchQuery}"
-										</div>
-									)
-								) : (
-									<div className="text-center py-8 text-zinc-500 text-sm">
-										Start typing to search documentation...
-									</div>
-								)}
-							</div>
-						</motion.div>
+					<div className="p-4 border-b border-border">
+						<Input
+							type="text"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							placeholder="Search sections, FAQs, and content..."
+							className="font-mono text-sm"
+							autoFocus
+						/>
 					</div>
-				)}
-			</AnimatePresence>
+
+					<div className="flex-1 overflow-y-auto p-4">
+						{searchQuery.trim() ? (
+							searchResults.length > 0 ? (
+								<div className="space-y-2">
+									{searchResults.map((result, index) => (
+										<Button
+											key={index}
+											variant="outline"
+											onClick={() => {
+												if (result.type === "section") {
+													setActiveSection(result.id);
+												} else if (result.type === "faq") {
+													setActiveSection("faq");
+												}
+												setShowSearchModal(false);
+												setSearchQuery("");
+												setSearchResults([]);
+											}}
+											className="w-full h-auto justify-start p-3 text-left"
+										>
+											<div className="flex items-start gap-2 w-full">
+												{result.type === "faq" ? (
+													<HelpCircle className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+												) : (
+													<BookOpen className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+												)}
+												<div className="flex-1">
+													<div className="text-sm font-semibold text-foreground font-mono">
+														{result.title}
+													</div>
+													{result.content && (
+														<div className="text-xs text-muted-foreground mt-1 line-clamp-2 font-normal">
+															{result.content}
+														</div>
+													)}
+													{result.type === "faq" && (
+														<Badge variant="secondary" className="mt-1 text-xs font-normal">
+															FAQ
+														</Badge>
+													)}
+												</div>
+											</div>
+										</Button>
+									))}
+								</div>
+							) : (
+								<div className="text-center py-8 text-muted-foreground text-sm">
+									No results found for &quot;{searchQuery}&quot;
+								</div>
+							)
+						) : (
+							<div className="text-center py-8 text-muted-foreground text-sm">
+								Start typing to search documentation...
+							</div>
+						)}
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

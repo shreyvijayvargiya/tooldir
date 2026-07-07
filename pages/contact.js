@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import Head from "next/head";
 import Navbar from "../app/components/Navbar";
 import Footer from "../app/components/Footer";
-import { motion } from "framer-motion";
 import { Mail, MessageSquare, Send } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 
 const ContactPage = () => {
 	const [formData, setFormData] = useState({
@@ -66,115 +70,110 @@ const ContactPage = () => {
 				<section className="flex-1 py-20 px-4 sm:px-6 lg:px-8">
 					<div className="max-w-4xl mx-auto">
 						<div className="text-center mb-12">
-							<h1 className="text-4xl font-bold text-zinc-900 mb-4">
+							<h1 className="text-4xl font-bold text-foreground mb-4">
 								Get in Touch
 							</h1>
-							<p className="text-lg text-zinc-600">
+							<p className="text-lg text-muted-foreground">
 								Have a question? We'd love to hear from you.
 							</p>
 						</div>
 
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-							{/* Contact Info */}
 							<div className="space-y-6">
-								<div className="p-6 bg-white border border-zinc-200 rounded-xl">
-									<div className="flex items-start gap-4">
-										<div className="p-3 bg-zinc-900 text-white rounded-xl">
-											<Mail className="w-5 h-5" />
+								<Card>
+									<CardContent className="p-6">
+										<div className="flex items-start gap-4">
+											<div className="p-3 bg-primary text-primary-foreground rounded-xl">
+												<Mail className="w-5 h-5" />
+											</div>
+											<div>
+												<h3 className="font-semibold text-foreground mb-1">
+													Email
+												</h3>
+												<p className="text-sm text-muted-foreground">
+													support@yourapp.com
+												</p>
+											</div>
 										</div>
-										<div>
-											<h3 className="font-semibold text-zinc-900 mb-1">
-												Email
-											</h3>
-											<p className="text-sm text-zinc-600">
-												support@yourapp.com
-											</p>
+									</CardContent>
+								</Card>
+								<Card>
+									<CardContent className="p-6">
+										<div className="flex items-start gap-4">
+											<div className="p-3 bg-primary text-primary-foreground rounded-xl">
+												<MessageSquare className="w-5 h-5" />
+											</div>
+											<div>
+												<h3 className="font-semibold text-foreground mb-1">
+													Response Time
+												</h3>
+												<p className="text-sm text-muted-foreground">
+													We typically respond within 24 hours
+												</p>
+											</div>
 										</div>
-									</div>
-								</div>
-								<div className="p-6 bg-white border border-zinc-200 rounded-xl">
-									<div className="flex items-start gap-4">
-										<div className="p-3 bg-zinc-900 text-white rounded-xl">
-											<MessageSquare className="w-5 h-5" />
-										</div>
-										<div>
-											<h3 className="font-semibold text-zinc-900 mb-1">
-												Response Time
-											</h3>
-											<p className="text-sm text-zinc-600">
-												We typically respond within 24 hours
-											</p>
-										</div>
-									</div>
-								</div>
+									</CardContent>
+								</Card>
 							</div>
 
-							{/* Contact Form */}
-							<form
-								onSubmit={handleSubmit}
-								className="p-6 bg-white border border-zinc-200 rounded-xl space-y-4"
-							>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Name
-									</label>
-									<input
-										type="text"
-										name="name"
-										value={formData.name}
-										onChange={handleChange}
-										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Email
-									</label>
-									<input
-										type="email"
-										name="email"
-										value={formData.email}
-										onChange={handleChange}
-										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Subject
-									</label>
-									<input
-										type="text"
-										name="subject"
-										value={formData.subject}
-										onChange={handleChange}
-										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Message
-									</label>
-									<textarea
-										name="message"
-										value={formData.message}
-										onChange={handleChange}
-										required
-										rows={5}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100"
-									/>
-								</div>
-								<button
-									type="submit"
-									disabled={isSubmitting}
-									className="w-full py-3 bg-zinc-900 text-white rounded-xl font-medium hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-								>
-									<Send className="w-4 h-4" />
-									{isSubmitting ? "Sending..." : "Send Message"}
-								</button>
-							</form>
+							<Card>
+								<CardContent className="p-6">
+									<form onSubmit={handleSubmit} className="space-y-4">
+										<div className="space-y-2">
+											<Label htmlFor="name">Name</Label>
+											<Input
+												id="name"
+												type="text"
+												name="name"
+												value={formData.name}
+												onChange={handleChange}
+												required
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="email">Email</Label>
+											<Input
+												id="email"
+												type="email"
+												name="email"
+												value={formData.email}
+												onChange={handleChange}
+												required
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="subject">Subject</Label>
+											<Input
+												id="subject"
+												type="text"
+												name="subject"
+												value={formData.subject}
+												onChange={handleChange}
+												required
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="message">Message</Label>
+											<Textarea
+												id="message"
+												name="message"
+												value={formData.message}
+												onChange={handleChange}
+												required
+												rows={5}
+											/>
+										</div>
+										<Button
+											type="submit"
+											disabled={isSubmitting}
+											className="w-full"
+										>
+											<Send className="w-4 h-4" />
+											{isSubmitting ? "Sending..." : "Send Message"}
+										</Button>
+									</form>
+								</CardContent>
+							</Card>
 						</div>
 					</div>
 				</section>

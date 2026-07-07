@@ -67,21 +67,21 @@ const AnimatedDropdown = ({
 				whileHover={{ scale: 1.01 }}
 				whileTap={{ scale: 0.99 }}
 				onClick={onToggle}
-				className={`w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-100 focus:outline-none bg-white flex items-center justify-between ${buttonClassName}`}
+				className={`w-full px-4 py-2 border border rounded-xl focus:ring-2 focus:ring-zinc-100 focus:outline-none bg-card flex items-center justify-between ${buttonClassName}`}
 			>
 				{selectedOption ? (
 					<span
 						className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-							selectedOption.color || "bg-zinc-100 text-zinc-800"
+							selectedOption.color || "bg-muted text-foreground"
 						}`}
 					>
 						{selectedOption.label}
 					</span>
 				) : (
-					<span className="text-zinc-500">{placeholder}</span>
+					<span className="text-muted-foreground">{placeholder}</span>
 				)}
 				<ChevronDown
-					className={`w-4 h-4 text-zinc-400 transition-transform ${
+					className={`w-4 h-4 text-muted-foreground transition-transform ${
 						isOpen ? "rotate-180" : ""
 					}`}
 				/>
@@ -105,8 +105,8 @@ const AnimatedDropdown = ({
 				}}
 				className={`w-full px-4 py-1.5 text-left flex items-center gap-2 transition-colors text-sm ${
 					value === option.value
-						? "bg-zinc-50 text-zinc-900 font-medium"
-						: "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+						? "bg-muted text-foreground font-medium"
+						: "text-muted-foreground hover:bg-muted hover:text-foreground"
 				} ${optionClassName}`}
 			>
 				{option.color ? (
@@ -120,7 +120,7 @@ const AnimatedDropdown = ({
 				)}
 				{value === option.value && (
 					<svg
-						className="w-4 h-4 ml-auto text-zinc-600"
+						className="w-4 h-4 ml-auto text-muted-foreground"
 						fill="currentColor"
 						viewBox="0 0 20 20"
 					>
@@ -146,7 +146,7 @@ const AnimatedDropdown = ({
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0, y: -10, scale: 0.95 }}
 						transition={{ duration: 0.15 }}
-						className={`absolute top-full left-0 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-lg z-[60] overflow-hidden ${dropdownClassName}`}
+						className={`absolute top-full left-0 mt-1 w-full bg-card border border rounded-xl shadow-lg z-[60] overflow-hidden ${dropdownClassName}`}
 					>
 						<div className="max-h-64 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 							{options.map((option, index) => defaultRenderOption(option, index))}

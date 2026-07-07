@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
 import Fuse from "fuse.js";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
 	Search,
 	X,
@@ -366,14 +368,11 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 		}
 	}, [isOpen]);
 
-	// Handle keyboard shortcuts
+	// Prevent Cmd/Ctrl+K from triggering browser shortcuts while open
 	useEffect(() => {
 		if (!isOpen) return;
 
 		const handleKeyDown = (e) => {
-			if (e.key === "Escape") {
-				onClose();
-			}
 			if ((e.metaKey || e.ctrlKey) && e.key === "k") {
 				e.preventDefault();
 			}
@@ -381,7 +380,23 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [isOpen, onClose]);
+	}, [isOpen]);
+
+	const categories = [
+		{ id: "all", label: "All" },
+		{ id: "blogs", label: "Blogs" },
+		{ id: "emails", label: "Emails" },
+		{ id: "subscribers", label: "Subscribers" },
+		{ id: "users", label: "Users" },
+		{ id: "customers", label: "Customers" },
+		{ id: "products", label: "Products" },
+		{ id: "payments", label: "Payments" },
+		{ id: "invoices", label: "Invoices" },
+		{ id: "messages", label: "Messages" },
+		{ id: "forms", label: "Forms" },
+		{ id: "teams", label: "Teams" },
+		{ id: "waitlist", label: "Waitlist" },
+	];
 
 	// Handle result click
 	const handleResultClick = (result) => {
@@ -535,7 +550,7 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 	const getTypeColor = (type) => {
 		switch (type) {
 			case "blog":
-				return "bg-zinc-100 text-zinc-800";
+				return "bg-muted text-foreground";
 			case "email":
 				return "bg-purple-100 text-purple-800";
 			case "subscriber":
@@ -549,172 +564,161 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			case "payment":
 				return "bg-emerald-100 text-emerald-800";
 			case "invoice":
-				return "bg-zinc-100 text-zinc-800";
+				return "bg-muted text-foreground";
 			case "message":
 				return "bg-pink-100 text-pink-800";
 			case "form":
 				return "bg-violet-100 text-violet-800";
 			case "team":
-				return "bg-zinc-100 text-zinc-800";
+				return "bg-muted text-foreground";
 			case "waitlist":
 				return "bg-teal-100 text-teal-800";
 			default:
-				return "bg-zinc-100 text-zinc-800";
+				return "bg-muted text-foreground";
 		}
 	};
 
 	return (
-		<AnimatePresence>
-			{isOpen && (
-				<>
-					{/* Backdrop */}
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						onClick={onClose}
-						className="fixed inset-0 bg-black bg-opacity-50 z-50"
-					/>
-
-					{/* Modal */}
-					<div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-						<motion.div
-							initial={{ scale: 0.95, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							exit={{ scale: 0.95, opacity: 0 }}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col pointer-events-auto"
+		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="flex max-h-[80vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0 sm:rounded-2xl [&>button]:hidden">
+				{/* Header */}
+				<div className="p-4">
+					<div className="mb-3 flex items-center gap-3">
+						<div className="relative flex-1">
+							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+							<Input
+								type="text"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								placeholder="Search blogs, emails, subscribers, users, customers, products, payments, invoices..."
+								className="rounded-xl pl-10"
+								autoFocus
+							/>
+						</div>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={onClose}
+							className="rounded-xl"
 						>
-							{/* Header */}
-							<div className="p-4">
-								<div className="flex items-center gap-3 mb-3">
-									<div className="flex-1 relative">
-										<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
-										<input
-											type="text"
-											value={searchQuery}
-											onChange={(e) => setSearchQuery(e.target.value)}
-											placeholder="Search blogs, emails, subscribers, users, customers, products, payments, invoices..."
-											className="w-full pl-10 pr-4 py-2.5 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none text-sm"
-											autoFocus
-										/>
-									</div>
-									<button
-										onClick={onClose}
-										className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors rounded-xl hover:bg-zinc-100"
-									>
-										<X className="w-5 h-5" />
-									</button>
-								</div>
-							</div>
-
-							{/* Content */}
-							<div className="flex-1 overflow-y-auto p-4">
-								{/* Search Results */}
-								{searchQuery.trim() && (
-									<div className="mb-6">
-										{searchResults.length === 0 ? (
-											<div className="text-center py-8 text-zinc-500 text-sm">
-												No results found for "{searchQuery}"
-											</div>
-										) : (
-											<div className="space-y-1">
-												{searchResults.map((result) => {
-													const Icon = getTypeIcon(result.type);
-													return (
-														<motion.button
-															key={`${result.type}-${result.id}`}
-															whileHover={{ scale: 1.01 }}
-															whileTap={{ scale: 0.99 }}
-															onClick={() => handleResultClick(result)}
-															className="w-full p-2 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors text-left flex items-center gap-3"
-														>
-															<div
-																className={`p-2 rounded-xl ${getTypeColor(
-																	result.type
-																)}`}
-															>
-																<Icon className="w-4 h-4" />
-															</div>
-															<div className="flex-1 min-w-0">
-																<div className="font-medium text-zinc-900 truncate">
-																	{result.title}
-																</div>
-																{result.subtitle && (
-																	<div className="text-xs text-zinc-500 truncate">
-																		{result.subtitle}
-																	</div>
-																)}
-															</div>
-															<div className="flex items-center gap-2">
-																<span
-																	className={`px-2 py-0.5 text-xs font-medium rounded ${getTypeColor(
-																		result.type
-																	)}`}
-																>
-																	{result.type}
-																</span>
-																<ArrowRight className="w-4 h-4 text-zinc-400" />
-															</div>
-														</motion.button>
-													);
-												})}
-											</div>
-										)}
-									</div>
-								)}
-
-								{/* Guidance Section */}
-								<div>
-									<div className="flex items-center gap-2 mb-3">
-										<Sparkles className="w-4 h-4 text-zinc-400" />
-										<h3 className="text-sm font-semibold text-zinc-700">
-											Quick Actions
-										</h3>
-									</div>
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-										{guidanceActions.map((action, index) => {
-											const Icon = action.icon;
-											return (
-												<motion.button
-													key={index}
-													whileHover={{ scale: 1.02 }}
-													whileTap={{ scale: 0.98 }}
-													onClick={action.action}
-													className="py-1 px-2 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-colors text-left flex items-center gap-3"
-												>
-													<div className="py-1 px-2 rounded-xl bg-zinc-100 text-zinc-700">
-														<Icon className="w-4 h-4" />
-													</div>
-													<span className="text-sm font-medium text-zinc-900">
-														{action.label}
-													</span>
-													<ArrowRight className="w-4 h-4 text-zinc-400 ml-auto" />
-												</motion.button>
-											);
-										})}
-									</div>
-								</div>
-							</div>
-
-							{/* Footer */}
-							<div className="p-4 border-t border-zinc-200 bg-zinc-50">
-								<div className="flex items-center justify-between text-xs text-zinc-500">
-									<div className="flex items-center gap-4">
-										<span>Press Esc to close</span>
-									</div>
-									<span>
-										{searchQuery.trim()
-											? `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""
-											}`
-											: `${searchData.length} total items`}
-									</span>
-								</div>
-							</div>
-						</motion.div>
+							<X className="h-5 w-5" />
+						</Button>
 					</div>
-				</>
-			)}
-		</AnimatePresence>
+					<div className="flex flex-wrap gap-2">
+						{categories.map((category) => (
+							<Button
+								key={category.id}
+								variant={selectedCategory === category.id ? "default" : "outline"}
+								size="sm"
+								onClick={() => setSelectedCategory(category.id)}
+								className="rounded-xl"
+							>
+								{category.label}
+							</Button>
+						))}
+					</div>
+				</div>
+
+				{/* Content */}
+				<div className="flex-1 overflow-y-auto p-4">
+					{/* Search Results */}
+					{searchQuery.trim() && (
+						<div className="mb-6">
+							{searchResults.length === 0 ? (
+								<div className="py-8 text-center text-sm text-muted-foreground">
+									No results found for "{searchQuery}"
+								</div>
+							) : (
+								<div className="space-y-1">
+									{searchResults.map((result) => {
+										const Icon = getTypeIcon(result.type);
+										return (
+											<Button
+												key={`${result.type}-${result.id}`}
+												variant="ghost"
+												onClick={() => handleResultClick(result)}
+												className="h-auto w-full justify-start rounded-xl border p-2 text-left hover:bg-muted"
+											>
+												<div
+													className={`rounded-xl p-2 ${getTypeColor(result.type)}`}
+												>
+													<Icon className="h-4 w-4" />
+												</div>
+												<div className="min-w-0 flex-1">
+													<div className="truncate font-medium text-foreground">
+														{result.title}
+													</div>
+													{result.subtitle && (
+														<div className="truncate text-xs text-muted-foreground">
+															{result.subtitle}
+														</div>
+													)}
+												</div>
+												<div className="flex items-center gap-2">
+													<span
+														className={`rounded px-2 py-0.5 text-xs font-medium ${getTypeColor(
+															result.type
+														)}`}
+													>
+														{result.type}
+													</span>
+													<ArrowRight className="h-4 w-4 text-muted-foreground" />
+												</div>
+											</Button>
+										);
+									})}
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Guidance Section */}
+					<div>
+						<div className="mb-3 flex items-center gap-2">
+							<Sparkles className="h-4 w-4 text-muted-foreground" />
+							<h3 className="text-sm font-semibold text-muted-foreground">
+								Quick Actions
+							</h3>
+						</div>
+						<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+							{guidanceActions.map((action, index) => {
+								const Icon = action.icon;
+								return (
+									<Button
+										key={index}
+										variant="ghost"
+										onClick={action.action}
+										className="h-auto justify-start rounded-xl border px-2 py-1 text-left hover:bg-muted"
+									>
+										<div className="rounded-xl bg-muted px-2 py-1 text-muted-foreground">
+											<Icon className="h-4 w-4" />
+										</div>
+										<span className="text-sm font-medium text-foreground">
+											{action.label}
+										</span>
+										<ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
+									</Button>
+								);
+							})}
+						</div>
+					</div>
+				</div>
+
+				{/* Footer */}
+				<div className="border-t border bg-muted p-4">
+					<div className="flex items-center justify-between text-xs text-muted-foreground">
+						<div className="flex items-center gap-4">
+							<span>Press Esc to close</span>
+						</div>
+						<span>
+							{searchQuery.trim()
+								? `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""}`
+								: `${searchData.length} total items`}
+						</span>
+					</div>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

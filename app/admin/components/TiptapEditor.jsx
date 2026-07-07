@@ -42,7 +42,7 @@ import {
 	Table as TableIcon,
 	CheckSquare2,
 } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { htmlToMarkdown } from "../../../lib/utils/htmlToMarkdown";
 import { CodeBlock, CodeGroup } from "../../../lib/ui/TiptapCodeExtensions";
 import { AnimatePresence } from "framer-motion";

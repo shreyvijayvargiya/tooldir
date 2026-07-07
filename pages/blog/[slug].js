@@ -17,9 +17,11 @@ import { getAllBlogs, getBlogById } from "../../lib/api/blog";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { motion } from "framer-motion";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { htmlToMarkdown } from "../../lib/utils/htmlToMarkdown";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 const BlogPostPage = () => {
 	const router = useRouter();
@@ -70,7 +72,7 @@ const BlogPostPage = () => {
 				<div className="min-h-screen flex flex-col">
 					<Navbar />
 					<div className="flex-1 flex items-center justify-center">
-						<div className="text-zinc-600">Loading...</div>
+						<div className="text-muted-foreground">Loading...</div>
 					</div>
 					<Footer />
 				</div>
@@ -87,14 +89,16 @@ const BlogPostPage = () => {
 				<div className="min-h-screen flex flex-col">
 					<Navbar />
 					<div className="flex-1 flex items-center justify-center">
-						<div className="text-center">
-							<h1 className="text-2xl font-bold text-zinc-900 mb-4">
-								Blog Post Not Found
-							</h1>
-							<Link href="/blog" className="text-zinc-600 hover:text-zinc-900">
-								Back to Blog
-							</Link>
-						</div>
+						<Card className="max-w-md">
+							<CardContent className="p-8 text-center">
+								<h1 className="text-2xl font-bold text-foreground mb-4">
+									Blog Post Not Found
+								</h1>
+								<Button variant="link" asChild>
+									<Link href="/blog">Back to Blog</Link>
+								</Button>
+							</CardContent>
+						</Card>
 					</div>
 					<Footer />
 				</div>
@@ -143,15 +147,11 @@ const BlogPostPage = () => {
 		return (
 			<div className="relative group mb-4">
 				<div className="absolute top-2 right-2 z-10">
-					<motion.button
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
+					<Button
+						size="sm"
+						variant={copied ? "secondary" : "outline"}
 						onClick={handleCopyCode}
-						className={`flex items-center gap-1.5 px-2 py-1.5 rounded text-xs font-medium transition-colors ${
-							copied
-								? "bg-green-100 text-green-700"
-								: "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
-						}`}
+						className="h-7 gap-1.5 text-xs"
 					>
 						{copied ? (
 							<>
@@ -164,19 +164,19 @@ const BlogPostPage = () => {
 								Copy
 							</>
 						)}
-					</motion.button>
+					</Button>
 				</div>
 				<SyntaxHighlighter
 					language={language || "javascript"}
 					style={lightTheme}
 					PreTag="div"
-					className="rounded border border-zinc-200 !bg-white"
+					className="rounded border border-border !bg-background"
 					customStyle={{
-						background: "#ffffff",
+						background: "hsl(var(--background))",
 						padding: "1rem",
 						margin: 0,
 						fontSize: "0.875rem",
-						border: "1px solid #e4e4e7",
+						border: "1px solid hsl(var(--border))",
 					}}
 					{...props}
 				>
@@ -232,13 +232,12 @@ const BlogPostPage = () => {
 
 				<article className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
 					<div className="max-w-3xl mx-auto">
-						<Link
-							href="/blog"
-							className="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 mb-6"
-						>
-							<ArrowLeft className="w-4 h-4" />
-							Back to Blog
-						</Link>
+						<Button variant="ghost" size="sm" asChild className="mb-6">
+							<Link href="/blog">
+								<ArrowLeft className="w-4 h-4" />
+								Back to Blog
+							</Link>
+						</Button>
 
 						{blog.bannerImage && (
 							<img
@@ -249,21 +248,20 @@ const BlogPostPage = () => {
 						)}
 
 						<div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-							<div className="flex items-center gap-2 text-sm text-zinc-600">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
 								<Calendar className="w-4 h-4" />
 								{formatDate(blog.createdAt)}
 								{blog.author && (
 									<>
 										<span>•</span>
-										<span>{blog.author}</span>
+										<Badge variant="secondary">{blog.author}</Badge>
 									</>
 								)}
 							</div>
 							<div className="flex items-center gap-2">
-								{/* Copy Markdown Button */}
-								<motion.button
-									whileHover={{ scale: 1.05 }}
-									whileTap={{ scale: 0.95 }}
+								<Button
+									variant="outline"
+									size="sm"
 									onClick={async () => {
 										try {
 											await navigator.clipboard.writeText(markdownContent);
@@ -272,33 +270,28 @@ const BlogPostPage = () => {
 											toast.error("Failed to copy markdown");
 										}
 									}}
-									className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl transition-colors text-xs font-medium"
 									title="Copy Markdown"
 								>
 									<Copy className="w-3.5 h-3.5" />
 									Copy Markdown
-								</motion.button>
-								{/* Share to Twitter Button */}
-								<motion.a
-									whileHover={{ scale: 1.05 }}
-									whileTap={{ scale: 0.95 }}
-									href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-										blog.title
-									)}&url=${encodeURIComponent(
-										typeof window !== "undefined" ? window.location.href : ""
-									)}`}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-500 hover:bg-zinc-600 text-white rounded-xl transition-colors text-xs font-medium"
-									title="Share on Twitter"
-								>
-									<Twitter className="w-3.5 h-3.5" />
-									Share
-								</motion.a>
-								{/* Copy Link Button */}
-								<motion.button
-									whileHover={{ scale: 1.05 }}
-									whileTap={{ scale: 0.95 }}
+								</Button>
+								<Button variant="default" size="sm" asChild title="Share on Twitter">
+									<a
+										href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+											blog.title
+										)}&url=${encodeURIComponent(
+											typeof window !== "undefined" ? window.location.href : ""
+										)}`}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										<Twitter className="w-3.5 h-3.5" />
+										Share
+									</a>
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
 									onClick={async () => {
 										try {
 											const url =
@@ -311,62 +304,63 @@ const BlogPostPage = () => {
 											toast.error("Failed to copy link");
 										}
 									}}
-									className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl transition-colors text-xs font-medium"
 									title="Copy Link"
 								>
 									<LinkIcon className="w-3.5 h-3.5" />
 									Copy Link
-								</motion.button>
+								</Button>
 							</div>
 						</div>
 
-						<h1 className="text-4xl font-bold text-zinc-900 mb-6">
+						<h1 className="text-4xl font-bold text-foreground mb-6">
 							{blog.title}
 						</h1>
 
-						<div className="blog-content prose prose-zinc max-w-none prose-base">
+						<Card className="shadow-none border-none">
+							<CardContent className="p-0">
+						<div className="blog-content prose prose-zinc max-w-none prose-base dark:prose-invert">
 							<ReactMarkdown
 								components={{
 									h1: ({ node, ...props }) => (
 										<h1
-											className="text-3xl font-bold text-zinc-900 mb-4 mt-8"
+											className="text-3xl font-bold text-foreground mb-4 mt-8"
 											{...props}
 										/>
 									),
 									h2: ({ node, ...props }) => (
 										<h2
-											className="text-2xl font-bold text-zinc-900 mb-3 mt-6"
+											className="text-2xl font-bold text-foreground mb-3 mt-6"
 											{...props}
 										/>
 									),
 									h3: ({ node, ...props }) => (
 										<h3
-											className="text-xl font-semibold text-zinc-900 mb-2 mt-4"
+											className="text-xl font-semibold text-foreground mb-2 mt-4"
 											{...props}
 										/>
 									),
 									h4: ({ node, ...props }) => (
 										<h4
-											className="text-lg font-semibold text-zinc-900 mb-2 mt-3"
+											className="text-lg font-semibold text-foreground mb-2 mt-3"
 											{...props}
 										/>
 									),
 									p: ({ node, ...props }) => (
 										<p
-											className="text-zinc-700 mb-4 leading-7 text-base"
+											className="text-muted-foreground mb-4 leading-7 text-base"
 											{...props}
 										/>
 									),
 									ul: ({ node, ...props }) => (
 										<ul
-											className="list-disc mb-4 space-y-2 text-zinc-700 text-base ml-6 pl-2"
+											className="list-disc mb-4 space-y-2 text-muted-foreground text-base ml-6 pl-2"
 											style={{ listStylePosition: "outside" }}
 											{...props}
 										/>
 									),
 									ol: ({ node, ...props }) => (
 										<ol
-											className="list-decimal mb-4 space-y-2 text-zinc-700 text-base ml-6 pl-2"
+											className="list-decimal mb-4 space-y-2 text-muted-foreground text-base ml-6 pl-2"
 											style={{ listStylePosition: "outside" }}
 											{...props}
 										/>
@@ -379,7 +373,7 @@ const BlogPostPage = () => {
 										if (inline) {
 											return (
 												<code
-													className="text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded text-sm font-mono"
+													className="text-foreground bg-muted px-1.5 py-0.5 rounded text-sm font-mono"
 													{...props}
 												>
 													{children}
@@ -404,7 +398,7 @@ const BlogPostPage = () => {
 
 										// If it doesn't look like code, render as regular text
 										return (
-											<div className="text-zinc-700 mb-4 leading-7 text-base">
+											<div className="text-muted-foreground mb-4 leading-7 text-base">
 												{codeString}
 											</div>
 										);
@@ -415,13 +409,13 @@ const BlogPostPage = () => {
 									},
 									blockquote: ({ node, ...props }) => (
 										<blockquote
-											className="border-l-4 border-zinc-300 pl-4 italic text-zinc-600 my-6 text-base"
+											className="border-l-4 border-border pl-4 italic text-muted-foreground my-6 text-base"
 											{...props}
 										/>
 									),
 									a: ({ node, ...props }) => (
 										<a
-											className="text-blue-600 hover:text-blue-800 underline"
+											className="text-primary hover:underline"
 											target="_blank"
 											rel="noopener noreferrer"
 											{...props}
@@ -429,12 +423,12 @@ const BlogPostPage = () => {
 									),
 									strong: ({ node, ...props }) => (
 										<strong
-											className="font-semibold text-zinc-900"
+											className="font-semibold text-foreground"
 											{...props}
 										/>
 									),
 									em: ({ node, ...props }) => (
-										<em className="italic text-zinc-800" {...props} />
+										<em className="italic text-foreground/80" {...props} />
 									),
 									img: ({ node, ...props }) => (
 										<img
@@ -443,13 +437,15 @@ const BlogPostPage = () => {
 										/>
 									),
 									hr: ({ node, ...props }) => (
-										<hr className="border-zinc-200 my-8" {...props} />
+										<hr className="border-border my-8" {...props} />
 									),
 								}}
 							>
 								{markdownContent}
 							</ReactMarkdown>
 						</div>
+							</CardContent>
+						</Card>
 					</div>
 				</article>
 

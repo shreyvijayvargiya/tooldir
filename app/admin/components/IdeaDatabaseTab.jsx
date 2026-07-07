@@ -33,7 +33,10 @@ import {
 import { createTask } from "../../../lib/api/tasks";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -151,12 +154,12 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -347,14 +350,14 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 			{
 				value: false,
 				label: "Not Marked as Task",
-				color: "bg-zinc-100 text-zinc-700",
+				color: "bg-muted text-muted-foreground",
 			},
 		],
 	};
 
 	// Task status options
 	const taskStatusOptions = [
-		{ value: "todo", label: "Todo", color: "bg-zinc-100 text-zinc-700" },
+		{ value: "todo", label: "Todo", color: "bg-muted text-muted-foreground" },
 		{
 			value: "in-progress",
 			label: "In Progress",
@@ -387,51 +390,44 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 
 	return (
 		<div className="relative">
-			<div className="flex justify-between items-center border-b border-zinc-200 py-2 px-4">
+			<div className="flex justify-between items-center border-b py-2 px-4">
 				<div>
-					<h2 className="text-lg text-zinc-900">Idea Database</h2>
-					<p className="text-sm text-zinc-600 mt-1">List of your Ideas/Notes/Features for SAAS application</p>
+					<h2 className="text-lg text-foreground">Idea Database</h2>
+					<p className="text-sm text-muted-foreground mt-1">List of your Ideas/Notes/Features for SAAS application</p>
 				</div>
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
-					onClick={handleAddNew}
-					className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
-				>
+				<Button onClick={handleAddNew} size="sm" className="rounded-xl gap-1.5">
 					<Plus className="w-3.5 h-3.5" />
 					Add New Idea
-				</motion.button>
+				</Button>
 			</div>
 
 			{/* Search and Filter */}
 			<div className="flex items-center gap-2 my-4 mx-4">
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 					<input
 						type="text"
 						placeholder="Search ideas..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+						className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 					/>
 				</div>
 				<div className="relative" ref={filterDropdownRef}>
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
+					<Button
 						onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-						className={`flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-medium text-zinc-700 hover:bg-zinc-50 ${
-							hasActiveFilters ? "ring-2 ring-zinc-900" : ""
+						className={`flex items-center gap-2 px-3 py-2 bg-card border rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted ${
+							hasActiveFilters ? "ring-2 ring-primary" : ""
 						}`}
 					>
 						<Filter className="w-4 h-4" />
 						Filter
 						{hasActiveFilters && (
-							<span className="px-1.5 py-0.5 bg-zinc-900 text-white rounded-full text-xs">
+							<span className="px-1.5 py-0.5 bg-primary text-primary-foreground rounded-full text-xs">
 								{Object.values(activeFilters).filter((f) => f !== null).length}
 							</span>
 						)}
-					</motion.button>
+					</Button>
 
 					<AnimatePresence>
 						{showFilterDropdown && (
@@ -439,10 +435,10 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 								initial={{ opacity: 0, y: -10, scale: 0.95 }}
 								animate={{ opacity: 1, y: 0, scale: 1 }}
 								exit={{ opacity: 0, y: -10, scale: 0.95 }}
-								className="absolute right-0 top-full mt-2 w-64 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 p-4 space-y-4"
+								className="absolute right-0 top-full mt-2 w-64 bg-card border rounded-xl shadow-lg z-50 p-4 space-y-4"
 							>
 								<div className="flex items-center justify-between mb-2">
-									<h4 className="font-semibold text-zinc-900 text-sm">
+									<h4 className="font-semibold text-foreground text-sm">
 										Filters
 									</h4>
 									{hasActiveFilters && (
@@ -451,7 +447,7 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 												clearFilters();
 												setShowFilterDropdown(false);
 											}}
-											className="text-xs text-zinc-600 hover:text-zinc-900 underline"
+											className="text-xs text-muted-foreground hover:text-foreground underline"
 										>
 											Clear all
 										</button>
@@ -460,7 +456,7 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 
 								{/* Mark as Task Filter */}
 								<div>
-									<label className="block text-xs font-medium text-zinc-700 mb-2">
+									<label className="block text-xs font-medium text-muted-foreground mb-2">
 										Mark as Task
 									</label>
 									<AnimatedDropdown
@@ -537,12 +533,12 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 										className="cursor-pointer"
 									>
 										<TableCell>
-											<div className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors">
+											<div className="font-medium text-foreground hover:text-muted-foreground transition-colors">
 												{idea.title || "Untitled"}
 											</div>
 										</TableCell>
 										<TableCell>
-											<div className="text-sm text-zinc-600 truncate max-w-xs">
+											<div className="text-sm text-muted-foreground truncate max-w-xs">
 												{idea.content
 													? idea.content
 															.replace(/<[^>]*>/g, "")
@@ -559,47 +555,43 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 																? "bg-green-100 text-green-800"
 																: idea.taskStatus === "in-progress"
 																? "bg-blue-100 text-blue-800"
-																: "bg-zinc-100 text-zinc-800"
+																: "bg-muted text-foreground"
 														}`}
 													>
 														{idea.taskStatus}
 													</span>
 													{idea.taskId && onNavigate && (
-														<motion.button
-															whileHover={{ scale: 1.05 }}
-															whileTap={{ scale: 0.95 }}
+														<Button
 															onClick={(e) => {
 																e.stopPropagation();
 																onNavigate("kanban-board");
 															}}
-															className="p-1.5 text-zinc-400 hover:text-zinc-900 transition-colors"
+															className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
 															title="View in Kanban Board"
 														>
 															<ExternalLink className="w-3.5 h-3.5" />
-														</motion.button>
+														</Button>
 													)}
 												</div>
 											) : (
-												<span className="text-sm text-zinc-400">-</span>
+												<span className="text-sm text-muted-foreground">-</span>
 											)}
 										</TableCell>
-										<TableCell className="text-zinc-600">
+										<TableCell className="text-muted-foreground">
 											{formatDate(idea.createdAt)}
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-2">
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
+												<Button
 													onClick={(e) => {
 														e.stopPropagation();
 														handleDelete(idea.id);
 													}}
-													className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+													className="p-2 text-muted-foreground hover:text-red-600 transition-colors"
 													title="Delete"
 												>
 													<Trash2 className="w-4 h-4" />
-												</motion.button>
+												</Button>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -629,17 +621,17 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 							animate={{ x: 0 }}
 							exit={{ x: "100%" }}
 							transition={{ type: "spring", damping: 25, stiffness: 200 }}
-							className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-white shadow-2xl z-50 flex flex-col"
+							className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-card shadow-2xl z-50 flex flex-col"
 							onClick={(e) => e.stopPropagation()}
 						>
 							{/* Drawer Header */}
-							<div className="flex items-center justify-between p-2 border-b border-zinc-200">
-								<h3 className="text-sm font-semibold text-zinc-900">
+							<div className="flex items-center justify-between p-2 border-b border">
+								<h3 className="text-sm font-semibold text-foreground">
 									{selectedIdea ? "Edit Idea" : "New Idea"}
 								</h3>
 								<button
 									onClick={handleCloseDrawer}
-									className="cursor-pointer p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 rounded-xl transition-colors"
+									className="cursor-pointer p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground rounded-xl transition-colors"
 								>
 									<X className="w-4 h-4" />
 								</button>
@@ -649,7 +641,7 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 							<div className="flex-1 overflow-y-auto p-4 space-y-4">
 								{/* Title */}
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Title *
 									</label>
 									<input
@@ -658,18 +650,18 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 										onChange={(e) =>
 											setIdeaForm({ ...ideaForm, title: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 										placeholder="Enter idea title..."
 									/>
 								</div>
 
 								{/* Mark as Task Switch */}
-								<div className="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-200">
+								<div className="flex items-center justify-between p-3 bg-muted rounded-xl border border">
 									<div>
-										<label className="block text-sm font-medium text-zinc-700">
+										<label className="block text-sm font-medium text-muted-foreground">
 											Mark as Task
 										</label>
-										<p className="text-xs text-zinc-500 mt-1">
+										<p className="text-xs text-muted-foreground mt-1">
 											Convert this idea into a task in the kanban board
 										</p>
 									</div>
@@ -688,14 +680,14 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 											}
 											className="sr-only peer"
 										/>
-										<div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-zinc-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-zinc-900"></div>
+										<div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
 									</label>
 								</div>
 
 								{/* Task Status Dropdown (only shown when markAsTask is true) */}
 								{ideaForm.markAsTask && (
 									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
+										<label className="block text-sm font-medium text-muted-foreground mb-2">
 											Task Status
 										</label>
 										<AnimatedDropdown
@@ -716,7 +708,7 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 
 								{/* Content Editor */}
 								<div className="flex-1 min-h-[400px]">
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Content
 									</label>
 									<div className="h-[400px]">
@@ -732,16 +724,11 @@ const IdeaDatabaseTab = ({ queryClient, onNavigate }) => {
 							</div>
 
 							{/* Drawer Footer */}
-							<div className="flex items-center gap-2 p-4 border-t border-zinc-200">
-								<motion.button
-									whileHover={{ scale: 1.02 }}
-									whileTap={{ scale: 0.98 }}
-									onClick={handleSave}
-									className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors font-medium text-sm"
-								>
+							<div className="flex items-center gap-2 p-4 border-t border">
+								<Button onClick={handleSave} className="rounded-xl gap-2">
 									<Save className="w-4 h-4" />
 									{selectedIdea ? "Update" : "Create"} Idea
-								</motion.button>
+								</Button>
 							</div>
 						</motion.div>
 					</>

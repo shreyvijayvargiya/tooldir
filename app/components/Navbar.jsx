@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogIn, User, ChevronDown, LogOut } from "lucide-react";
+import { Menu, LogIn, User, ChevronDown, LogOut } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscription } from "../../lib/hooks/useSubscription";
 import LoginModal from "../../lib/ui/LoginModal";
@@ -12,27 +11,41 @@ import {
 	setUserCookie,
 } from "../../lib/utils/cookies";
 import { signOutUser, onAuthStateChange } from "../../lib/api/auth";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { ThemeCustomizerButton } from "@/components/theme/ThemeCustomizer";
+import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-	const [showLoginModal, setShowLoginModal] = useState(false);
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-	const dropdownRef = useRef(null);
+	const [showLoginModal, setShowLoginModal] = React.useState(false);
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 	const authUnsubscribeRef = useRef(null);
 	const subscription = useSubscription();
 
-	// Fetch user with React Query - checks cookie and sets up auth listener
 	const { data: user } = useQuery({
 		queryKey: ["currentUser"],
 		queryFn: async () => {
-			// Check for existing user in cookie first
 			const cookieUser = getUserCookie();
 
-			// Set up auth state listener to update query cache only once
-			// This runs once when the query is first executed
 			if (!authUnsubscribeRef.current) {
 				const unsubscribe = onAuthStateChange(async (supabaseUser) => {
 					if (supabaseUser) {
@@ -50,30 +63,25 @@ const Navbar = () => {
 									: "email",
 						};
 						setUserCookie(userData);
-						// Update query cache with new user data
 						queryClient.setQueryData(["currentUser"], userData);
 					} else {
 						removeUserCookie();
-						// Update query cache to null
 						queryClient.setQueryData(["currentUser"], null);
 					}
 				});
 
-				// Store unsubscribe in a ref for cleanup
 				authUnsubscribeRef.current = unsubscribe;
 			}
 
-			// Return initial user from cookie
 			return cookieUser;
 		},
 		enabled: true,
-		staleTime: Infinity, // Auth state is managed by Supabase listener
-		gcTime: Infinity, // Keep in cache indefinitely
+		staleTime: Infinity,
+		gcTime: Infinity,
 		refetchOnWindowFocus: false,
 		refetchOnMount: false,
 	});
 
-	// Cleanup auth listener on unmount
 	useEffect(() => {
 		return () => {
 			if (authUnsubscribeRef.current) {
@@ -83,45 +91,17 @@ const Navbar = () => {
 		};
 	}, []);
 
-	// Close dropdown when clicking outside
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-				setIsDropdownOpen(false);
-			}
-		};
-
-		if (isDropdownOpen) {
-			document.addEventListener("mousedown", handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, [isDropdownOpen]);
-
 	const handleLogout = async () => {
 		try {
-			// Remove cookie first
 			removeUserCookie();
-
-			// Clear React Query cache immediately
 			queryClient.setQueryData(["currentUser"], null);
-
-			// Sign out from Supabase (this will trigger auth state change)
 			await signOutUser();
-
-			// Ensure cache is cleared (in case auth listener hasn't fired yet)
 			queryClient.setQueryData(["currentUser"], null);
-
-			// Invalidate query to force refetch if needed
 			await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-
-			setIsDropdownOpen(false);
+			setIsMobileMenuOpen(false);
 			toast.success("Logged out successfully!");
 		} catch (error) {
 			console.error("Logout error:", error);
-			// Even if signOut fails, clear local state
 			removeUserCookie();
 			queryClient.setQueryData(["currentUser"], null);
 			toast.error("Failed to logout. Please try again.");
@@ -143,19 +123,49 @@ const Navbar = () => {
 		return router.pathname.startsWith(href);
 	};
 
+	const UserAvatar = ({ size = "sm" }) => {
+		const sizeClass = size === "lg" ? "w-16 h-16" : size === "md" ? "w-10 h-10" : "w-4 h-4";
+		const iconSize = size === "lg" ? "w-8 h-8" : size === "md" ? "w-5 h-5" : "w-4 h-4";
+
+		if (user?.photoURL) {
+			return (
+				<img
+					src={user.photoURL}
+					alt={user.displayName}
+					className={`${sizeClass} rounded-full`}
+				/>
+			);
+		}
+
+		return (
+			<div
+				className={`${sizeClass} rounded-full bg-muted flex items-center justify-center`}
+			>
+				<User className={`${iconSize} text-muted-foreground`} />
+			</div>
+		);
+	};
+
+	const SubscriptionStatus = () =>
+		subscription.isSubscribed && subscription.status === "active" ? (
+			<Badge variant="secondary" className="text-green-600 bg-green-50">
+				Active - {subscription.planName || "Pro"}
+			</Badge>
+		) : (
+			<p className="text-sm text-muted-foreground">No active subscription</p>
+		);
+
 	return (
 		<>
-			<nav className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+			<nav className="sticky top-0 z-50 bg-background border-b">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="flex items-center justify-between h-16">
-						{/* Logo */}
 						<Link href="/" className="flex items-center">
-							<span className="text-lg font-semibold -rotate-3 text-zinc-900 p-1 border border-dashed border-zinc-200">
+							<span className="text-lg font-semibold -rotate-3 text-foreground p-1 border border-dashed">
 								YourApp
 							</span>
 						</Link>
 
-						{/* Desktop Navigation */}
 						<div className="hidden md:flex items-center gap-6">
 							{navLinks.map((link) => (
 								<Link
@@ -163,8 +173,8 @@ const Navbar = () => {
 									href={link.href}
 									className={`text-sm font-medium transition-colors ${
 										isActive(link.href)
-											? "text-zinc-900"
-											: "text-zinc-600 hover:text-zinc-900"
+											? "text-foreground"
+											: "text-muted-foreground hover:text-foreground"
 									}`}
 								>
 									{link.label}
@@ -172,210 +182,130 @@ const Navbar = () => {
 							))}
 						</div>
 
-						{/* Right Side Actions */}
-						<div className="hidden md:flex items-center gap-4">
+						<div className="hidden md:flex items-center gap-2">
+							<ThemeCustomizerButton />
+							<ThemeToggle />
 							{user ? (
-								// User is logged in - show dropdown
-								<div className="relative" ref={dropdownRef}>
-									<button
-										onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-										className="flex items-center gap-2 px-3 py-2 bg-zinc-100 hover:bg-zinc-200/50 rounded-xl transition-colors"
-									>
-										{user.photoURL ? (
-											<img
-												src={user.photoURL}
-												alt={user.displayName}
-												className="w-4 h-4 rounded-full"
-											/>
-										) : (
-											<div className="w-4 h-4 rounded-full bg-zinc-300 flex items-center justify-center">
-												<User className="w-4 h-4 text-zinc-600" />
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button variant="secondary" className="gap-2">
+											<UserAvatar />
+											<span className="text-sm font-medium">
+												{user.displayName}
+											</span>
+											<ChevronDown className="w-4 h-4 text-muted-foreground" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end" className="w-64">
+										<div className="p-4 text-center">
+											<div className="flex justify-center mb-2">
+												<UserAvatar size="lg" />
 											</div>
-										)}
-										<span className="text-sm font-medium text-zinc-900">
-											{user.displayName}
-										</span>
-										<ChevronDown className="w-4 h-4 text-zinc-600" />
-									</button>
-
-									{/* Dropdown Menu */}
-									<AnimatePresence>
-										{isDropdownOpen && (
-											<motion.div
-												initial={{ opacity: 0, y: -10 }}
-												animate={{ opacity: 1, y: 0 }}
-												exit={{ opacity: 0, y: -10 }}
-												className="absolute top-full right-0 mt-2 w-64 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 overflow-hidden"
-											>
-												{/* Avatar and Email */}
-												<div className="p-4 border-b border-zinc-200 text-center">
-													{user.photoURL ? (
-														<img
-															src={user.photoURL}
-															alt={user.displayName}
-															className="w-16 h-16 rounded-full mx-auto mb-2"
-														/>
-													) : (
-														<div className="w-16 h-16 rounded-full bg-zinc-300 flex items-center justify-center mx-auto mb-2">
-															<User className="w-8 h-8 text-zinc-600" />
-														</div>
-													)}
-													<p className="text-sm font-medium text-zinc-900">
-														{user.displayName}
-													</p>
-													<p className="text-xs text-zinc-600 mt-1">
-														{user.email}
-													</p>
-												</div>
-
-												{/* Subscription Status */}
-												<div className="p-4 border-b border-zinc-200">
-													<p className="text-xs text-zinc-500 mb-1">
-														Subscription Status
-													</p>
-													{subscription.isSubscribed &&
-													subscription.status === "active" ? (
-														<p className="text-sm font-medium text-green-600">
-															Active - {subscription.planName || "Pro"}
-														</p>
-													) : (
-														<p className="text-sm text-zinc-600">
-															No active subscription
-														</p>
-													)}
-												</div>
-
-												{/* Logout Button */}
-												<button
-													onClick={handleLogout}
-													className="w-full p-4 flex items-center gap-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-												>
-													<LogOut className="w-4 h-4" />
-													Logout
-												</button>
-											</motion.div>
-										)}
-									</AnimatePresence>
-								</div>
-							) : (
-								<button
-									onClick={() => setShowLoginModal(true)}
-									className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-sm font-medium hover:bg-zinc-800 transition-colors"
-								>
-									<LogIn className="w-4 h-4" />
-									Get Started
-								</button>
-							)}
-						</div>
-
-						{/* Mobile Menu Button */}
-						<button
-							onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-							className="md:hidden p-2 text-zinc-600 hover:text-zinc-900"
-						>
-							{isMobileMenuOpen ? (
-								<X className="w-6 h-6" />
-							) : (
-								<Menu className="w-6 h-6" />
-							)}
-						</button>
-					</div>
-				</div>
-
-				{/* Mobile Menu */}
-				<AnimatePresence>
-					{isMobileMenuOpen && (
-						<motion.div
-							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: "auto" }}
-							exit={{ opacity: 0, height: 0 }}
-							className="md:hidden border-t border-zinc-200 bg-white"
-						>
-							<div className="px-4 py-4 space-y-3">
-								{navLinks.map((link) => (
-									<Link
-										key={link.href}
-										href={link.href}
-										onClick={() => setIsMobileMenuOpen(false)}
-										className={`block text-sm font-medium transition-colors ${
-											isActive(link.href)
-												? "text-zinc-900"
-												: "text-zinc-600 hover:text-zinc-900"
-										}`}
-									>
-										{link.label}
-									</Link>
-								))}
-								{user ? (
-									<div className="mt-2 space-y-3">
-										{/* User Info */}
-										<div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl">
-											{user.photoURL ? (
-												<img
-													src={user.photoURL}
-													alt={user.displayName}
-													className="w-10 h-10 rounded-full"
-												/>
-											) : (
-												<div className="w-10 h-10 rounded-full bg-zinc-300 flex items-center justify-center">
-													<User className="w-5 h-5 text-zinc-600" />
-												</div>
-											)}
-											<div className="flex-1 min-w-0">
-												<p className="text-sm font-medium text-zinc-900 truncate">
-													{user.displayName}
-												</p>
-												<p className="text-xs text-zinc-600 truncate">
-													{user.email}
-												</p>
-											</div>
+											<p className="text-sm font-medium">{user.displayName}</p>
+											<p className="text-xs text-muted-foreground mt-1">
+												{user.email}
+											</p>
 										</div>
-
-										{/* Subscription Status */}
-										<div className="p-3 bg-zinc-50 rounded-xl">
-											<p className="text-xs text-zinc-500 mb-1">
+										<DropdownMenuSeparator />
+										<div className="p-4">
+											<p className="text-xs text-muted-foreground mb-2">
 												Subscription Status
 											</p>
-											{subscription.isSubscribed &&
-											subscription.status === "active" ? (
-												<p className="text-sm font-medium text-green-600">
-													Active - {subscription.planName || "Pro"}
-												</p>
-											) : (
-												<p className="text-sm text-zinc-600">
-													No active subscription
-												</p>
-											)}
+											<SubscriptionStatus />
 										</div>
-
-										{/* Logout Button */}
-										<button
-											onClick={() => {
-												handleLogout();
-												setIsMobileMenuOpen(false);
-											}}
-											className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors"
+										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											onClick={handleLogout}
+											className="text-destructive focus:text-destructive cursor-pointer"
 										>
 											<LogOut className="w-4 h-4" />
 											Logout
-										</button>
-									</div>
-								) : (
-									<button
-										onClick={() => {
-											setShowLoginModal(true);
-											setIsMobileMenuOpen(false);
-										}}
-										className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-sm font-medium hover:bg-zinc-800 transition-colors mt-2"
-									>
-										<LogIn className="w-4 h-4" />
-										Get Started
-									</button>
-								)}
-							</div>
-						</motion.div>
-					)}
-				</AnimatePresence>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							) : (
+								<Button onClick={() => setShowLoginModal(true)}>
+									<LogIn className="w-4 h-4" />
+									Get Started
+								</Button>
+							)}
+						</div>
+
+						<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+							<SheetTrigger asChild>
+								<div className="flex items-center gap-1 md:hidden">
+									<ThemeCustomizerButton />
+									<ThemeToggle />
+									<Button variant="ghost" size="icon">
+										<Menu className="w-6 h-6" />
+									</Button>
+								</div>
+							</SheetTrigger>
+							<SheetContent side="right" className="w-[300px]">
+								<SheetHeader>
+									<SheetTitle>Menu</SheetTitle>
+								</SheetHeader>
+								<div className="mt-6 space-y-3">
+									{navLinks.map((link) => (
+										<Link
+											key={link.href}
+											href={link.href}
+											onClick={() => setIsMobileMenuOpen(false)}
+											className={`block text-sm font-medium transition-colors ${
+												isActive(link.href)
+													? "text-foreground"
+													: "text-muted-foreground hover:text-foreground"
+											}`}
+										>
+											{link.label}
+										</Link>
+									))}
+									<Separator className="my-4" />
+									{user ? (
+										<div className="space-y-3">
+											<div className="flex items-center gap-3 p-3 bg-muted rounded-xl">
+												<UserAvatar size="md" />
+												<div className="flex-1 min-w-0">
+													<p className="text-sm font-medium truncate">
+														{user.displayName}
+													</p>
+													<p className="text-xs text-muted-foreground truncate">
+														{user.email}
+													</p>
+												</div>
+											</div>
+											<div className="p-3 bg-muted rounded-xl">
+												<p className="text-xs text-muted-foreground mb-2">
+													Subscription Status
+												</p>
+												<SubscriptionStatus />
+											</div>
+											<Button
+												variant="destructive"
+												className="w-full"
+												onClick={handleLogout}
+											>
+												<LogOut className="w-4 h-4" />
+												Logout
+											</Button>
+										</div>
+									) : (
+										<Button
+											className="w-full"
+											onClick={() => {
+												setShowLoginModal(true);
+												setIsMobileMenuOpen(false);
+											}}
+										>
+											<LogIn className="w-4 h-4" />
+											Get Started
+										</Button>
+									)}
+								</div>
+							</SheetContent>
+						</Sheet>
+					</div>
+				</div>
 			</nav>
 
 			<LoginModal

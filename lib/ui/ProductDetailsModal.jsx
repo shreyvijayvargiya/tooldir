@@ -104,16 +104,16 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 						animate={{ scale: 1, opacity: 1 }}
 						exit={{ scale: 0.9, opacity: 0 }}
 						onClick={(e) => e.stopPropagation()}
-						className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
+						className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
 					>
 						{/* Header */}
-						<div className="flex items-center justify-between p-6 border-b border-zinc-200">
-							<h3 className="text-xl font-bold text-zinc-900">
+						<div className="flex items-center justify-between p-6 border-b border">
+							<h3 className="text-xl font-bold text-foreground">
 								Product Details
 							</h3>
 							<button
 								onClick={onClose}
-								className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors rounded-xl hover:bg-zinc-100"
+								className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors rounded-xl hover:bg-muted"
 							>
 								<X className="w-5 h-5" />
 							</button>
@@ -124,30 +124,30 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 							<div className="space-y-6">
 								{/* Product Name */}
 								<div>
-									<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+									<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 										Product Name
 									</label>
-									<p className="text-lg font-semibold text-zinc-900">
+									<p className="text-lg font-semibold text-foreground">
 										{product.name || "Unnamed Product"}
 									</p>
 								</div>
 
 								{/* Product ID */}
 								<div>
-									<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+									<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 										Product ID
 									</label>
-									<p className="text-sm font-mono text-zinc-700 bg-zinc-50 px-3 py-2 rounded-xl">
+									<p className="text-sm font-mono text-muted-foreground bg-muted px-3 py-2 rounded-xl">
 										{product.id || ""}
 									</p>
 								</div>
 
 								{/* Description */}
 								<div>
-									<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+									<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 										Description
 									</label>
-									<p className="text-sm text-zinc-700 whitespace-pre-wrap">
+									<p className="text-sm text-muted-foreground whitespace-pre-wrap">
 										{product.description || "No description provided"}
 									</p>
 								</div>
@@ -155,14 +155,14 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 								{/* Banner Images */}
 								{bannerImages.length > 0 && (
 									<div>
-										<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+										<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 											Banner Images {bannerImages.length > 1 && `(${bannerImages.length})`}
 										</label>
 										<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
 											{bannerImages.map((imgUrl, index) => (
 												<div
 													key={index}
-													className="relative rounded-xl overflow-hidden border border-zinc-200 bg-zinc-100 aspect-video"
+													className="relative rounded-xl overflow-hidden border border bg-muted aspect-video"
 												>
 													<img
 														src={imgUrl}
@@ -180,8 +180,8 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 														}}
 													/>
 													{/* Fallback icon - hidden by default */}
-													<div className="absolute inset-0 hidden items-center justify-center bg-zinc-100 error-placeholder">
-														<ImageIcon className="w-6 h-6 text-zinc-400" />
+													<div className="absolute inset-0 hidden items-center justify-center bg-muted error-placeholder">
+														<ImageIcon className="w-6 h-6 text-muted-foreground" />
 													</div>
 												</div>
 											))}
@@ -192,35 +192,35 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 								{/* Price Information */}
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+										<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 											Price Type
 										</label>
-										<p className="text-sm font-medium text-zinc-900">
+										<p className="text-sm font-medium text-foreground">
 											{getPriceType(product)}
 										</p>
 									</div>
 									<div>
-										<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+										<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 											Price
 										</label>
-										<p className="text-sm font-medium text-zinc-900">
+										<p className="text-sm font-medium text-foreground">
 											{formatPrice(product)}
 										</p>
 									</div>
 									<div>
-										<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+										<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 											Billing Interval
 										</label>
-										<p className="text-sm font-medium text-zinc-900">
+										<p className="text-sm font-medium text-foreground">
 											{getBillingInterval(product)}
 										</p>
 									</div>
 									{product.prices && product.prices[0] && (
 										<div>
-											<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+											<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 												Currency
 											</label>
-											<p className="text-sm font-medium text-zinc-900">
+											<p className="text-sm font-medium text-foreground">
 												{(
 													product.prices[0].price_currency ||
 													product.prices[0].currency ||
@@ -233,7 +233,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 
 								{/* Checkout Link */}
 								<div>
-									<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+									<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 										Checkout Link
 									</label>
 									{product.checkoutLink ? (
@@ -247,7 +247,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 											<ExternalLink className="w-4 h-4 flex-shrink-0" />
 										</a>
 									) : (
-										<p className="text-sm text-zinc-400">
+										<p className="text-sm text-muted-foreground">
 											No checkout link available
 										</p>
 									)}
@@ -255,10 +255,10 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 
 								{/* Created Date */}
 								<div>
-									<label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
+									<label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
 										Created At
 									</label>
-									<p className="text-sm text-zinc-700">
+									<p className="text-sm text-muted-foreground">
 										{formatDate(
 											product.createdAt?.toDate
 												? product.createdAt.toDate()
@@ -270,10 +270,10 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
 						</div>
 
 						{/* Footer */}
-						<div className="flex items-center justify-end gap-3 p-6 border-t border-zinc-200">
+						<div className="flex items-center justify-end gap-3 p-6 border-t border">
 							<button
 								onClick={onClose}
-								className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
+								className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-xl transition-colors"
 							>
 								Close
 							</button>

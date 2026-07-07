@@ -34,7 +34,10 @@ import {
 } from "../../../lib/api/cronJobs";
 import { getBlogById } from "../../../lib/api/blog";
 import { getEmailById } from "../../../lib/api/emails";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const CronJobsTab = ({ queryClient }) => {
 	const [selectedJob, setSelectedJob] = useState(null);
@@ -305,10 +308,10 @@ const CronJobsTab = ({ queryClient }) => {
 	return (
 		<div className="space-y-2">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
+			<div className="flex items-center justify-between border-b py-2 px-4">
 				<div>
-					<h1 className="text-lg text-zinc-900">CRON Jobs</h1>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h1 className="text-lg text-foreground">CRON Jobs</h1>
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage scheduled blog posts and email campaigns. Jobs execute
 						automatically at their scheduled time via Vercel CRON (every 5
 						minutes).
@@ -318,7 +321,7 @@ const CronJobsTab = ({ queryClient }) => {
 					<button
 						onClick={() => executeCronMutation.mutate()}
 						disabled={executeCronMutation.isPending || dueJobsCount === 0}
-						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-primary-foreground rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						title={
 							dueJobsCount === 0
 								? "No due jobs to execute. Jobs will run automatically at their scheduled time."
@@ -334,31 +337,27 @@ const CronJobsTab = ({ queryClient }) => {
 							? "Running..."
 							: `Run Due Jobs (${dueJobsCount})`}
 					</button>
-					<button
-						onClick={() => syncMutation.mutate()}
-						disabled={syncMutation.isPending}
-						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors disabled:opacity-50"
-					>
+					<Button onClick={() => syncMutation.mutate()} disabled={syncMutation.isPending}  className="rounded-xl gap-2 disabled:opacity-50">
 						<RefreshCw
 							className={`w-4 h-4 ${
 								syncMutation.isPending ? "animate-spin" : ""
 							}`}
 						/>
 						Sync Scheduled Items
-					</button>
+					</Button>
 				</div>
 			</div>
 
 			{/* Search and Filter */}
 			<div className="flex items-center justify-between gap-4 px-4">
 				<div className="relative flex-1 max-w-md">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 					<input
 						type="text"
 						placeholder="Search CRON jobs by title, subject, type, or status..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+						className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 					/>
 				</div>
 				<div className="flex items-center gap-2">
@@ -382,10 +381,10 @@ const CronJobsTab = ({ queryClient }) => {
 			{/* Table */}
 			<div className="px-4">
 				{isLoading ? (
-					<div className="text-center py-8 text-zinc-500">Loading...</div>
+					<div className="text-center py-8 text-muted-foreground">Loading...</div>
 				) : cronJobs.length === 0 ? (
-					<div className="text-center py-8 text-zinc-500">
-						<Clock className="w-12 h-12 text-zinc-400 mx-auto mb-2" />
+					<div className="text-center py-8 text-muted-foreground">
+						<Clock className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
 						<p>No CRON jobs found</p>
 						<p className="text-sm mt-1">
 							Click "Sync Scheduled Items" to import scheduled blogs and emails
@@ -433,7 +432,7 @@ const CronJobsTab = ({ queryClient }) => {
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-2">
-												<Calendar className="w-4 h-4 text-zinc-500" />
+												<Calendar className="w-4 h-4 text-muted-foreground" />
 												<span>{formatDate(job.scheduledDate)}</span>
 											</div>
 										</TableCell>
@@ -442,23 +441,23 @@ const CronJobsTab = ({ queryClient }) => {
 											<div className="flex items-center gap-2">
 												<button
 													onClick={() => handleViewDetails(job)}
-													className="p-1.5 rounded-xl hover:bg-zinc-100 transition-colors"
+													className="p-1.5 rounded-xl hover:bg-muted transition-colors"
 													title="View Details"
 												>
-													<Eye className="w-4 h-4 text-zinc-600" />
+													<Eye className="w-4 h-4 text-muted-foreground" />
 												</button>
 												{job.status === "scheduled" && (
 													<>
 														<button
 															onClick={() => handleEditSchedule(job)}
-															className="p-1.5 rounded-xl hover:bg-zinc-100 transition-colors"
+															className="p-1.5 rounded-xl hover:bg-muted transition-colors"
 															title="Edit Schedule"
 														>
 															<Edit className="w-4 h-4 text-blue-600" />
 														</button>
 														<button
 															onClick={() => handleCancelJob(job)}
-															className="p-1.5 rounded-xl hover:bg-zinc-100 transition-colors"
+															className="p-1.5 rounded-xl hover:bg-muted transition-colors"
 															title="Cancel Job"
 														>
 															<X className="w-4 h-4 text-red-600" />
@@ -468,7 +467,7 @@ const CronJobsTab = ({ queryClient }) => {
 												{job.status === "completed" && (
 													<button
 														onClick={() => handleDeleteJob(job)}
-														className="p-1.5 rounded-xl hover:bg-zinc-100 transition-colors"
+														className="p-1.5 rounded-xl hover:bg-muted transition-colors"
 														title="Delete Job"
 													>
 														<Trash2 className="w-4 h-4 text-red-600" />
@@ -490,10 +489,10 @@ const CronJobsTab = ({ queryClient }) => {
 					<motion.div
 						initial={{ opacity: 0, scale: 0.95 }}
 						animate={{ opacity: 1, scale: 1 }}
-						className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+						className="bg-card rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
 					>
 						<div className="flex items-center justify-between mb-4">
-							<h2 className="text-2xl font-bold text-zinc-900">
+							<h2 className="text-2xl font-bold text-foreground">
 								CRON Job Details
 							</h2>
 							<button
@@ -501,7 +500,7 @@ const CronJobsTab = ({ queryClient }) => {
 									setShowDetailsModal(false);
 									setSelectedJob(null);
 								}}
-								className="p-2 rounded-xl hover:bg-zinc-100 transition-colors"
+								className="p-2 rounded-xl hover:bg-muted transition-colors"
 							>
 								<X className="w-5 h-5" />
 							</button>
@@ -509,57 +508,57 @@ const CronJobsTab = ({ queryClient }) => {
 
 						<div className="space-y-4">
 							<div>
-								<label className="text-sm font-medium text-zinc-600">
+								<label className="text-sm font-medium text-muted-foreground">
 									Type
 								</label>
-								<p className="text-base text-zinc-900 capitalize">
+								<p className="text-base text-foreground capitalize">
 									{selectedJob.type}
 								</p>
 							</div>
 							<div>
-								<label className="text-sm font-medium text-zinc-600">
+								<label className="text-sm font-medium text-muted-foreground">
 									Scheduled Date
 								</label>
-								<p className="text-base text-zinc-900">
+								<p className="text-base text-foreground">
 									{formatDate(selectedJob.scheduledDate)}
 								</p>
 							</div>
 							<div>
-								<label className="text-sm font-medium text-zinc-600">
+								<label className="text-sm font-medium text-muted-foreground">
 									Status
 								</label>
 								<div className="mt-1">{getStatusBadge(selectedJob.status)}</div>
 							</div>
 
 							{jobDetails && (
-								<div className="border-t border-zinc-200 pt-4">
-									<h3 className="text-lg font-semibold text-zinc-900 mb-3">
+								<div className="border-t pt-4">
+									<h3 className="text-lg font-semibold text-foreground mb-3">
 										{selectedJob.type === "blog" ? "Blog" : "Email"} Details
 									</h3>
 									{selectedJob.type === "blog" ? (
 										<div className="space-y-3">
 											<div>
-												<label className="text-sm font-medium text-zinc-600">
+												<label className="text-sm font-medium text-muted-foreground">
 													Title
 												</label>
-												<p className="text-base text-zinc-900">
+												<p className="text-base text-foreground">
 													{jobDetails.title}
 												</p>
 											</div>
 											<div>
-												<label className="text-sm font-medium text-zinc-600">
+												<label className="text-sm font-medium text-muted-foreground">
 													Slug
 												</label>
-												<p className="text-base text-zinc-900">
+												<p className="text-base text-foreground">
 													{jobDetails.slug}
 												</p>
 											</div>
 											<div>
-												<label className="text-sm font-medium text-zinc-600">
+												<label className="text-sm font-medium text-muted-foreground">
 													Content Preview
 												</label>
 												<div
-													className="text-sm text-zinc-700 mt-1 max-h-40 overflow-y-auto border border-zinc-200 rounded-xl p-3"
+													className="text-sm text-muted-foreground mt-1 max-h-40 overflow-y-auto border rounded-xl p-3"
 													dangerouslySetInnerHTML={{
 														__html: jobDetails.content?.substring(0, 500) || "",
 													}}
@@ -569,19 +568,19 @@ const CronJobsTab = ({ queryClient }) => {
 									) : (
 										<div className="space-y-3">
 											<div>
-												<label className="text-sm font-medium text-zinc-600">
+												<label className="text-sm font-medium text-muted-foreground">
 													Subject
 												</label>
-												<p className="text-base text-zinc-900">
+												<p className="text-base text-foreground">
 													{jobDetails.subject}
 												</p>
 											</div>
 											<div>
-												<label className="text-sm font-medium text-zinc-600">
+												<label className="text-sm font-medium text-muted-foreground">
 													Content Preview
 												</label>
 												<div
-													className="text-sm text-zinc-700 mt-1 max-h-40 overflow-y-auto border border-zinc-200 rounded-xl p-3"
+													className="text-sm text-muted-foreground mt-1 max-h-40 overflow-y-auto border rounded-xl p-3"
 													dangerouslySetInnerHTML={{
 														__html: jobDetails.content?.substring(0, 500) || "",
 													}}
@@ -602,10 +601,10 @@ const CronJobsTab = ({ queryClient }) => {
 					<motion.div
 						initial={{ opacity: 0, scale: 0.95 }}
 						animate={{ opacity: 1, scale: 1 }}
-						className="bg-white rounded-2xl p-6 max-w-md w-full"
+						className="bg-card rounded-2xl p-6 max-w-md w-full"
 					>
 						<div className="flex items-center justify-between mb-4">
-							<h2 className="text-2xl font-bold text-zinc-900">
+							<h2 className="text-2xl font-bold text-foreground">
 								Edit Schedule
 							</h2>
 							<button
@@ -613,7 +612,7 @@ const CronJobsTab = ({ queryClient }) => {
 									setShowEditModal(false);
 									setSelectedJob(null);
 								}}
-								className="p-2 rounded-xl hover:bg-zinc-100 transition-colors"
+								className="p-2 rounded-xl hover:bg-muted transition-colors"
 							>
 								<X className="w-5 h-5" />
 							</button>
@@ -621,14 +620,14 @@ const CronJobsTab = ({ queryClient }) => {
 
 						<div className="space-y-4">
 							<div>
-								<label className="block text-sm font-medium text-zinc-700 mb-2">
+								<label className="block text-sm font-medium text-muted-foreground mb-2">
 									New Scheduled Date & Time
 								</label>
 								<input
 									type="datetime-local"
 									value={editScheduledDate}
 									onChange={(e) => setEditScheduledDate(e.target.value)}
-									className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-100 focus:border-transparent"
+									className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:border-transparent"
 								/>
 							</div>
 
@@ -638,17 +637,13 @@ const CronJobsTab = ({ queryClient }) => {
 										setShowEditModal(false);
 										setSelectedJob(null);
 									}}
-									className="flex-1 px-4 py-2 text-sm font-medium bg-zinc-100 text-zinc-900 rounded-xl hover:bg-zinc-200 transition-colors"
+									className="flex-1 px-4 py-2 text-sm font-medium bg-muted text-foreground rounded-xl hover:bg-muted transition-colors"
 								>
 									Cancel
 								</button>
-								<button
-									onClick={handleSaveSchedule}
-									disabled={updateScheduleMutation.isPending}
-									className="flex-1 px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors disabled:opacity-50"
-								>
+								<Button onClick={handleSaveSchedule} disabled={updateScheduleMutation.isPending}  className="flex-1 rounded-xl disabled:opacity-50">
 									{updateScheduleMutation.isPending ? "Saving..." : "Save"}
-								</button>
+								</Button>
 							</div>
 						</div>
 					</motion.div>

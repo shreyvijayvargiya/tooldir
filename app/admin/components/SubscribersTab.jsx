@@ -26,7 +26,10 @@ import {
 import { getCachedUserRole, getUserRole } from "../../../lib/utils/getUserRole";
 import { getCurrentUserEmail } from "../../../lib/utils/getCurrentUserEmail";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const SubscribersTab = () => {
 	const queryClient = useQueryClient();
@@ -158,12 +161,12 @@ const SubscribersTab = () => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -250,42 +253,40 @@ const SubscribersTab = () => {
 	return (
 		<div>
 			<div className="flex justify-between items-center mb-4">
-				<h2 className="text-xl font-semibold text-zinc-900">
+				<h2 className="text-xl font-semibold text-foreground">
 					Subscribers ({activeSubscribers} active)
 				</h2>
 				<div className="flex items-center gap-3">
 					{hasPermission(userRole, "subscribers", "create") && (
-						<motion.button
-							whileHover={{ scale: 1.02 }}
-							whileTap={{ scale: 0.98 }}
+						<Button
 							onClick={() => setShowAddModal(true)}
-							className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+							className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
 						>
 							<Plus className="w-3.5 h-3.5" />
 							Add Subscriber
-						</motion.button>
+						</Button>
 					)}
 				</div>
 			</div>
 
 			{/* Search */}
 			<div className="relative mb-4">
-				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					type="text"
 					placeholder="Search subscribers by email, name, or status..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+					className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 				/>
 			</div>
 
-			<div className="overflow-x-auto border border-zinc-200 rounded-xl">
+			<div className="overflow-x-auto border rounded-xl">
 				<table className="w-full">
 					<thead>
-						<tr className="border-b border-zinc-200 bg-zinc-50">
+						<tr className="border-b bg-muted">
 							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-l border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								className="text-left py-3 px-4 font-semibold text-muted-foreground border-l border-r cursor-pointer hover:bg-muted transition-colors"
 								onClick={() => handleSort("email")}
 							>
 								<div className="flex items-center">
@@ -294,7 +295,7 @@ const SubscribersTab = () => {
 								</div>
 							</th>
 							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								className="text-left py-3 px-4 font-semibold text-muted-foreground border-r cursor-pointer hover:bg-muted transition-colors"
 								onClick={() => handleSort("name")}
 							>
 								<div className="flex items-center">
@@ -303,7 +304,7 @@ const SubscribersTab = () => {
 								</div>
 							</th>
 							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								className="text-left py-3 px-4 font-semibold text-muted-foreground border-r cursor-pointer hover:bg-muted transition-colors"
 								onClick={() => handleSort("status")}
 							>
 								<div className="flex items-center">
@@ -312,7 +313,7 @@ const SubscribersTab = () => {
 								</div>
 							</th>
 							<th
-								className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200 cursor-pointer hover:bg-zinc-100 transition-colors"
+								className="text-left py-3 px-4 font-semibold text-muted-foreground border-r cursor-pointer hover:bg-muted transition-colors"
 								onClick={() => handleSort("subscribed_at")}
 							>
 								<div className="flex items-center">
@@ -320,7 +321,7 @@ const SubscribersTab = () => {
 									{getSortIcon("subscribed_at")}
 								</div>
 							</th>
-							<th className="text-left py-3 px-4 font-semibold text-zinc-700 border-r border-zinc-200">
+							<th className="text-left py-3 px-4 font-semibold text-muted-foreground border-r border">
 								Actions
 							</th>
 						</tr>
@@ -330,13 +331,13 @@ const SubscribersTab = () => {
 							<TableSkeleton rows={5} columns={5} />
 						) : subscribersError ? (
 							<tr>
-								<td colSpan={5} className="py-8 text-center text-zinc-500">
+								<td colSpan={5} className="py-8 text-center text-muted-foreground">
 									Error loading subscribers. Please try again.
 								</td>
 							</tr>
 						) : sortedSubscribers.length === 0 ? (
 							<tr>
-								<td colSpan={5} className="py-8 text-center text-zinc-500">
+								<td colSpan={5} className="py-8 text-center text-muted-foreground">
 									{searchQuery
 										? "No subscribers found matching your search."
 										: "No subscribers found."}
@@ -349,18 +350,18 @@ const SubscribersTab = () => {
 									className={`${
 										index === sortedSubscribers.length - 1
 											? ""
-											: "border-b border-zinc-200"
-									} hover:bg-zinc-50 transition-colors`}
+											: "border-b border"
+									} hover:bg-muted transition-colors`}
 								>
-									<td className="py-3 px-4 border-l border-r border-zinc-200">
-										<div className="font-medium text-zinc-900">
+									<td className="py-3 px-4 border-l border-r border">
+										<div className="font-medium text-foreground">
 											{subscriber.email}
 										</div>
 									</td>
-									<td className="py-3 px-4 text-zinc-600 border-r border-zinc-200">
+									<td className="py-3 px-4 text-muted-foreground border-r border">
 										{subscriber.name}
 									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
+									<td className="py-3 px-4 border-r border">
 										<span
 											className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
 												subscriber.status === "active"
@@ -371,26 +372,24 @@ const SubscribersTab = () => {
 											{subscriber.status}
 										</span>
 									</td>
-									<td className="py-3 px-4 text-sm text-zinc-600 border-r border-zinc-200">
+									<td className="py-3 px-4 text-sm text-muted-foreground border-r border">
 										{formatDate(subscriber.subscribed_at)}
 									</td>
-									<td className="py-3 px-4 border-r border-zinc-200">
+									<td className="py-3 px-4 border-r border">
 										<div className="flex items-center gap-2">
 											{allowedActions.map((action) => {
 												if (action === "delete") {
 													return (
-														<motion.button
+														<Button
 															key="delete"
-															whileHover={{ scale: 1.05 }}
-															whileTap={{ scale: 0.95 }}
 															onClick={() =>
 																handleDeleteSubscriber(subscriber.id)
 															}
-															className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+															className="p-2 text-muted-foreground hover:text-red-600 transition-colors"
 															title="Delete"
 														>
 															<Trash2 className="w-4 h-4" />
-														</motion.button>
+														</Button>
 													);
 												}
 												return null;
@@ -417,35 +416,27 @@ const SubscribersTab = () => {
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
 						>
 							{/* Modal Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-								<h3 className="text-lg font-bold text-zinc-900">
+							<div className="flex items-center justify-between p-4 border-b border">
+								<h3 className="text-lg font-bold text-foreground">
 									Add Subscriber
 								</h3>
 								<div className="flex items-center gap-3">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										onClick={handleAddSubscriber}
-										disabled={addSubscriberMutation.isPending}
-										className="flex items-center gap-2 px-4 py-1.5 text-sm bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-									>
+									<Button onClick={handleAddSubscriber} disabled={addSubscriberMutation.isPending} size="sm" className="rounded-xl gap-2 disabled:opacity-50">
 										<Save className="w-4 h-4" />
 										Add
-									</motion.button>
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+									</Button>
+									<Button
 										onClick={handleCloseModal}
-										className="px-4 py-1.5 text-sm text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium transition-colors"
+										className="px-4 py-1.5 text-sm text-muted-foreground bg-muted hover:bg-muted rounded-xl font-medium transition-colors"
 									>
 										Cancel
-									</motion.button>
+									</Button>
 									<button
 										onClick={handleCloseModal}
-										className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+										className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 									>
 										<X className="w-4 h-4" />
 									</button>
@@ -455,7 +446,7 @@ const SubscribersTab = () => {
 							{/* Modal Body */}
 							<div className="p-4 space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Email *
 									</label>
 									<input
@@ -463,13 +454,13 @@ const SubscribersTab = () => {
 										name="email"
 										value={subscriberForm.email}
 										onChange={handleFormChange}
-										className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+										className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 										placeholder="subscriber@example.com"
 										required
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Name (Optional)
 									</label>
 									<input
@@ -477,7 +468,7 @@ const SubscribersTab = () => {
 										name="name"
 										value={subscriberForm.name}
 										onChange={handleFormChange}
-										className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+										className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 										placeholder="Subscriber name"
 									/>
 								</div>

@@ -46,8 +46,11 @@ import {
 	useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { ThemeCustomizerButton } from "@/components/theme/ThemeCustomizer";
 
 const ICON_MAP = {
 	Home,
@@ -160,13 +163,13 @@ const SortableNavItem = ({ item, activeTab, onSelect }) => {
 			ref={setNodeRef}
 			style={style}
 			className={`group relative flex items-center rounded-xl transition-all ${
-				isDragging ? "bg-zinc-50 ring-2 ring-zinc-200 shadow-sm z-50" : ""
+				isDragging ? "bg-muted ring-2 ring-border shadow-sm z-50" : ""
 			}`}
 		>
 			<button
 				{...attributes}
 				{...listeners}
-				className="py-1 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 transition-opacity"
+				className="py-1 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-opacity"
 			>
 				<GripVertical className="w-3 h-3" />
 			</button>
@@ -174,8 +177,8 @@ const SortableNavItem = ({ item, activeTab, onSelect }) => {
 				onClick={() => onSelect(item.id)}
 				className={`flex-1 px-2 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
 					activeTab === item.id
-						? "bg-zinc-100 text-zinc-900"
-						: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+						? "bg-muted text-foreground"
+						: "text-muted-foreground hover:bg-muted hover:text-foreground"
 				}`}
 			>
 				<Icon className="w-3.5 h-3.5" />
@@ -211,18 +214,18 @@ const SortableCategory = ({
 			style={style}
 			className={`pt-2 group/category rounded-xl transition-all ${
 				isDragging
-					? "bg-white ring-2 ring-zinc-100 shadow-lg z-50 px-1 pb-2"
+					? "bg-card ring-2 ring-border shadow-lg z-50 px-1 pb-2"
 					: ""
 			}`}
 		>
 			<div className="flex items-center justify-between mb-1">
-				<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+				<p className="px-2.5 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
 					{category.title}
 				</p>
 				<button
 					{...attributes}
 					{...listeners}
-					className="p-1 opacity-0 group-hover/category:opacity-100 cursor-grab active:cursor-grabbing text-zinc-400 hover:text-zinc-600 transition-opacity"
+					className="p-1 opacity-0 group-hover/category:opacity-100 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-opacity"
 				>
 					<GripVertical className="w-3 h-3" />
 				</button>
@@ -439,43 +442,46 @@ const Sidebar = ({
 			<div className="flex-1 space-y-2 hidescrollbar overflow-y-auto">
 				{/* Project Dropdown / Logo */}
 				<div className="relative project-dropdown mb-2">
+					<div className="flex items-center gap-1 mb-2">
+						<ThemeToggle />
+						<ThemeCustomizerButton />
+					</div>
 					<motion.button
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
-						className="w-full flex items-center gap-2 px-3 py-2 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
+						className="w-full flex items-center gap-2 px-3 py-2 bg-card border rounded-xl hover:bg-muted transition-colors"
 					>
 						<RocketIcon className="w-3.5 h-3.5" />
 						<span className="text-xs font-medium">SAAS Starter Admin</span>
 						{isMobile && (
 							<ChevronDown
-								className={`w-4 h-4 ml-auto text-zinc-400 transition-transform ${
+								className={`w-4 h-4 ml-auto text-muted-foreground transition-transform ${
 									isProjectDropdownOpen ? "rotate-180" : ""
 								}`}
 							/>
 						)}
 					</motion.button>
-
-					
 				</div>
 
 				{/* Search Button */}
-				<button
+				<Button
+					variant="outline"
 					onClick={() => {
 						setShowSearchModal(true);
 						if (isMobile) setIsSidebarOpen(false);
 					}}
-					className="w-full px-2 py-1 text-sm font-medium transition-colors rounded-xl flex items-center gap-2 bg-white hover:bg-zinc-100 text-zinc-700 hover:text-zinc-900 border border-zinc-300 mb-2"
+					className="w-full justify-start gap-2 rounded-xl mb-2 h-auto py-1.5 px-2 text-sm font-medium"
 				>
 					<Search className="w-3.5 h-3.5" />
 					<div className="flex items-center gap-2 flex-1 justify-between">
 						<p>Search</p>
 						{!isMobile && (
-							<i className="text-[9px] mt-0.5 text-zinc-400 whitespace-nowrap">
+							<i className="text-[9px] mt-0.5 text-muted-foreground whitespace-nowrap">
 								CMD + K
 							</i>
 						)}
 					</div>
-				</button>
+				</Button>
 
 				<DndContext
 					sensors={sensors}
@@ -503,15 +509,15 @@ const Sidebar = ({
 					<DragOverlay zoom={1.05}>
 						{activeId ? (
 							isCategory(activeId) ? (
-								<div className="bg-white ring-2 ring-zinc-200 shadow-2xl rounded-xl p-2 opacity-90">
-									<p className="px-2.5 py-1 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+								<div className="bg-card ring-2 ring-border shadow-2xl rounded-xl p-2 opacity-90">
+									<p className="px-2.5 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
 										{activeItem.title}
 									</p>
 									<div className="space-y-1">
 										{activeItem.items.map((item) => (
 											<div
 												key={item.id}
-												className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-zinc-600 bg-zinc-50 rounded-xl border border-zinc-100 italic opacity-50"
+												className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-muted-foreground bg-muted rounded-xl border italic opacity-50"
 											>
 												{item.label}
 											</div>
@@ -519,7 +525,7 @@ const Sidebar = ({
 									</div>
 								</div>
 							) : (
-								<div className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-zinc-900 bg-white rounded-xl shadow-xl ring-2 ring-zinc-200 border border-zinc-100 min-w-[150px]">
+								<div className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-foreground bg-card rounded-xl shadow-xl ring-2 ring-border border min-w-[150px]">
 									{ICON_MAP[activeItem.icon] &&
 										React.createElement(ICON_MAP[activeItem.icon], {
 											className: "w-3.5 h-3.5",
@@ -533,38 +539,40 @@ const Sidebar = ({
 			</div>
 
 			{/* Footer Section */}
-			<div className="mt-auto pt-4 space-y-2 border-t border-zinc-100">
+			<div className="mt-auto pt-4 space-y-2 border-t">
 				<a
-					className="flex gap-2 items-center px-2 py-1.5 cursor-pointer text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+					className="flex gap-2 items-center px-2 py-1.5 cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
 					href="/docs"
 					target="_blank"
 				>
 					<ExternalLink className="w-3 h-3" /> Read Docs
 				</a>
-				<button
+				<Button
+					variant="secondary"
 					onClick={() => setShowLoginModal(true)}
-					className="w-full px-2.5 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 bg-zinc-100 hover:bg-zinc-200 text-black"
+					className="w-full justify-start gap-2 rounded-xl h-auto py-1.5 px-2.5 text-xs font-medium"
 				>
 					<LogIn className="w-3.5 h-3.5" />
 					<span className="truncate flex-1 text-left">
 						{user ? user.displayName || "Logged In" : "Login"}
 					</span>
-				</button>
+				</Button>
 
-				<div className="p-3 bg-white border border-zinc-200 rounded-xl shadow-sm">
-					<p className="font-bold text-zinc-900 text-sm">Buildsaas PRO</p>
-					<p className="text-[10px] text-zinc-500 mt-1 mb-2 leading-relaxed">
+				<div className="p-3 bg-card border rounded-xl shadow-sm">
+					<p className="font-bold text-foreground text-sm">Buildsaas PRO</p>
+					<p className="text-[10px] text-muted-foreground mt-1 mb-2 leading-relaxed">
 						Build SAAS applications 10x Faster. The complete boilerplate for
 						developers.
 					</p>
-					<a
-						className="block text-center bg-zinc-900 text-white text-[10px] py-1.5 rounded-xl font-medium hover:bg-zinc-800 transition-colors"
-						target="_blank"
-						rel="noopener noreferrer"
-						href="https://buy.polar.sh/polar_cl_4DKKA9Ohkz60mo6VtK0VetQLUkkS5lWnjpeRv4Y9rPK"
-					>
-						Get PRO Access
-					</a>
+					<Button asChild size="sm" className="w-full rounded-xl text-[10px] h-auto py-1.5">
+						<a
+							target="_blank"
+							rel="noopener noreferrer"
+							href="https://buy.polar.sh/polar_cl_4DKKA9Ohkz60mo6VtK0VetQLUkkS5lWnjpeRv4Y9rPK"
+						>
+							Get PRO Access
+						</a>
+					</Button>
 				</div>
 			</div>
 		</div>
@@ -585,7 +593,7 @@ const Sidebar = ({
 						animate={{ x: 0 }}
 						exit={{ x: -280 }}
 						transition={{ type: "spring", damping: 25, stiffness: 200 }}
-						className="fixed md:hidden inset-y-0 left-0 top-0 w-64 bg-white border-r border-zinc-200 z-50 overflow-hidden"
+						className="fixed md:hidden inset-y-0 left-0 top-0 w-64 bg-background border-r z-50 overflow-hidden"
 					>
 						{sidebarContent(true)}
 					</motion.aside>

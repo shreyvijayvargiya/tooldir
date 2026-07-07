@@ -49,8 +49,11 @@ import {
 	addAssigneeToTask,
 } from "../../../lib/api/tasks";
 import { getAllTeamMembers } from "../../../lib/api/teams";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Sortable Task Card Component
 const SortableTaskCard = ({
@@ -116,7 +119,7 @@ const SortableTaskCard = ({
 		<div
 			ref={setNodeRef}
 			style={style}
-			className="bg-white border border-zinc-200 rounded-xl p-4 hover:shadow-lg transition-shadow"
+			className="bg-card border rounded-xl p-4 hover:shadow-lg transition-shadow"
 		>
 			{/* Type Badge */}
 			<div className="flex items-center justify-between mb-2">
@@ -131,42 +134,38 @@ const SortableTaskCard = ({
 					<div
 						{...attributes}
 						{...listeners}
-						className="p-1 text-zinc-400 hover:text-zinc-600 rounded-xl hover:bg-zinc-100 cursor-grab active:cursor-grabbing"
+						className="p-1 text-muted-foreground hover:text-muted-foreground rounded-xl hover:bg-muted cursor-grab active:cursor-grabbing"
 					>
 						<GripVertical className="w-3 h-3" />
 					</div>
-					<motion.button
-						whileHover={{ scale: 1.1 }}
-						whileTap={{ scale: 0.9 }}
+					<Button
 						onClick={() => onEdit(task)}
-						className="p-1 text-zinc-400 hover:text-zinc-600 rounded-xl hover:bg-zinc-100"
+						className="p-1 text-muted-foreground hover:text-muted-foreground rounded-xl hover:bg-muted"
 					>
 						<Edit className="w-3 h-3" />
-					</motion.button>
-					<motion.button
-						whileHover={{ scale: 1.1 }}
-						whileTap={{ scale: 0.9 }}
+					</Button>
+					<Button
 						onClick={() => onDelete(task.id)}
-						className="p-1 text-zinc-400 hover:text-red-600 rounded-xl hover:bg-red-50"
+						className="p-1 text-muted-foreground hover:text-red-600 rounded-xl hover:bg-red-50"
 					>
 						<Trash2 className="w-3 h-3" />
-					</motion.button>
+					</Button>
 				</div>
 			</div>
 
 			{/* Title */}
-			<h4 className="font-semibold text-zinc-900 mb-1">{task.title}</h4>
+			<h4 className="font-semibold text-foreground mb-1">{task.title}</h4>
 
 			{/* Description */}
 			{task.description && (
-				<p className="text-sm text-zinc-600 mb-3 line-clamp-2">
+				<p className="text-sm text-muted-foreground mb-3 line-clamp-2">
 					{task.description}
 				</p>
 			)}
 
 			{/* Category */}
 			{task.category && (
-				<p className="text-xs text-zinc-500 mb-3">{task.category}</p>
+				<p className="text-xs text-muted-foreground mb-3">{task.category}</p>
 			)}
 
 			{/* Assignees */}
@@ -175,21 +174,19 @@ const SortableTaskCard = ({
 					{task.assignees?.map((assignee, idx) => (
 						<div
 							key={idx}
-							className="w-6 h-6 rounded-full bg-zinc-200 border-2 border-white flex items-center justify-center text-xs font-medium text-zinc-700"
+							className="w-6 h-6 rounded-full bg-muted border-2 border-white flex items-center justify-center text-xs font-medium text-muted-foreground"
 							title={assignee}
 						>
 							{getAssigneeInitials(assignee)}
 						</div>
 					))}
 				</div>
-				<motion.button
-					whileHover={{ scale: 1.1 }}
-					whileTap={{ scale: 0.9 }}
+				<Button
 					onClick={() => onAddAssignee(task.id)}
-					className="w-6 h-6 rounded-full bg-zinc-100 border-2 border-dashed border-zinc-300 flex items-center justify-center text-xs font-medium text-zinc-500 hover:bg-zinc-200"
+					className="w-6 h-6 rounded-full bg-muted border-2 border-dashed flex items-center justify-center text-xs font-medium text-muted-foreground hover:bg-muted"
 				>
 					<Plus className="w-3 h-3" />
-				</motion.button>
+				</Button>
 			</div>
 
 			{/* Priority and Progress */}
@@ -202,8 +199,8 @@ const SortableTaskCard = ({
 					{task.priority}
 				</span>
 				<div className="flex items-center gap-2">
-					<span className="text-xs text-zinc-600">{task.progress || 0}%</span>
-					<div className="w-8 h-8 rounded-full border-2 border-zinc-200 flex items-center justify-center relative">
+					<span className="text-xs text-muted-foreground">{task.progress || 0}%</span>
+					<div className="w-8 h-8 rounded-full border-2 flex items-center justify-center relative">
 						{task.status === "done" ? (
 							<div className="w-6 h-6 rounded-full bg-green-500" />
 						) : (
@@ -215,7 +212,7 @@ const SortableTaskCard = ({
 									stroke="currentColor"
 									strokeWidth="2"
 									fill="none"
-									className="text-zinc-200"
+									className="text-muted-foreground/30"
 								/>
 								<circle
 									cx="12"
@@ -225,7 +222,7 @@ const SortableTaskCard = ({
 									strokeWidth="2"
 									fill="none"
 									strokeDasharray={`${((task.progress || 0) / 100) * 62.83} 62.83`}
-									className="text-zinc-900"
+									className="text-foreground"
 								/>
 							</svg>
 						)}
@@ -234,7 +231,7 @@ const SortableTaskCard = ({
 			</div>
 
 			{/* Attachments and Comments */}
-			<div className="flex items-center gap-4 text-xs text-zinc-500 pt-3 border-t border-zinc-100">
+			<div className="flex items-center gap-4 text-xs text-muted-foreground pt-3 border-t border">
 				<div className="flex items-center gap-1">
 					<Paperclip className="w-3 h-3" />
 					{task.attachments || 0}
@@ -257,7 +254,7 @@ const DroppableColumn = ({ id, children }) => {
 	return (
 		<div
 			ref={setNodeRef}
-			className={`flex-shrink-0 w-80 bg-white rounded-xl p-4 border border-zinc-200 ${isOver ? "ring-2 ring-zinc-900 ring-offset-2" : ""
+			className={`flex-shrink-0 w-80 bg-card rounded-xl p-4 border ${isOver ? "ring-2 ring-primary ring-offset-2" : ""
 				}`}
 		>
 			{children}
@@ -357,7 +354,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 	);
 
 	const columns = [
-		{ id: "backlog", title: "Backlog", color: "bg-zinc-100" },
+		{ id: "backlog", title: "Backlog", color: "bg-muted" },
 		{ id: "in-progress", title: "In Progress", color: "bg-blue-50" },
 		{ id: "done", title: "Done", color: "bg-green-50" },
 	];
@@ -554,13 +551,13 @@ const KanbanBoardTab = ({ queryClient }) => {
 	const getPriorityColor = (priority) => {
 		switch (priority) {
 			case "High":
-				return "bg-zinc-900 text-white";
+				return "bg-primary text-primary-foreground";
 			case "Medium":
-				return "bg-zinc-200 text-zinc-700";
+				return "bg-muted text-muted-foreground";
 			case "Low":
-				return "bg-zinc-100 text-zinc-600";
+				return "bg-muted text-muted-foreground";
 			default:
-				return "bg-zinc-200 text-zinc-700";
+				return "bg-muted text-muted-foreground";
 		}
 	};
 
@@ -575,7 +572,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 			case "improvement":
 				return "bg-purple-100 text-purple-700";
 			default:
-				return "bg-zinc-100 text-zinc-700";
+				return "bg-muted text-muted-foreground";
 		}
 	};
 
@@ -602,16 +599,16 @@ const KanbanBoardTab = ({ queryClient }) => {
 		],
 		priority: [
 			{ value: null, label: "All Priorities" },
-			{ value: "High", label: "High", color: "bg-zinc-900 text-white" },
-			{ value: "Medium", label: "Medium", color: "bg-zinc-200 text-zinc-700" },
-			{ value: "Low", label: "Low", color: "bg-zinc-100 text-zinc-600" },
+			{ value: "High", label: "High", color: "bg-primary text-primary-foreground" },
+			{ value: "Medium", label: "Medium", color: "bg-muted text-muted-foreground" },
+			{ value: "Low", label: "Low", color: "bg-muted text-muted-foreground" },
 		],
 		status: [
 			{ value: null, label: "All Statuses" },
 			{
 				value: "backlog",
 				label: "Backlog",
-				color: "bg-zinc-100 text-zinc-700",
+				color: "bg-muted text-muted-foreground",
 			},
 			{
 				value: "in-progress",
@@ -643,15 +640,15 @@ const KanbanBoardTab = ({ queryClient }) => {
 			},
 		],
 		priority: [
-			{ value: "High", label: "High", color: "bg-zinc-900 text-white" },
-			{ value: "Medium", label: "Medium", color: "bg-zinc-200 text-zinc-700" },
-			{ value: "Low", label: "Low", color: "bg-zinc-100 text-zinc-600" },
+			{ value: "High", label: "High", color: "bg-primary text-primary-foreground" },
+			{ value: "Medium", label: "Medium", color: "bg-muted text-muted-foreground" },
+			{ value: "Low", label: "Low", color: "bg-muted text-muted-foreground" },
 		],
 		status: [
 			{
 				value: "backlog",
 				label: "Backlog",
-				color: "bg-zinc-100 text-zinc-700",
+				color: "bg-muted text-muted-foreground",
 			},
 			{
 				value: "in-progress",
@@ -795,85 +792,77 @@ const KanbanBoardTab = ({ queryClient }) => {
 	return (
 		<div className="min-h-full">
 			{/* Header */}
-			<div className="mb-6 border-b border-zinc-200 py-2 px-4">
-				<h2 className="text-lg text-zinc-900">Kanban Board</h2>
+			<div className="mb-6 border-b py-2 px-4">
+				<h2 className="text-lg text-foreground">Kanban Board</h2>
 				<div>
-					<p className="text-sm text-zinc-600 mt-1">
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage your kanban board and tasks
 					</p>
 				</div>
 			</div>
 
-			<div className="flex items-center gap-1 mb-4 mx-4 rounded-xl p-1.5 bg-zinc-50 w-fit">
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
+			<div className="flex items-center gap-1 mb-4 mx-4 rounded-xl p-1.5 bg-muted w-fit">
+				<Button
 					onClick={() => setViewMode("board")}
 					className={`px-2 py-1 rounded-xl text-sm font-medium flex items-center gap-2 ${viewMode === "board"
-							? "bg-white border border-zinc-200 text-zinc-700"
-							: "bg-zinc-100 border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+							? "bg-card border text-muted-foreground"
+							: "bg-muted border text-muted-foreground hover:bg-muted"
 						}`}
 				>
 					<LayoutGrid className="w-3 h-3" />
 					Board
-				</motion.button>
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
+				</Button>
+				<Button
 					onClick={() => setViewMode("list")}
 					className={`px-2 py-1 rounded-xl text-sm font-medium flex items-center gap-2 ${viewMode === "list"
-							? "bg-white border border-zinc-200 text-zinc-700"
-							: "bg-zinc-100 border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+							? "bg-card border text-muted-foreground"
+							: "bg-muted border text-muted-foreground hover:bg-muted"
 						}`}
 				>
 					<List className="w-3 h-3" />
 					List
-				</motion.button>
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
+				</Button>
+				<Button
 					onClick={() => setViewMode("table")}
 					className={`px-2 py-1 rounded-xl text-sm font-medium flex items-center gap-2 ${viewMode === "table"
-							? "bg-white border border-zinc-200 text-zinc-700"
-							: "bg-zinc-100 border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+							? "bg-card border text-muted-foreground"
+							: "bg-muted border text-muted-foreground hover:bg-muted"
 						}`}
 				>
 					<Table className="w-3 h-3" />
 					Table
-				</motion.button>
+				</Button>
 			</div>
 			{/* Top Action Bar */}
 			<div className="flex items-center justify-between mb-6 px-4">
 				<div className="flex items-center gap-3">
 					<div className="relative">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 						<input
 							type="text"
 							placeholder="Search tasks..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-sm w-64"
+							className="pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm w-64"
 						/>
 					</div>
 					<div className="relative" ref={filterDropdownRef}>
-						<motion.button
-							whileHover={{ scale: 1.02 }}
-							whileTap={{ scale: 0.98 }}
+						<Button
 							onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-							className={`flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-medium text-zinc-700 hover:bg-zinc-50 ${hasActiveFilters ? "ring-2 ring-zinc-900" : ""
+							className={`flex items-center gap-2 px-4 py-2 bg-card border rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted ${hasActiveFilters ? "ring-2 ring-primary" : ""
 								}`}
 						>
 							<Filter className="w-4 h-4" />
 							Filters
 							{hasActiveFilters && (
-								<span className="px-1.5 py-0.5 bg-zinc-900 text-white rounded-full text-xs">
+								<span className="px-1.5 py-0.5 bg-primary text-primary-foreground rounded-full text-xs">
 									{
 										Object.values(activeFilters).filter((f) => f !== null)
 											.length
 									}
 								</span>
 							)}
-						</motion.button>
+						</Button>
 
 						<AnimatePresence>
 							{showFilterDropdown && (
@@ -881,17 +870,17 @@ const KanbanBoardTab = ({ queryClient }) => {
 									initial={{ opacity: 0, y: -10, scale: 0.95 }}
 									animate={{ opacity: 1, y: 0, scale: 1 }}
 									exit={{ opacity: 0, y: -10, scale: 0.95 }}
-									className="absolute right-0 top-full mt-2 w-80 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 p-4 space-y-4"
+									className="absolute right-0 top-full mt-2 w-80 bg-card border rounded-xl shadow-lg z-50 p-4 space-y-4"
 								>
 									<div className="flex items-center justify-between mb-2">
-										<h4 className="font-semibold text-zinc-900">Filters</h4>
+										<h4 className="font-semibold text-foreground">Filters</h4>
 										{hasActiveFilters && (
 											<button
 												onClick={() => {
 													clearFilters();
 													setShowFilterDropdown(false);
 												}}
-												className="text-xs text-zinc-600 hover:text-zinc-900 underline"
+												className="text-xs text-muted-foreground hover:text-foreground underline"
 											>
 												Clear all
 											</button>
@@ -900,7 +889,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 
 									{/* Type Filter */}
 									<div>
-										<label className="block text-xs font-medium text-zinc-700 mb-2">
+										<label className="block text-xs font-medium text-muted-foreground mb-2">
 											Type
 										</label>
 										<AnimatedDropdown
@@ -922,7 +911,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 
 									{/* Priority Filter */}
 									<div>
-										<label className="block text-xs font-medium text-zinc-700 mb-2">
+										<label className="block text-xs font-medium text-muted-foreground mb-2">
 											Priority
 										</label>
 										<AnimatedDropdown
@@ -944,7 +933,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 
 									{/* Status Filter */}
 									<div>
-										<label className="block text-xs font-medium text-zinc-700 mb-2">
+										<label className="block text-xs font-medium text-muted-foreground mb-2">
 											Status
 										</label>
 										<AnimatedDropdown
@@ -967,9 +956,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 							)}
 						</AnimatePresence>
 					</div>
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
+					<Button
 						onClick={() => {
 							setEditingTask(null);
 							setFormData({
@@ -982,17 +969,17 @@ const KanbanBoardTab = ({ queryClient }) => {
 							});
 							setShowAddModal(true);
 						}}
-						className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-sm font-medium hover:bg-zinc-800"
+						className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90"
 					>
 						<Plus className="w-4 h-4" />
 						Add Task
-					</motion.button>
+					</Button>
 					<div className="flex items-center gap-2">
 						<div className="flex -space-x-2">
 							{allAssignees.slice(0, 3).map((assignee, idx) => (
 								<div
 									key={idx}
-									className="w-8 h-8 rounded-full bg-zinc-200 border-2 border-white flex items-center justify-center text-xs font-medium text-zinc-700"
+									className="w-8 h-8 rounded-full bg-muted border-2 border-white flex items-center justify-center text-xs font-medium text-muted-foreground"
 									title={assignee}
 								>
 									{getAssigneeInitials(assignee)}
@@ -1000,7 +987,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 							))}
 						</div>
 						{allAssignees.length > 3 && (
-							<span className="text-xs text-zinc-600">
+							<span className="text-xs text-muted-foreground">
 								+{allAssignees.length - 3}
 							</span>
 						)}
@@ -1010,7 +997,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 
 			{/* Loading State */}
 			{isLoadingTasks && (
-				<div className="text-center py-12 text-zinc-500">Loading tasks...</div>
+				<div className="text-center py-12 text-muted-foreground">Loading tasks...</div>
 			)}
 
 			{/* Error State */}
@@ -1038,21 +1025,21 @@ const KanbanBoardTab = ({ queryClient }) => {
 									{/* Column Header */}
 									<div className="flex items-center justify-between mb-4">
 										<div className="flex items-center gap-2">
-											<h3 className="font-semibold text-zinc-900">
+											<h3 className="font-semibold text-foreground">
 												{column.title}
 											</h3>
-											<span className="px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-xl text-xs font-medium">
+											<span className="px-2 py-0.5 bg-muted text-muted-foreground rounded-xl text-xs font-medium">
 												{columnTasks.length}
 											</span>
 										</div>
 										<div className="flex items-center gap-1">
-											<button className="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-xl hover:bg-zinc-100">
+											<button className="p-1.5 text-muted-foreground hover:text-muted-foreground rounded-xl hover:bg-muted">
 												<GripVertical className="w-4 h-4" />
 											</button>
-											<button className="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-xl hover:bg-zinc-100">
+											<button className="p-1.5 text-muted-foreground hover:text-muted-foreground rounded-xl hover:bg-muted">
 												<MoreVertical className="w-4 h-4" />
 											</button>
-											<button className="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-xl hover:bg-zinc-100">
+											<button className="p-1.5 text-muted-foreground hover:text-muted-foreground rounded-xl hover:bg-muted">
 												<Plus className="w-4 h-4" />
 											</button>
 										</div>
@@ -1085,33 +1072,33 @@ const KanbanBoardTab = ({ queryClient }) => {
 												>
 													{column.id === "backlog" && (
 														<>
-															<ClipboardList className="w-12 h-12 text-zinc-300 mb-3" />
-															<p className="text-sm text-zinc-500 font-medium">
+															<ClipboardList className="w-12 h-12 text-muted-foreground/50 mb-3" />
+															<p className="text-sm text-muted-foreground font-medium">
 																No tasks in backlog
 															</p>
-															<p className="text-xs text-zinc-400 mt-1">
+															<p className="text-xs text-muted-foreground mt-1">
 																Drag tasks here or create a new one
 															</p>
 														</>
 													)}
 													{column.id === "in-progress" && (
 														<>
-															<PlayCircle className="w-12 h-12 text-zinc-300 mb-3" />
-															<p className="text-sm text-zinc-500 font-medium">
+															<PlayCircle className="w-12 h-12 text-muted-foreground/50 mb-3" />
+															<p className="text-sm text-muted-foreground font-medium">
 																No tasks in progress
 															</p>
-															<p className="text-xs text-zinc-400 mt-1">
+															<p className="text-xs text-muted-foreground mt-1">
 																Move tasks here to start working
 															</p>
 														</>
 													)}
 													{column.id === "done" && (
 														<>
-															<CheckCircle2 className="w-12 h-12 text-zinc-300 mb-3" />
-															<p className="text-sm text-zinc-500 font-medium">
+															<CheckCircle2 className="w-12 h-12 text-muted-foreground/50 mb-3" />
+															<p className="text-sm text-muted-foreground font-medium">
 																No completed tasks
 															</p>
-															<p className="text-xs text-zinc-400 mt-1">
+															<p className="text-xs text-muted-foreground mt-1">
 																Completed tasks will appear here
 															</p>
 														</>
@@ -1151,7 +1138,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 
 			{/* List View */}
 			{!isLoadingTasks && !tasksError && viewMode === "list" && (
-				<div className="bg-white rounded-xl border border-zinc-200 overflow-hidden px-4">
+				<div className="bg-card rounded-xl border overflow-hidden px-4">
 					<div className="overflow-x-auto">
 						<div className="space-y-2 p-4">
 							{filteredTasks.map((task) => (
@@ -1159,7 +1146,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 									key={task.id}
 									initial={{ opacity: 0, x: -20 }}
 									animate={{ opacity: 1, x: 0 }}
-									className="flex items-center gap-4 p-4 border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
+									className="flex items-center gap-4 p-4 border rounded-xl hover:bg-muted transition-colors"
 								>
 									<div className="flex items-center gap-3 flex-1 min-w-0">
 										<span
@@ -1170,17 +1157,17 @@ const KanbanBoardTab = ({ queryClient }) => {
 											{task.type}
 										</span>
 										<div className="flex-1 min-w-0">
-											<h4 className="font-semibold text-zinc-900 truncate">
+											<h4 className="font-semibold text-foreground truncate">
 												{task.title}
 											</h4>
 											{task.description && (
-												<p className="text-sm text-zinc-600 truncate">
+												<p className="text-sm text-muted-foreground truncate">
 													{task.description}
 												</p>
 											)}
 										</div>
 										{task.category && (
-											<span className="text-xs text-zinc-500 flex-shrink-0">
+											<span className="text-xs text-muted-foreground flex-shrink-0">
 												{task.category}
 											</span>
 										)}
@@ -1188,20 +1175,18 @@ const KanbanBoardTab = ({ queryClient }) => {
 											{task.assignees?.map((assignee, idx) => (
 												<div
 													key={idx}
-													className="w-8 h-8 rounded-full bg-zinc-200 border-2 border-white flex items-center justify-center text-xs font-medium text-zinc-700"
+													className="w-8 h-8 rounded-full bg-muted border-2 border-white flex items-center justify-center text-xs font-medium text-muted-foreground"
 													title={assignee}
 												>
 													{getAssigneeInitials(assignee)}
 												</div>
 											))}
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
+											<Button
 												onClick={() => handleAddAssignee(task.id)}
-												className="w-8 h-8 rounded-full bg-zinc-100 border-2 border-dashed border-zinc-300 flex items-center justify-center text-xs font-medium text-zinc-500 hover:bg-zinc-200"
+												className="w-8 h-8 rounded-full bg-muted border-2 border-dashed flex items-center justify-center text-xs font-medium text-muted-foreground hover:bg-muted"
 											>
 												<Plus className="w-4 h-4" />
-											</motion.button>
+											</Button>
 										</div>
 										<span
 											className={`px-2 py-1 rounded-xl text-xs font-medium flex-shrink-0 ${getPriorityColor(
@@ -1210,7 +1195,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 										>
 											{task.priority}
 										</span>
-										<span className="text-xs text-zinc-600 flex-shrink-0">
+										<span className="text-xs text-muted-foreground flex-shrink-0">
 											{task.progress || 0}%
 										</span>
 										<span
@@ -1218,28 +1203,24 @@ const KanbanBoardTab = ({ queryClient }) => {
 													? "bg-green-100 text-green-700"
 													: task.status === "in-progress"
 														? "bg-blue-100 text-blue-700"
-														: "bg-zinc-100 text-zinc-700"
+														: "bg-muted text-muted-foreground"
 												}`}
 										>
 											{task.status}
 										</span>
 										<div className="flex items-center gap-2 flex-shrink-0">
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
+											<Button
 												onClick={() => handleEdit(task)}
-												className="p-2 text-zinc-400 hover:text-zinc-600 rounded-xl hover:bg-zinc-100"
+												className="p-2 text-muted-foreground hover:text-muted-foreground rounded-xl hover:bg-muted"
 											>
 												<Edit className="w-4 h-4" />
-											</motion.button>
-											<motion.button
-												whileHover={{ scale: 1.1 }}
-												whileTap={{ scale: 0.9 }}
+											</Button>
+											<Button
 												onClick={() => handleDelete(task.id)}
-												className="p-2 text-zinc-400 hover:text-red-600 rounded-xl hover:bg-red-50"
+												className="p-2 text-muted-foreground hover:text-red-600 rounded-xl hover:bg-red-50"
 											>
 												<Trash2 className="w-4 h-4" />
-											</motion.button>
+											</Button>
 										</div>
 									</div>
 								</motion.div>
@@ -1251,33 +1232,33 @@ const KanbanBoardTab = ({ queryClient }) => {
 
 			{/* Table View */}
 			{!isLoadingTasks && !tasksError && viewMode === "table" && (
-				<div className="bg-white rounded-xl border border-zinc-200 overflow-hidden px-4">
+				<div className="bg-card rounded-xl border overflow-hidden px-4">
 					<div className="overflow-x-auto">
 						<table className="w-full">
-							<thead className="bg-zinc-50 border-b border-zinc-200">
+							<thead className="bg-muted border-b border">
 								<tr>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Type
 									</th>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Title
 									</th>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Category
 									</th>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Assignees
 									</th>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Priority
 									</th>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Progress
 									</th>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Status
 									</th>
-									<th className="text-left py-3 px-4 font-semibold text-zinc-700 text-sm">
+									<th className="text-left py-3 px-4 font-semibold text-muted-foreground text-sm">
 										Actions
 									</th>
 								</tr>
@@ -1286,7 +1267,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 								{filteredTasks.map((task) => (
 									<tr
 										key={task.id}
-										className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors"
+										className="border-b hover:bg-muted transition-colors"
 									>
 										<td className="py-3 px-4">
 											<span
@@ -1299,17 +1280,17 @@ const KanbanBoardTab = ({ queryClient }) => {
 										</td>
 										<td className="py-3 px-4">
 											<div>
-												<div className="font-medium text-zinc-900">
+												<div className="font-medium text-foreground">
 													{task.title}
 												</div>
 												{task.description && (
-													<div className="text-sm text-zinc-600 truncate max-w-xs">
+													<div className="text-sm text-muted-foreground truncate max-w-xs">
 														{task.description}
 													</div>
 												)}
 											</div>
 										</td>
-										<td className="py-3 px-4 text-sm text-zinc-600">
+										<td className="py-3 px-4 text-sm text-muted-foreground">
 											{task.category || "-"}
 										</td>
 										<td className="py-3 px-4">
@@ -1318,21 +1299,19 @@ const KanbanBoardTab = ({ queryClient }) => {
 													{task.assignees?.map((assignee, idx) => (
 														<div
 															key={idx}
-															className="w-8 h-8 rounded-full bg-zinc-200 border-2 border-white flex items-center justify-center text-xs font-medium text-zinc-700"
+															className="w-8 h-8 rounded-full bg-muted border-2 border-white flex items-center justify-center text-xs font-medium text-muted-foreground"
 															title={assignee}
 														>
 															{getAssigneeInitials(assignee)}
 														</div>
 													))}
 												</div>
-												<motion.button
-													whileHover={{ scale: 1.1 }}
-													whileTap={{ scale: 0.9 }}
+												<Button
 													onClick={() => handleAddAssignee(task.id)}
-													className="w-8 h-8 rounded-full bg-zinc-100 border-2 border-dashed border-zinc-300 flex items-center justify-center text-xs font-medium text-zinc-500 hover:bg-zinc-200"
+													className="w-8 h-8 rounded-full bg-muted border-2 border-dashed flex items-center justify-center text-xs font-medium text-muted-foreground hover:bg-muted"
 												>
 													<Plus className="w-4 h-4" />
-												</motion.button>
+												</Button>
 											</div>
 										</td>
 										<td className="py-3 px-4">
@@ -1346,12 +1325,12 @@ const KanbanBoardTab = ({ queryClient }) => {
 										</td>
 										<td className="py-3 px-4">
 											<div className="flex items-center gap-2">
-												<span className="text-sm text-zinc-600">
+												<span className="text-sm text-muted-foreground">
 													{task.progress || 0}%
 												</span>
-												<div className="w-12 h-2 bg-zinc-200 rounded-full overflow-hidden">
+												<div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
 													<div
-														className="h-full bg-zinc-900 transition-all"
+														className="h-full bg-primary transition-all"
 														style={{ width: `${task.progress || 0}%` }}
 													/>
 												</div>
@@ -1363,7 +1342,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 														? "bg-green-100 text-green-700"
 														: task.status === "in-progress"
 															? "bg-blue-100 text-blue-700"
-															: "bg-zinc-100 text-zinc-700"
+															: "bg-muted text-muted-foreground"
 													}`}
 											>
 												{task.status}
@@ -1371,22 +1350,18 @@ const KanbanBoardTab = ({ queryClient }) => {
 										</td>
 										<td className="py-3 px-4">
 											<div className="flex items-center gap-2">
-												<motion.button
-													whileHover={{ scale: 1.1 }}
-													whileTap={{ scale: 0.9 }}
+												<Button
 													onClick={() => handleEdit(task)}
-													className="p-2 text-zinc-400 hover:text-zinc-600 rounded-xl hover:bg-zinc-100"
+													className="p-2 text-muted-foreground hover:text-muted-foreground rounded-xl hover:bg-muted"
 												>
 													<Edit className="w-4 h-4" />
-												</motion.button>
-												<motion.button
-													whileHover={{ scale: 1.1 }}
-													whileTap={{ scale: 0.9 }}
+												</Button>
+												<Button
 													onClick={() => handleDelete(task.id)}
-													className="p-2 text-zinc-400 hover:text-red-600 rounded-xl hover:bg-red-50"
+													className="p-2 text-muted-foreground hover:text-red-600 rounded-xl hover:bg-red-50"
 												>
 													<Trash2 className="w-4 h-4" />
-												</motion.button>
+												</Button>
 											</div>
 										</td>
 									</tr>
@@ -1412,22 +1387,22 @@ const KanbanBoardTab = ({ queryClient }) => {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
 							onClick={(e) => e.stopPropagation()}
-							className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
+							className="bg-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
 						>
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-								<h3 className="text-lg text-zinc-900">
+							<div className="flex items-center justify-between p-4 border-b border">
+								<h3 className="text-lg text-foreground">
 									{editingTask ? "Edit Task" : "Add New Task"}
 								</h3>
 								<button
 									onClick={handleCloseModal}
-									className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+									className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 								>
 									<X className="w-4 h-4" />
 								</button>
 							</div>
 							<div className="p-4 space-y-4" ref={modalDropdownRef}>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Title *
 									</label>
 									<input
@@ -1436,11 +1411,11 @@ const KanbanBoardTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setFormData({ ...formData, title: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Description
 									</label>
 									<textarea
@@ -1449,12 +1424,12 @@ const KanbanBoardTab = ({ queryClient }) => {
 											setFormData({ ...formData, description: e.target.value })
 										}
 										rows={3}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 									/>
 								</div>
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
+										<label className="block text-sm font-medium text-muted-foreground mb-2">
 											Type
 										</label>
 										<AnimatedDropdown
@@ -1474,7 +1449,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
+										<label className="block text-sm font-medium text-muted-foreground mb-2">
 											Priority
 										</label>
 										<AnimatedDropdown
@@ -1495,7 +1470,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 									</div>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Status
 									</label>
 									<AnimatedDropdown
@@ -1515,7 +1490,7 @@ const KanbanBoardTab = ({ queryClient }) => {
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Category (optional)
 									</label>
 									<input
@@ -1524,27 +1499,20 @@ const KanbanBoardTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setFormData({ ...formData, category: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 									/>
 								</div>
 								<div className="flex items-center gap-2 pt-2">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										onClick={handleSave}
-										className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors font-medium text-sm"
-									>
+									<Button onClick={handleSave} className="flex-1 rounded-xl gap-2">
 										<Save className="w-4 h-4" />
 										{editingTask ? "Update" : "Add"} Task
-									</motion.button>
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+									</Button>
+									<Button
 										onClick={handleCloseModal}
-										className="px-4 py-2 text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium text-sm transition-colors"
+										className="px-4 py-2 text-muted-foreground bg-muted hover:bg-muted rounded-xl font-medium text-sm transition-colors"
 									>
 										Cancel
-									</motion.button>
+									</Button>
 								</div>
 							</div>
 						</motion.div>
@@ -1567,20 +1535,20 @@ const KanbanBoardTab = ({ queryClient }) => {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
 							onClick={(e) => e.stopPropagation()}
-							className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"
+							className="bg-card rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"
 						>
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-								<h3 className="text-lg text-zinc-900">Add Assignee</h3>
+							<div className="flex items-center justify-between p-4 border-b border">
+								<h3 className="text-lg text-foreground">Add Assignee</h3>
 								<button
 									onClick={() => setShowAssigneeModal(false)}
-									className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+									className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 								>
 									<X className="w-4 h-4" />
 								</button>
 							</div>
 							<div className="p-4 space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Email Address
 									</label>
 									<input
@@ -1590,19 +1558,14 @@ const KanbanBoardTab = ({ queryClient }) => {
 											setAssigneeForm({ ...assigneeForm, email: e.target.value })
 										}
 										placeholder="colleague@example.com"
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 									/>
 								</div>
 								<div className="flex items-center gap-2 pt-2">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										onClick={handleSaveAssignee}
-										className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors font-medium text-sm"
-									>
+									<Button onClick={handleSaveAssignee} className="flex-1 rounded-xl gap-2">
 										<User className="w-4 h-4" />
 										Add Assignee
-									</motion.button>
+									</Button>
 								</div>
 							</div>
 						</motion.div>

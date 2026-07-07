@@ -39,7 +39,10 @@ import {
 import { getCachedUserRole, getUserRole } from "../../../lib/utils/getUserRole";
 import { getCurrentUserEmail } from "../../../lib/utils/getCurrentUserEmail";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const EmailTab = ({ onSendEmail }) => {
 	const queryClient = useQueryClient();
@@ -188,12 +191,12 @@ const EmailTab = ({ onSendEmail }) => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -390,10 +393,10 @@ const EmailTab = ({ onSendEmail }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex justify-between items-center border-b border-zinc-200 py-2 px-4">
+			<div className="flex justify-between items-center border-b py-2 px-4">
 				<div>
-					<h2 className="text-lg text-zinc-900">Email Campaigns</h2>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h2 className="text-lg text-foreground">Email Campaigns</h2>
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage your email drafts and campaigns
 					</p>
 				</div>
@@ -404,7 +407,7 @@ const EmailTab = ({ onSendEmail }) => {
 							whileHover={{ scale: 1.02 }}
 							whileTap={{ scale: 0.98 }}
 							href="/admin/editor/email"
-							className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+							className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
 						>
 							<Plus className="w-3.5 h-3.5" />
 							Create New Email
@@ -415,13 +418,13 @@ const EmailTab = ({ onSendEmail }) => {
 
 			{/* Search */}
 			<div className="relative mx-4">
-				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					type="text"
 					placeholder="Search emails by subject, status, or content..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+					className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 				/>
 			</div>
 
@@ -482,7 +485,7 @@ const EmailTab = ({ onSendEmail }) => {
 											onClick={() => handleEditEmail(email)}
 											className="cursor-pointer"
 										>
-											<div className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors">
+											<div className="font-medium text-foreground hover:text-muted-foreground transition-colors">
 												{email.subject}
 											</div>
 										</TableCell>
@@ -499,10 +502,10 @@ const EmailTab = ({ onSendEmail }) => {
 												{email.status || "draft"}
 											</span>
 										</TableCell>
-										<TableCell className="text-zinc-600">
+										<TableCell className="text-muted-foreground">
 											{email.recipients || 0}
 										</TableCell>
-										<TableCell className="text-sm text-zinc-600">
+										<TableCell className="text-sm text-muted-foreground">
 											{formatDate(email.createdAt)}
 										</TableCell>
 										<TableCell>
@@ -510,52 +513,46 @@ const EmailTab = ({ onSendEmail }) => {
 												{allowedActions.map((action) => {
 													if (action === "send" && email.status === "draft") {
 														return (
-															<motion.button
+															<Button
 																key="send"
-																whileHover={{ scale: 1.05 }}
-																whileTap={{ scale: 0.95 }}
 																onClick={(e) => {
 																	e.stopPropagation();
 																	handleSendEmail(email);
 																}}
-																className="p-2 text-zinc-400 hover:text-green-600 transition-colors"
+																className="p-2 text-muted-foreground hover:text-green-600 transition-colors"
 																title="Send to Subscribers"
 															>
 																<Mail className="w-4 h-4" />
-															</motion.button>
+															</Button>
 														);
 													}
 													if (action === "view") {
 														return (
-															<motion.button
+															<Button
 																key="preview"
-																whileHover={{ scale: 1.05 }}
-																whileTap={{ scale: 0.95 }}
 																onClick={(e) => {
 																	e.stopPropagation();
 																	handlePreviewEmail(email);
 																}}
-																className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+																className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 																title="Preview"
 															>
 																<Eye className="w-4 h-4" />
-															</motion.button>
+															</Button>
 														);
 													}
 													return null;
 												})}
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
+												<Button
 													onClick={(e) => {
 														e.stopPropagation();
 														handleDeleteEmail(email.id);
 													}}
-													className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+													className="p-2 text-muted-foreground hover:text-red-600 transition-colors"
 													title="Delete"
 												>
 													<Trash2 className="w-4 h-4" />
-												</motion.button>
+												</Button>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -579,34 +576,27 @@ const EmailTab = ({ onSendEmail }) => {
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
 						>
 							{/* Modal Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-								<h3 className="text-lg font-bold text-zinc-900">
+							<div className="flex items-center justify-between p-4 border-b border">
+								<h3 className="text-lg font-bold text-foreground">
 									{editingEmail ? "Edit Email" : "Create Email"}
 								</h3>
 								<div className="flex items-center gap-3">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										onClick={handleSaveEmail}
-										className="flex items-center gap-2 px-4 py-1.5 text-sm bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium transition-colors"
-									>
+									<Button onClick={handleSaveEmail} size="sm" className="rounded-xl gap-2">
 										<Save className="w-4 h-4" />
 										{editingEmail ? "Update" : "Create"} Email
-									</motion.button>
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+									</Button>
+									<Button
 										onClick={handleCloseModal}
-										className="px-4 py-1.5 text-sm text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium transition-colors"
+										className="px-4 py-1.5 text-sm text-muted-foreground bg-muted hover:bg-muted rounded-xl font-medium transition-colors"
 									>
 										Cancel
-									</motion.button>
+									</Button>
 									<button
 										onClick={handleCloseModal}
-										className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+										className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 									>
 										<X className="w-4 h-4" />
 									</button>
@@ -616,7 +606,7 @@ const EmailTab = ({ onSendEmail }) => {
 							{/* Modal Body */}
 							<div className="flex-1 overflow-y-auto p-4 space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Subject *
 									</label>
 									<input
@@ -624,12 +614,12 @@ const EmailTab = ({ onSendEmail }) => {
 										name="subject"
 										value={emailForm.subject}
 										onChange={handleEmailFormChange}
-										className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+										className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 										placeholder="Email subject"
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Content *
 									</label>
 									<TiptapEditor
@@ -668,24 +658,22 @@ const EmailTab = ({ onSendEmail }) => {
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
 						>
 							{/* Preview Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
+							<div className="flex items-center justify-between p-4 border-b border">
 								<div>
-									<h3 className="text-lg font-bold text-zinc-900">
+									<h3 className="text-lg font-bold text-foreground">
 										Email Preview
 									</h3>
-									<p className="text-xs text-zinc-600 mt-1">
+									<p className="text-xs text-muted-foreground mt-1">
 										{editingEmail?.subject ||
 											emailForm.subject ||
 											"Email Preview"}
 									</p>
 								</div>
 								<div className="flex items-center gap-3">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+									<Button
 										onClick={async () => {
 											const currentSubject =
 												emailForm.subject || editingEmail?.subject || "";
@@ -717,21 +705,19 @@ const EmailTab = ({ onSendEmail }) => {
 											});
 											setShowConfirmModal(true);
 										}}
-										className="px-4 py-1.5 text-sm bg-zinc-50 hover:bg-zinc-100 text-zinc-900 rounded-xl font-medium transition-colors border border-zinc-200"
+										className="px-4 py-1.5 text-sm bg-muted hover:bg-muted text-foreground rounded-xl font-medium transition-colors border border"
 									>
 										Send to All Subscribers
-									</motion.button>
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+									</Button>
+									<Button
 										onClick={() => setShowSendSingleModal(true)}
-										className="px-4 py-1.5 text-sm bg-zinc-50 hover:bg-zinc-100 text-zinc-900 rounded-xl font-medium transition-colors border border-zinc-200"
+										className="px-4 py-1.5 text-sm bg-muted hover:bg-muted text-foreground rounded-xl font-medium transition-colors border border"
 									>
 										Send to Single User
-									</motion.button>
+									</Button>
 									<button
 										onClick={() => setShowEmailPreview(false)}
-										className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+										className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 									>
 										<X className="w-4 h-4" />
 									</button>
@@ -765,40 +751,33 @@ const EmailTab = ({ onSendEmail }) => {
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
 						>
 							{/* Modal Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-								<h3 className="text-lg font-bold text-zinc-900">
+							<div className="flex items-center justify-between p-4 border-b border">
+								<h3 className="text-lg font-bold text-foreground">
 									Send Email to User
 								</h3>
 								<div className="flex items-center gap-3">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										onClick={handleSendSingleEmail}
-										className="flex items-center gap-2 px-4 py-1.5 text-sm bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium transition-colors"
-									>
+									<Button onClick={handleSendSingleEmail} size="sm" className="rounded-xl gap-2">
 										<Mail className="w-4 h-4" />
 										Send
-									</motion.button>
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+									</Button>
+									<Button
 										onClick={() => {
 											setShowSendSingleModal(false);
 											setSingleEmailForm({ email: "", name: "" });
 										}}
-										className="px-4 py-1.5 text-sm text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium transition-colors"
+										className="px-4 py-1.5 text-sm text-muted-foreground bg-muted hover:bg-muted rounded-xl font-medium transition-colors"
 									>
 										Cancel
-									</motion.button>
+									</Button>
 									<button
 										onClick={() => {
 											setShowSendSingleModal(false);
 											setSingleEmailForm({ email: "", name: "" });
 										}}
-										className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+										className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 									>
 										<X className="w-4 h-4" />
 									</button>
@@ -808,7 +787,7 @@ const EmailTab = ({ onSendEmail }) => {
 							{/* Modal Body */}
 							<div className="p-4 space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Email Address *
 									</label>
 									<input
@@ -816,13 +795,13 @@ const EmailTab = ({ onSendEmail }) => {
 										name="email"
 										value={singleEmailForm.email}
 										onChange={handleSingleEmailFormChange}
-										className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+										className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 										placeholder="user@example.com"
 										required
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Name (Optional)
 									</label>
 									<input
@@ -830,16 +809,16 @@ const EmailTab = ({ onSendEmail }) => {
 										name="name"
 										value={singleEmailForm.name}
 										onChange={handleSingleEmailFormChange}
-										className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+										className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 										placeholder="User name"
 									/>
 								</div>
-								<div className="bg-zinc-50 p-3 rounded-xl border border-zinc-200">
-									<p className="text-xs text-zinc-600 mb-1">
+								<div className="bg-muted p-3 rounded-xl border border">
+									<p className="text-xs text-muted-foreground mb-1">
 										<strong>Subject:</strong>{" "}
 										{emailForm.subject || "No subject"}
 									</p>
-									<p className="text-xs text-zinc-500">
+									<p className="text-xs text-muted-foreground">
 										Email will be sent with the current email content
 									</p>
 								</div>

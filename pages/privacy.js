@@ -2,6 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Navbar from "../app/components/Navbar";
 import Footer from "../app/components/Footer";
+import { Card, CardContent } from "@/components/ui/card";
 
 const PrivacyPage = () => {
 	return (
@@ -16,13 +17,14 @@ const PrivacyPage = () => {
 			<div className="min-h-screen flex flex-col">
 				<Navbar />
 
-				<section className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-zinc-50">
+				<section className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-muted">
 					<div className="max-w-4xl mx-auto">
-						<div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 md:p-12">
-							<h1 className="text-4xl font-bold text-zinc-900 mb-4">
+						<Card>
+							<CardContent className="p-8 md:p-12">
+							<h1 className="text-4xl font-bold text-foreground mb-4">
 								Privacy Policy
 							</h1>
-							<p className="text-sm text-zinc-600 mb-8">
+							<p className="text-sm text-muted-foreground mb-8">
 								Last updated:{" "}
 								{new Date().toLocaleDateString("en-US", {
 									year: "numeric",
@@ -33,10 +35,10 @@ const PrivacyPage = () => {
 
 							<div className="prose prose-zinc max-w-none space-y-6">
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										1. Introduction
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										Welcome to YourApp. We are committed to protecting your
 										personal information and your right to privacy. This Privacy
 										Policy explains how we collect, use, disclose, and safeguard
@@ -45,17 +47,17 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										2. Information We Collect
 									</h2>
-									<h3 className="text-xl font-semibold text-zinc-900 mt-6 mb-3">
+									<h3 className="text-xl font-semibold text-foreground mt-6 mb-3">
 										2.1 Personal Information
 									</h3>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										We may collect personal information that you voluntarily
 										provide to us when you:
 									</p>
-									<ul className="list-disc list-inside text-zinc-700 space-y-2 ml-4">
+									<ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
 										<li>Register for an account</li>
 										<li>Subscribe to our newsletter</li>
 										<li>Make a purchase or transaction</li>
@@ -63,10 +65,10 @@ const PrivacyPage = () => {
 										<li>Participate in surveys or promotions</li>
 									</ul>
 
-									<h3 className="text-xl font-semibold text-zinc-900 mt-6 mb-3">
+									<h3 className="text-xl font-semibold text-foreground mt-6 mb-3">
 										2.2 Automatically Collected Information
 									</h3>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										When you visit our website, we automatically collect certain
 										information about your device, including information about
 										your web browser, IP address, time zone, and some of the
@@ -75,13 +77,13 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										3. How We Use Your Information
 									</h2>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										We use the information we collect to:
 									</p>
-									<ul className="list-disc list-inside text-zinc-700 space-y-2 ml-4">
+									<ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
 										<li>Provide, operate, and maintain our service</li>
 										<li>Improve, personalize, and expand our service</li>
 										<li>Understand and analyze how you use our service</li>
@@ -98,15 +100,15 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										4. Information Sharing and Disclosure
 									</h2>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										We do not sell, trade, or rent your personal information to
 										third parties. We may share your information in the
 										following situations:
 									</p>
-									<ul className="list-disc list-inside text-zinc-700 space-y-2 ml-4">
+									<ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
 										<li>
 											<strong>Service Providers:</strong> We may share your
 											information with third-party service providers who perform
@@ -126,10 +128,10 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										5. Data Security
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										We use administrative, technical, and physical security
 										measures to help protect your personal information. However,
 										no method of transmission over the Internet or electronic
@@ -139,14 +141,14 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										6. Your Privacy Rights
 									</h2>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										Depending on your location, you may have the following
 										rights regarding your personal information:
 									</p>
-									<ul className="list-disc list-inside text-zinc-700 space-y-2 ml-4">
+									<ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
 										<li>The right to access your personal information</li>
 										<li>
 											The right to rectify inaccurate personal information
@@ -163,10 +165,10 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										7. Cookies and Tracking Technologies
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										We use cookies and similar tracking technologies to track
 										activity on our service and hold certain information. You
 										can instruct your browser to refuse all cookies or to
@@ -175,10 +177,10 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										8. Children's Privacy
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										Our service is not intended for children under the age of
 										13. We do not knowingly collect personal information from
 										children under 13. If you are a parent or guardian and
@@ -188,10 +190,10 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										9. Changes to This Privacy Policy
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										We may update our Privacy Policy from time to time. We will
 										notify you of any changes by posting the new Privacy Policy
 										on this page and updating the "Last updated" date.
@@ -199,21 +201,22 @@ const PrivacyPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										10. Contact Us
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										If you have any questions about this Privacy Policy, please
 										contact us at:
 									</p>
-									<p className="text-zinc-700 leading-relaxed mt-2">
+									<p className="text-muted-foreground leading-relaxed mt-2">
 										Email: privacy@yourapp.com
 										<br />
 										Address: [Your Company Address]
 									</p>
 								</section>
 							</div>
-						</div>
+							</CardContent>
+						</Card>
 					</div>
 				</section>
 

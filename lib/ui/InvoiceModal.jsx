@@ -1,10 +1,17 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, FileText } from "lucide-react";
 import { jsPDF } from "jspdf";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 
 const InvoiceModal = ({ isOpen, onClose, payment }) => {
-	if (!isOpen || !payment) return null;
+	if (!payment) return null;
 
 	const formatDate = (date) => {
 		if (!date) return "";
@@ -163,206 +170,171 @@ const InvoiceModal = ({ isOpen, onClose, payment }) => {
 	};
 
 	return (
-		<AnimatePresence>
-			{isOpen && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-					onClick={onClose}
-				>
-					<motion.div
-						initial={{ scale: 0.9, opacity: 0 }}
-						animate={{ scale: 1, opacity: 1 }}
-						exit={{ scale: 0.9, opacity: 0 }}
-						onClick={(e) => e.stopPropagation()}
-						className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
-					>
-						{/* Header */}
-						<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-							<div className="flex items-center gap-3">
-								<div className="p-2 rounded-full bg-zinc-100 text-zinc-600">
-									<FileText className="w-5 h-5" />
-								</div>
-								<h3 className="text-lg font-bold text-zinc-900">Invoice</h3>
+		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="flex max-h-[90vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0 sm:rounded-2xl [&>button]:hidden">
+				{/* Header */}
+				<DialogHeader className="flex-row items-center justify-between space-y-0 border-b border p-4">
+					<div className="flex items-center gap-3">
+						<div className="rounded-full bg-muted p-2 text-muted-foreground">
+							<FileText className="h-5 w-5" />
+						</div>
+						<DialogTitle>Invoice</DialogTitle>
+					</div>
+					<div className="flex items-center gap-2">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={downloadInvoicePDF}
+							className="rounded-xl"
+							title="Download PDF"
+						>
+							<Download className="h-5 w-5" />
+						</Button>
+						<Button variant="ghost" size="icon" onClick={onClose}>
+							<X className="h-4 w-4" />
+						</Button>
+					</div>
+				</DialogHeader>
+
+				{/* Body */}
+				<div className="flex-1 overflow-y-auto p-6">
+					<div className="space-y-6">
+						{/* Invoice Header */}
+						<div className="flex items-start justify-between border-b border pb-4">
+							<div>
+								<h2 className="mb-2 text-2xl font-bold text-foreground">INVOICE</h2>
+								<p className="text-sm text-muted-foreground">
+									Invoice #:{" "}
+									<span className="font-mono">
+										{payment.paymentId || payment.id}
+									</span>
+								</p>
+								<p className="text-sm text-muted-foreground">
+									Date: {formatDate(payment.createdAt)}
+								</p>
 							</div>
-							<div className="flex items-center gap-2">
-								<motion.button
-									whileHover={{ scale: 1.05 }}
-									whileTap={{ scale: 0.95 }}
-									onClick={downloadInvoicePDF}
-									className="p-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
-									title="Download PDF"
+							<div className="text-right">
+								<p className="mb-1 text-sm text-muted-foreground">Status</p>
+								<span
+									className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+										payment.status === "succeeded"
+											? "bg-green-100 text-green-800"
+											: payment.status === "failed"
+												? "bg-red-100 text-red-800"
+												: "bg-yellow-100 text-yellow-800"
+									}`}
 								>
-									<Download className="w-5 h-5" />
-								</motion.button>
-								<button
-									onClick={onClose}
-									className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
-								>
-									<X className="w-4 h-4" />
-								</button>
+									{payment.status || ""}
+								</span>
 							</div>
 						</div>
 
-						{/* Body */}
-						<div className="p-6 overflow-y-auto flex-1">
-							<div className="space-y-6">
-								{/* Invoice Header */}
-								<div className="flex justify-between items-start border-b border-zinc-200 pb-4">
-									<div>
-										<h2 className="text-2xl font-bold text-zinc-900 mb-2">
-											INVOICE
-										</h2>
-										<p className="text-sm text-zinc-600">
-											Invoice #:{" "}
-											<span className="font-mono">
-												{payment.paymentId || payment.id}
-											</span>
-										</p>
-										<p className="text-sm text-zinc-600">
-											Date: {formatDate(payment.createdAt)}
-										</p>
-									</div>
-									<div className="text-right">
-										<p className="text-sm text-zinc-600 mb-1">Status</p>
-										<span
-											className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-												payment.status === "succeeded"
-													? "bg-green-100 text-green-800"
-													: payment.status === "failed"
-														? "bg-red-100 text-red-800"
-														: "bg-yellow-100 text-yellow-800"
-											}`}
-										>
-											{payment.status || ""}
-										</span>
-									</div>
+						{/* From/To Section */}
+						<div className="grid grid-cols-2 gap-6">
+							<div>
+								<h3 className="mb-2 text-sm font-semibold text-foreground">From</h3>
+								<div className="space-y-1 text-sm text-muted-foreground">
+									<p>Your Company Name</p>
+									<p>Your Company Address</p>
+									<p>City, State, ZIP</p>
 								</div>
-
-								{/* From/To Section */}
-								<div className="grid grid-cols-2 gap-6">
-									<div>
-										<h3 className="text-sm font-semibold text-zinc-900 mb-2">
-											From
-										</h3>
-										<div className="text-sm text-zinc-600 space-y-1">
-											<p>Your Company Name</p>
-											<p>Your Company Address</p>
-											<p>City, State, ZIP</p>
-										</div>
-									</div>
-									<div>
-										<h3 className="text-sm font-semibold text-zinc-900 mb-2">
-											To
-										</h3>
-										<div className="text-sm text-zinc-600 space-y-1">
-											<p className="font-medium text-zinc-900">
-												{payment.customerName || ""}
-											</p>
-											<p>{payment.customerEmail || ""}</p>
-										</div>
-									</div>
-								</div>
-
-								{/* Items Table */}
-								<div className="border border-zinc-200 rounded-xl overflow-hidden">
-									<table className="w-full">
-										<thead className="bg-zinc-50">
-											<tr>
-												<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
-													Description
-												</th>
-												<th className="py-3 px-4 text-right text-xs font-semibold text-zinc-700">
-													Amount
-												</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr className="border-t border-zinc-200">
-												<td className="py-3 px-4 text-sm text-zinc-900">
-													{payment.planName || "Plan"} -{" "}
-													{payment.paymentType === "subscription"
-														? "Subscription"
-														: "Payment"}
-												</td>
-												<td className="py-3 px-4 text-sm font-semibold text-zinc-900 text-right">
-													{payment.amount
-														? formatCurrency(payment.amount, payment.currency)
-														: "$0"}
-												</td>
-											</tr>
-										</tbody>
-										<tfoot className="bg-zinc-50 border-t-2 border-zinc-300">
-											<tr>
-												<td className="py-3 px-4 text-sm font-semibold text-zinc-900">
-													Total
-												</td>
-												<td className="py-3 px-4 text-sm font-bold text-zinc-900 text-right">
-													{payment.amount
-														? formatCurrency(payment.amount, payment.currency)
-														: "$0"}
-												</td>
-											</tr>
-										</tfoot>
-									</table>
-								</div>
-
-								{/* Additional Info */}
-								<div className="border-t border-zinc-200 pt-4">
-									<div className="grid grid-cols-2 gap-4 text-sm">
-										<div>
-											<p className="text-zinc-600 mb-1">Payment ID</p>
-											<p className="font-mono text-zinc-900">
-												{payment.paymentId || payment.id}
-											</p>
-										</div>
-										{payment.subscriptionId && (
-											<div>
-												<p className="text-zinc-600 mb-1">Subscription ID</p>
-												<p className="font-mono text-zinc-900">
-													{payment.subscriptionId}
-												</p>
-											</div>
-										)}
-										{payment.customerId && (
-											<div>
-												<p className="text-zinc-600 mb-1">Customer ID</p>
-												<p className="font-mono text-zinc-900">
-													{payment.customerId}
-												</p>
-											</div>
-										)}
-									</div>
+							</div>
+							<div>
+								<h3 className="mb-2 text-sm font-semibold text-foreground">To</h3>
+								<div className="space-y-1 text-sm text-muted-foreground">
+									<p className="font-medium text-foreground">
+										{payment.customerName || ""}
+									</p>
+									<p>{payment.customerEmail || ""}</p>
 								</div>
 							</div>
 						</div>
 
-						{/* Footer */}
-						<div className="flex items-center justify-end gap-3 p-4 border-t border-zinc-200 bg-zinc-50">
-							<motion.button
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								onClick={downloadInvoicePDF}
-								className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl font-medium transition-colors"
-							>
-								<Download className="w-4 h-4" />
-								Download PDF
-							</motion.button>
-							<motion.button
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								onClick={onClose}
-								className="px-4 py-2 text-sm text-zinc-700 bg-white hover:bg-zinc-100 rounded-xl font-medium transition-colors border border-zinc-300"
-							>
-								Close
-							</motion.button>
+						{/* Items Table */}
+						<div className="overflow-hidden rounded-xl border border">
+							<table className="w-full">
+								<thead className="bg-muted">
+									<tr>
+										<th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">
+											Description
+										</th>
+										<th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground">
+											Amount
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr className="border-t border">
+										<td className="px-4 py-3 text-sm text-foreground">
+											{payment.planName || "Plan"} -{" "}
+											{payment.paymentType === "subscription"
+												? "Subscription"
+												: "Payment"}
+										</td>
+										<td className="px-4 py-3 text-right text-sm font-semibold text-foreground">
+											{payment.amount
+												? formatCurrency(payment.amount, payment.currency)
+												: "$0"}
+										</td>
+									</tr>
+								</tbody>
+								<tfoot className="border-t-2 border bg-muted">
+									<tr>
+										<td className="px-4 py-3 text-sm font-semibold text-foreground">
+											Total
+										</td>
+										<td className="px-4 py-3 text-right text-sm font-bold text-foreground">
+											{payment.amount
+												? formatCurrency(payment.amount, payment.currency)
+												: "$0"}
+										</td>
+									</tr>
+								</tfoot>
+							</table>
 						</div>
-					</motion.div>
-				</motion.div>
-			)}
-		</AnimatePresence>
+
+						{/* Additional Info */}
+						<div className="border-t border pt-4">
+							<div className="grid grid-cols-2 gap-4 text-sm">
+								<div>
+									<p className="mb-1 text-muted-foreground">Payment ID</p>
+									<p className="font-mono text-foreground">
+										{payment.paymentId || payment.id}
+									</p>
+								</div>
+								{payment.subscriptionId && (
+									<div>
+										<p className="mb-1 text-muted-foreground">Subscription ID</p>
+										<p className="font-mono text-foreground">
+											{payment.subscriptionId}
+										</p>
+									</div>
+								)}
+								{payment.customerId && (
+									<div>
+										<p className="mb-1 text-muted-foreground">Customer ID</p>
+										<p className="font-mono text-foreground">
+											{payment.customerId}
+										</p>
+									</div>
+								)}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{/* Footer */}
+				<DialogFooter className="border-t border bg-muted p-4 sm:justify-end">
+					<Button onClick={downloadInvoicePDF} className="rounded-xl">
+						<Download className="h-4 w-4" />
+						Download PDF
+					</Button>
+					<Button variant="outline" onClick={onClose} className="rounded-xl">
+						Close
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

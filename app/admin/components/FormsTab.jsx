@@ -25,7 +25,7 @@ import {
 	getFormSubmissions,
 	deleteFormSubmission,
 } from "../../../lib/api/forms";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
 import TableSkeleton from "../../../lib/ui/TableSkeleton";
 import {
@@ -39,6 +39,9 @@ import {
 } from "../../../lib/ui/Table";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import { getFormSubmissionCount } from "../../../lib/api/forms";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Component to display submission count
 const FormSubmissionCount = ({ formId }) => {
@@ -304,23 +307,18 @@ const FormsTab = ({ queryClient }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
+			<div className="flex items-center justify-between border-b py-2 px-4">
 				<div>
-					<h1 className="text-lg text-zinc-900">Forms</h1>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h1 className="text-lg text-foreground">Forms</h1>
+					<p className="text-sm text-muted-foreground mt-1">
 						Create forms, collect submissions, and manage responses
 					</p>
 				</div>
 				{viewMode === "list" && (
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						onClick={handleCreateForm}
-						className="flex items-center gap-2 bg-zinc-900 text-white px-4 py-2 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
-					>
+					<Button onClick={handleCreateForm} className="rounded-xl gap-2">
 						<Plus className="w-4 h-4" />
 						Create Form
-					</motion.button>
+					</Button>
 				)}
 				
 			</div>
@@ -333,13 +331,13 @@ const FormsTab = ({ queryClient }) => {
 					>
 						{/* Search */}
 						<div className="relative mb-4">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 							<input
 								type="text"
 								placeholder="Search forms..."
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+								className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 							/>
 						</div>
 
@@ -382,16 +380,16 @@ const FormsTab = ({ queryClient }) => {
 													className="cursor-pointer"
 												>
 													<TableCell>
-														<div className="font-medium text-sm text-zinc-900">
+														<div className="font-medium text-sm text-foreground">
 															{form.title}
 														</div>
 														{form.description && (
-															<div className="text-xs text-zinc-500 mt-1">
+															<div className="text-xs text-muted-foreground mt-1">
 																{form.description}
 															</div>
 														)}
 													</TableCell>
-													<TableCell className="text-zinc-600">
+													<TableCell className="text-muted-foreground">
 														{form.fields?.length || 0} fields
 													</TableCell>
 													<TableCell>
@@ -405,10 +403,10 @@ const FormsTab = ({ queryClient }) => {
 															{form.isPublished ? "Published" : "Draft"}
 														</span>
 													</TableCell>
-													<TableCell className="text-zinc-600">
+													<TableCell className="text-muted-foreground">
 														<FormSubmissionCount formId={form.id} />
 													</TableCell>
-													<TableCell className="text-zinc-600">
+													<TableCell className="text-muted-foreground">
 														{formatDate(form.createdAt)}
 													</TableCell>
 													<TableCell>
@@ -418,7 +416,7 @@ const FormsTab = ({ queryClient }) => {
 													>
 														<button
 															onClick={() => handleEditForm(form)}
-															className="p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
+															className="p-1.5 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-xl transition-colors"
 															title="Edit form"
 														>
 															<FileText className="w-4 h-4" />
@@ -426,7 +424,7 @@ const FormsTab = ({ queryClient }) => {
 														{form.isPublished && (
 															<button
 																onClick={() => handleCopyFormUrl(form)}
-																className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+																className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
 																title="Copy form URL"
 															>
 																<Copy className="w-4 h-4" />
@@ -434,7 +432,7 @@ const FormsTab = ({ queryClient }) => {
 														)}
 														<button
 															onClick={() => handleDeleteForm(form.id)}
-															className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+															className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
 															title="Delete form"
 														>
 															<Trash2 className="w-4 h-4" />
@@ -452,32 +450,29 @@ const FormsTab = ({ queryClient }) => {
 
 					{/* Right Side - Form Editor */}
 					{showFormModal && (
-						<div className="w-1/2 border border-zinc-200 rounded-xl bg-white overflow-hidden flex flex-col">
+						<div className="w-1/2 border rounded-xl bg-card overflow-hidden flex flex-col">
 							{/* Editor Header */}
-							<div className="flex items-center justify-between px-4 py-2 border-b border-zinc-200">
-								<h2 className="text-lg text-zinc-900">
+							<div className="flex items-center justify-between px-4 py-2 border-b border">
+								<h2 className="text-lg text-foreground">
 									{editingForm ? "Edit Form" : "Create Form"}
 								</h2>
 								<div className="flex items-center gap-2">
 									<button
 										onClick={() => setShowPreview(!showPreview)}
-										className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
+										className="p-2 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-xl transition-colors"
 										title="Preview form"
 									>
 										<Eye className="w-5 h-5" />
 									</button>
 									{!showPreview && (
-										<button
-											onClick={handleSaveForm}
-											className="px-3 py-1.5 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors flex items-center gap-1.5"
-										>
+										<Button onClick={handleSaveForm}  size="sm" className="rounded-xl gap-1.5">
 											<Save className="w-4 h-4" />
 											{editingForm ? "Update" : "Create"}
-										</button>
+										</Button>
 									)}
 									<button
 										onClick={handleCloseModal}
-										className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
+										className="p-2 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-xl transition-colors"
 									>
 										<X className="w-5 h-5" />
 									</button>
@@ -490,11 +485,11 @@ const FormsTab = ({ queryClient }) => {
 									/* Preview Mode */
 									<div className="space-y-6">
 										<div>
-											<h1 className="text-2xl font-bold text-zinc-900 mb-2">
+											<h1 className="text-2xl font-bold text-foreground mb-2">
 												{formTitle || "Form Title"}
 											</h1>
 											{formDescription && (
-												<p className="text-zinc-600 mb-6">{formDescription}</p>
+												<p className="text-muted-foreground mb-6">{formDescription}</p>
 											)}
 										</div>
 
@@ -505,7 +500,7 @@ const FormsTab = ({ queryClient }) => {
 												)
 												.map((field, index) => (
 													<div key={field.id || index}>
-														<label className="block text-sm font-medium text-zinc-900 mb-2">
+														<label className="block text-sm font-medium text-foreground mb-2">
 															{field.label}
 															{field.required && (
 																<span className="text-red-600 ml-1">*</span>
@@ -517,12 +512,12 @@ const FormsTab = ({ queryClient }) => {
 																placeholder={field.placeholder || ""}
 																rows={4}
 																disabled
-																className="w-full px-4 py-2 border border-zinc-200 rounded-xl bg-zinc-50 text-sm"
+																className="w-full px-4 py-2 border rounded-xl bg-muted text-sm"
 															/>
 														) : field.type === "select" ? (
 															<select
 																disabled
-																className="w-full px-4 py-2 border border-zinc-200 rounded-xl bg-zinc-50 text-sm"
+																className="w-full px-4 py-2 border rounded-xl bg-muted text-sm"
 															>
 																<option>Select an option...</option>
 																{field.options?.map((opt, i) => (
@@ -531,12 +526,12 @@ const FormsTab = ({ queryClient }) => {
 															</select>
 														) : field.type === "checkbox" ? (
 															<div className="flex items-center gap-2">
-																<input
+																<Input
 																	type="checkbox"
 																	disabled
-																	className="w-4 h-4 text-zinc-900 border-zinc-300 rounded"
+																	
 																/>
-																<label className="text-sm text-zinc-700">
+																<label className="text-sm text-muted-foreground">
 																	{field.placeholder || "Check this box"}
 																</label>
 															</div>
@@ -547,12 +542,12 @@ const FormsTab = ({ queryClient }) => {
 																		key={optIndex}
 																		className="flex items-center gap-2"
 																	>
-																		<input
+																		<Input
 																			type="radio"
 																			disabled
-																			className="w-4 h-4 text-zinc-900 border-zinc-300"
+																			
 																		/>
-																		<label className="text-sm text-zinc-700">
+																		<label className="text-sm text-muted-foreground">
 																			{option}
 																		</label>
 																	</div>
@@ -565,41 +560,41 @@ const FormsTab = ({ queryClient }) => {
 																}).map((_, i) => (
 																	<Star
 																		key={i}
-																		className="w-6 h-6 text-zinc-300"
+																		className="w-6 h-6 text-muted-foreground/50"
 																	/>
 																))}
 															</div>
 														) : field.type === "date" ? (
-															<input
+															<Input
 																type="date"
 																disabled
-																className="w-full px-4 py-2 border border-zinc-200 rounded-xl bg-zinc-50 text-sm"
+																
 															/>
 														) : field.type === "signature" ? (
-															<div className="border border-zinc-200 rounded-xl h-32 bg-zinc-50 flex items-center justify-center">
-																<span className="text-sm text-zinc-500">
+															<div className="border rounded-xl h-32 bg-muted flex items-center justify-center">
+																<span className="text-sm text-muted-foreground">
 																	Signature area
 																</span>
 															</div>
 														) : field.type === "image" ? (
-															<div className="border-2 border-dashed border-zinc-300 rounded-xl p-8 text-center">
-																<Upload className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
-																<p className="text-sm text-zinc-500">
+															<div className="border-2 border-dashed rounded-xl p-8 text-center">
+																<Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+																<p className="text-sm text-muted-foreground">
 																	Image upload area
 																</p>
 															</div>
 														) : (
-															<input
+															<Input
 																type={field.type || "text"}
 																placeholder={field.placeholder || ""}
 																disabled
-																className="w-full px-4 py-2 border border-zinc-200 rounded-xl bg-zinc-50 text-sm"
+																
 															/>
 														)}
 													</div>
 												))
 										) : (
-											<p className="text-zinc-500 text-center py-8">
+											<p className="text-muted-foreground text-center py-8">
 												No fields configured. Add fields to see preview.
 											</p>
 										)}
@@ -608,7 +603,7 @@ const FormsTab = ({ queryClient }) => {
 									/* Edit Mode */
 									<>
 										<div>
-											<label className="block text-sm font-medium text-zinc-900 mb-2">
+											<label className="block text-sm font-medium text-foreground mb-2">
 												Form Title *
 											</label>
 											<input
@@ -616,12 +611,12 @@ const FormsTab = ({ queryClient }) => {
 												value={formTitle}
 												onChange={(e) => setFormTitle(e.target.value)}
 												placeholder="Enter form title..."
-												className="w-full px-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+												className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 											/>
 										</div>
 
 										<div>
-											<label className="block text-sm font-medium text-zinc-900 mb-2">
+											<label className="block text-sm font-medium text-foreground mb-2">
 												Description
 											</label>
 											<textarea
@@ -629,7 +624,7 @@ const FormsTab = ({ queryClient }) => {
 												onChange={(e) => setFormDescription(e.target.value)}
 												placeholder="Enter form description..."
 												rows={3}
-												className="w-full px-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm resize-none"
+												className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm resize-none"
 											/>
 										</div>
 
@@ -639,11 +634,11 @@ const FormsTab = ({ queryClient }) => {
 												id="isPublished"
 												checked={isPublished}
 												onChange={(e) => setIsPublished(e.target.checked)}
-												className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-100"
+												className="w-4 h-4 text-foreground border rounded focus:ring-ring"
 											/>
 											<label
 												htmlFor="isPublished"
-												className="text-sm font-medium text-zinc-900"
+												className="text-sm font-medium text-foreground"
 											>
 												Publish form (make it live)
 											</label>
@@ -651,26 +646,23 @@ const FormsTab = ({ queryClient }) => {
 
 										<div>
 											<div className="flex items-center justify-between mb-2">
-												<label className="block text-sm font-medium text-zinc-900">
+												<label className="block text-sm font-medium text-foreground">
 													Form Fields
 												</label>
-												<button
-													onClick={handleAddField}
-													className="flex items-center gap-1 text-sm text-zinc-700 hover:text-zinc-900 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors"
-												>
+												<Button variant="secondary" size="sm" onClick={handleAddField}  className="rounded-xl">
 													<Plus className="w-3.5 h-3.5" />
 													Add Field
-												</button>
+												</Button>
 											</div>
 
 											<div className="space-y-3">
 												{formFields.map((field) => (
 													<div
 														key={field.id}
-														className="p-4 border border-zinc-200 rounded-xl space-y-3"
+														className="p-4 border rounded-xl space-y-3"
 													>
 														<div className="flex items-center justify-between">
-															<span className="text-sm font-medium text-zinc-700">
+															<span className="text-sm font-medium text-muted-foreground">
 																Field {formFields.indexOf(field) + 1}
 															</span>
 															<button
@@ -682,7 +674,7 @@ const FormsTab = ({ queryClient }) => {
 														</div>
 
 														<div>
-															<label className="block text-xs font-medium text-zinc-700 mb-1">
+															<label className="block text-xs font-medium text-muted-foreground mb-1">
 																Label *
 															</label>
 															<input
@@ -694,12 +686,12 @@ const FormsTab = ({ queryClient }) => {
 																	})
 																}
 																placeholder="Field label..."
-																className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+																className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 															/>
 														</div>
 
 														<div>
-															<label className="block text-xs font-medium text-zinc-700 mb-1">
+															<label className="block text-xs font-medium text-muted-foreground mb-1">
 																Type *
 															</label>
 															<AnimatedDropdown
@@ -735,7 +727,7 @@ const FormsTab = ({ queryClient }) => {
 														{(field.type === "select" ||
 															field.type === "radio") && (
 															<div>
-																<label className="block text-xs font-medium text-zinc-700 mb-1">
+																<label className="block text-xs font-medium text-muted-foreground mb-1">
 																	Options (one per line) *
 																</label>
 																<textarea
@@ -753,14 +745,14 @@ const FormsTab = ({ queryClient }) => {
 																	}}
 																	placeholder="Option 1&#10;Option 2&#10;Option 3"
 																	rows={3}
-																	className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm resize-none"
+																	className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm resize-none"
 																/>
 															</div>
 														)}
 
 														{field.type === "rating" && (
 															<div>
-																<label className="block text-xs font-medium text-zinc-700 mb-1">
+																<label className="block text-xs font-medium text-muted-foreground mb-1">
 																	Max Rating
 																</label>
 																<input
@@ -773,13 +765,13 @@ const FormsTab = ({ queryClient }) => {
 																			maxRating: parseInt(e.target.value) || 5,
 																		})
 																	}
-																	className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+																	className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 																/>
 															</div>
 														)}
 
 														<div>
-															<label className="block text-xs font-medium text-zinc-700 mb-1">
+															<label className="block text-xs font-medium text-muted-foreground mb-1">
 																Placeholder
 															</label>
 															<input
@@ -791,7 +783,7 @@ const FormsTab = ({ queryClient }) => {
 																	})
 																}
 																placeholder="Field placeholder..."
-																className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+																className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 															/>
 														</div>
 
@@ -805,11 +797,11 @@ const FormsTab = ({ queryClient }) => {
 																		required: e.target.checked,
 																	})
 																}
-																className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-100"
+																className="w-4 h-4 text-foreground border rounded focus:ring-ring"
 															/>
 															<label
 																htmlFor={`required-${field.id}`}
-																className="text-xs font-medium text-zinc-700"
+																className="text-xs font-medium text-muted-foreground"
 															>
 																Required field
 															</label>
@@ -818,7 +810,7 @@ const FormsTab = ({ queryClient }) => {
 												))}
 
 												{formFields.length === 0 && (
-													<div className="text-center py-8 text-zinc-500 text-sm">
+													<div className="text-center py-8 text-muted-foreground text-sm">
 														No fields added yet. Click "Add Field" to get
 														started.
 													</div>
@@ -842,25 +834,25 @@ const FormsTab = ({ queryClient }) => {
 										setViewMode("list");
 										setSelectedForm(null);
 									}}
-									className="flex items-center gap-2 text-zinc-700 hover:text-zinc-900 p-2 rounded-xl hover:bg-zinc-100 transition-colors text-xs"
+									className="flex items-center gap-2 text-muted-foreground hover:text-foreground p-2 rounded-xl hover:bg-muted transition-colors text-xs"
 								>
 									<ArrowLeft className="w-3 h-3" />
 									Back to Forms
 								</button>
 							)}
-							<div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4">
-								<h2 className="text-lg font-semibold text-zinc-900 mb-2">
+							<div className="bg-muted border rounded-xl p-4">
+								<h2 className="text-lg font-semibold text-foreground mb-2">
 									{selectedForm.title}
 								</h2>
 								{selectedForm.description && (
-									<p className="text-sm text-zinc-600 mb-3">
+									<p className="text-sm text-muted-foreground mb-3">
 										{selectedForm.description}
 									</p>
 								)}
 								<div className="flex items-center gap-4">
 									<div className="text-sm">
-										<span className="text-zinc-600">Total Submissions: </span>
-										<span className="font-semibold text-zinc-900">
+										<span className="text-muted-foreground">Total Submissions: </span>
+										<span className="font-semibold text-foreground">
 											{submissions.length}
 										</span>
 									</div>
@@ -877,17 +869,17 @@ const FormsTab = ({ queryClient }) => {
 							</div>
 
 							{/* Submissions Table */}
-							<div className="border border-zinc-200 rounded-xl overflow-hidden">
+							<div className="border rounded-xl overflow-hidden">
 								<table className="w-full">
-									<thead className="bg-zinc-50 border-b border-zinc-200">
+									<thead className="bg-muted border-b border">
 										<tr>
-											<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
+											<th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground">
 												Submission Data
 											</th>
-											<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
+											<th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground">
 												Date
 											</th>
-											<th className="py-3 px-4 text-left text-xs font-semibold text-zinc-700">
+											<th className="py-3 px-4 text-left text-xs font-semibold text-muted-foreground">
 												Actions
 											</th>
 										</tr>
@@ -903,7 +895,7 @@ const FormsTab = ({ queryClient }) => {
 											<tr>
 												<td
 													colSpan={3}
-													className="py-8 text-center text-zinc-500"
+													className="py-8 text-center text-muted-foreground"
 												>
 													No submissions yet. Share your form to start
 													collecting responses!
@@ -916,18 +908,18 @@ const FormsTab = ({ queryClient }) => {
 													className={`${
 														index === submissions.length - 1
 															? ""
-															: "border-b border-zinc-200"
-													} hover:bg-zinc-50 transition-colors`}
+															: "border-b border"
+													} hover:bg-muted transition-colors`}
 												>
 													<td className="py-3 px-4">
 														<div className="space-y-1">
 															{Object.entries(submission.data || {}).map(
 																([key, value]) => (
 																	<div key={key} className="text-sm">
-																		<span className="font-medium text-zinc-700">
+																		<span className="font-medium text-muted-foreground">
 																			{key}:
 																		</span>{" "}
-																		<span className="text-zinc-600">
+																		<span className="text-muted-foreground">
 																			{String(value)}
 																		</span>
 																	</div>
@@ -935,7 +927,7 @@ const FormsTab = ({ queryClient }) => {
 															)}
 														</div>
 													</td>
-													<td className="py-3 px-4 text-sm text-zinc-600">
+													<td className="py-3 px-4 text-sm text-muted-foreground">
 														<div className="flex items-center gap-1">
 															<Calendar className="w-3.5 h-3.5" />
 															{formatDate(submission.createdAt)}
@@ -946,7 +938,7 @@ const FormsTab = ({ queryClient }) => {
 															onClick={() =>
 																handleDeleteSubmission(submission.id)
 															}
-															className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+															className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
 															title="Delete submission"
 														>
 															<Trash2 className="w-4 h-4" />

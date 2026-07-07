@@ -43,7 +43,10 @@ import { getCachedUserRole, getUserRole } from "../../../lib/utils/getUserRole";
 import { getCurrentUserEmail } from "../../../lib/utils/getCurrentUserEmail";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const BlogTab = () => {
 	const queryClient = useQueryClient();
@@ -183,12 +186,12 @@ const BlogTab = () => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -394,10 +397,10 @@ const BlogTab = () => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex justify-between items-center border-b border-zinc-200 py-2 px-4">
+			<div className="flex justify-between items-center border-b py-2 px-4">
 				<div>
-					<h2 className="text-lg text-zinc-900">Blog Posts</h2>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h2 className="text-lg text-foreground">Blog Posts</h2>
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage your blog posts and content
 					</p>
 				</div>
@@ -408,7 +411,7 @@ const BlogTab = () => {
 							whileHover={{ scale: 1.02 }}
 							whileTap={{ scale: 0.98 }}
 							href="/admin/editor/blog"
-							className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+							className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
 						>
 							<Plus className="w-3.5 h-3.5" />
 							Create New Blog
@@ -419,13 +422,13 @@ const BlogTab = () => {
 
 			{/* Search */}
 			<div className="relative mx-4">
-				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					type="text"
 					placeholder="Search blogs by title, author, status, or slug..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+					className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 				/>
 			</div>
 
@@ -487,12 +490,12 @@ const BlogTab = () => {
 											onClick={() => handleEditBlog(blog)}
 											className="cursor-pointer"
 										>
-											<div className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors">
+											<div className="font-medium text-foreground hover:text-muted-foreground transition-colors">
 												{blog.title}
 											</div>
-											<div className="text-sm text-zinc-500">{blog.slug}</div>
+											<div className="text-sm text-muted-foreground">{blog.slug}</div>
 										</TableCell>
-										<TableCell className="text-zinc-600">{blog.author}</TableCell>
+										<TableCell className="text-muted-foreground">{blog.author}</TableCell>
 										<TableCell>
 											<span
 												className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -506,51 +509,45 @@ const BlogTab = () => {
 												{blog.status}
 											</span>
 										</TableCell>
-										<TableCell className="text-sm text-zinc-600">
+										<TableCell className="text-sm text-muted-foreground">
 											{formatDate(blog.createdAt)}
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-2">
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
+												<Button
 													onClick={(e) => {
 														e.stopPropagation();
 														handleCopyHTML(blog.content || "");
 													}}
-													className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+													className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 													title="Copy HTML"
 												>
 													<Copy className="w-4 h-4" />
-												</motion.button>
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
+												</Button>
+												<Button
 													onClick={(e) => {
 														e.stopPropagation();
 														handleCopyMarkdown(blog.content || "");
 													}}
-													className="p-2 text-zinc-400 hover:text-purple-600 transition-colors"
+													className="p-2 text-muted-foreground hover:text-purple-600 transition-colors"
 													title="Copy Markdown"
 												>
 													<FileText className="w-4 h-4" />
-												</motion.button>
+												</Button>
 											</div>
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-2">
-												<motion.button
-													whileHover={{ scale: 1.05 }}
-													whileTap={{ scale: 0.95 }}
+												<Button
 													onClick={(e) => {
 														e.stopPropagation();
 														handleDeleteBlog(blog.id);
 													}}
-													className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+													className="p-2 text-muted-foreground hover:text-red-600 transition-colors"
 													title="Delete"
 												>
 													<Trash2 className="w-4 h-4" />
-												</motion.button>
+												</Button>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -574,34 +571,27 @@ const BlogTab = () => {
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
 						>
 							{/* Modal Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-								<h3 className="text-lg font-bold text-zinc-900">
+							<div className="flex items-center justify-between p-4 border-b border">
+								<h3 className="text-lg font-bold text-foreground">
 									{editingBlog ? "Edit Blog" : "Create Blog"}
 								</h3>
 								<div className="flex items-center gap-3">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										onClick={handleSaveBlog}
-										className="flex items-center gap-2 px-4 py-1.5 text-sm bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium transition-colors"
-									>
+									<Button onClick={handleSaveBlog} size="sm" className="rounded-xl gap-2">
 										<Save className="w-4 h-4" />
 										{editingBlog ? "Update" : "Create"} Blog
-									</motion.button>
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+									</Button>
+									<Button
 										onClick={handleCloseModal}
-										className="px-4 py-1.5 text-sm text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium transition-colors"
+										className="px-4 py-1.5 text-sm text-muted-foreground bg-muted hover:bg-muted rounded-xl font-medium transition-colors"
 									>
 										Cancel
-									</motion.button>
+									</Button>
 									<button
 										onClick={handleCloseModal}
-										className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+										className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 									>
 										<X className="w-4 h-4" />
 									</button>
@@ -612,7 +602,7 @@ const BlogTab = () => {
 							<div className="flex-1 overflow-y-auto p-4 space-y-4">
 								{/* Banner Image */}
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Banner Image
 									</label>
 									{bannerPreview ? (
@@ -620,28 +610,26 @@ const BlogTab = () => {
 											<img
 												src={bannerPreview}
 												alt="Banner preview"
-												className="w-full h-48 object-cover rounded-xl border border-zinc-300"
+												className="w-full h-48 object-cover rounded-xl border border"
 											/>
-											<motion.button
-												whileHover={{ scale: 1.05 }}
-												whileTap={{ scale: 0.95 }}
+											<Button
 												onClick={handleRemoveBanner}
-												className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+												className="absolute top-2 right-2 p-2 bg-red-500 text-primary-foreground rounded-full hover:bg-red-600 transition-colors"
 												title="Remove banner"
 											>
 												<X className="w-4 h-4" />
-											</motion.button>
+											</Button>
 										</div>
 									) : (
 										<div
 											onClick={() => bannerFileInputRef.current?.click()}
-											className="w-full h-48 border-2 border-dashed border-zinc-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-zinc-400 transition-colors"
+											className="w-full h-48 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-ring transition-colors"
 										>
-											<ImageIcon className="w-12 h-12 text-zinc-400 mb-2" />
-											<p className="text-sm text-zinc-600">
+											<ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
+											<p className="text-sm text-muted-foreground">
 												Click to upload banner image
 											</p>
-											<p className="text-xs text-zinc-500 mt-1">
+											<p className="text-xs text-muted-foreground mt-1">
 												Recommended: 1200x600px
 											</p>
 										</div>
@@ -657,7 +645,7 @@ const BlogTab = () => {
 
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
+										<label className="block text-sm font-medium text-muted-foreground mb-2">
 											Title *
 										</label>
 										<input
@@ -665,12 +653,12 @@ const BlogTab = () => {
 											name="title"
 											value={blogForm.title}
 											onChange={handleBlogFormChange}
-											className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+											className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 											placeholder="Blog title"
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
+										<label className="block text-sm font-medium text-muted-foreground mb-2">
 											Slug *
 										</label>
 										<input
@@ -678,14 +666,14 @@ const BlogTab = () => {
 											name="slug"
 											value={blogForm.slug}
 											onChange={handleBlogFormChange}
-											className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+											className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 											placeholder="blog-slug"
 										/>
 									</div>
 								</div>
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
+										<label className="block text-sm font-medium text-muted-foreground mb-2">
 											Author *
 										</label>
 										<input
@@ -693,12 +681,12 @@ const BlogTab = () => {
 											name="author"
 											value={blogForm.author}
 											onChange={handleBlogFormChange}
-											className="w-full px-4 py-2 border border-zinc-300 rounded-xl focus:ring-2 focus:ring-zinc-500 focus:outline-none"
+											className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-ring focus:outline-none"
 											placeholder="Author name"
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
+										<label className="block text-sm font-medium text-muted-foreground mb-2">
 											Status *
 										</label>
 										<AnimatedDropdown
@@ -714,7 +702,7 @@ const BlogTab = () => {
 									</div>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Content *
 									</label>
 									<TiptapEditor

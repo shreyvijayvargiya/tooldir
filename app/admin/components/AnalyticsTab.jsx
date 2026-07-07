@@ -94,11 +94,11 @@ const MapView = dynamic(
 								>
 									<Popup>
 										<div className="p-2 min-w-[200px]">
-											<div className="font-semibold text-sm text-zinc-900 mb-2">
+											<div className="font-semibold text-sm text-foreground mb-2">
 												{group.records.length} Record
 												{group.records.length !== 1 ? "s" : ""}
 											</div>
-											<div className="text-xs text-zinc-600 space-y-1">
+											<div className="text-xs text-muted-foreground space-y-1">
 												<div>
 													<strong>Total Visits:</strong> {group.totalVisits}
 												</div>
@@ -160,12 +160,12 @@ const generateMockReferrers = () => [
 ];
 
 const StatCard = ({ title, value, change, trend }) => (
-	<div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm">
+	<div className="bg-card p-6 rounded-xl border shadow-sm">
 		<div className="flex justify-between items-start mb-4">
-			<h3 className="text-sm font-medium text-zinc-500">{title}</h3>
+			<h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
 		</div>
 		<div className="flex items-baseline gap-3">
-			<span className="text-3xl font-bold text-zinc-900">{value}</span>
+			<span className="text-3xl font-bold text-foreground">{value}</span>
 			{change && (
 				<span
 					className={`text-xs font-medium px-2 py-0.5 rounded-full ${
@@ -383,9 +383,9 @@ const AnalyticsTab = () => {
 			{/* Header */}
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 				<div>
-					<h2 className="text-2xl font-bold text-zinc-900">Web Analytics</h2>
+					<h2 className="text-2xl font-bold text-foreground">Web Analytics</h2>
 					<div className="flex items-center gap-2 mt-1">
-						<div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium text-zinc-600">
+						<div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium text-muted-foreground">
 							<Globe className="w-3 h-3" />
 							www.buildsaas.dev
 						</div>
@@ -397,13 +397,13 @@ const AnalyticsTab = () => {
 				</div>
 
 				<div className="flex items-center gap-2">
-					<div className="flex bg-zinc-100 p-1 rounded-xl mr-2">
+					<div className="flex bg-muted p-1 rounded-xl mr-2">
 						<button
 							onClick={() => setViewMode("dashboard")}
 							className={`flex items-center gap-2 px-3 py-1 text-sm font-medium rounded-xl transition-all ${
 								viewMode === "dashboard"
-									? "bg-white text-zinc-900 shadow-sm"
-									: "text-zinc-500 hover:text-zinc-700"
+									? "bg-card text-foreground shadow-sm"
+									: "text-muted-foreground hover:text-muted-foreground"
 							}`}
 						>
 							<LayoutDashboard className="w-4 h-4" />
@@ -413,8 +413,8 @@ const AnalyticsTab = () => {
 							onClick={() => setViewMode("map")}
 							className={`flex items-center gap-2 px-3 py-1 text-sm font-medium rounded-xl transition-all ${
 								viewMode === "map"
-									? "bg-white text-zinc-900 shadow-sm"
-									: "text-zinc-500 hover:text-zinc-700"
+									? "bg-card text-foreground shadow-sm"
+									: "text-muted-foreground hover:text-muted-foreground"
 							}`}
 						>
 							<MapIcon className="w-4 h-4" />
@@ -429,7 +429,7 @@ const AnalyticsTab = () => {
 							options={envOptions}
 							value={env}
 							placeholder="Environment"
-							buttonClassName="!rounded-xl !py-1 !px-2 font-medium text-xs text-zinc-700 h-[32px]"
+							buttonClassName="!rounded-xl !py-1 !px-2 font-medium text-xs text-muted-foreground h-[32px]"
 						/>
 					</div>
 
@@ -443,7 +443,7 @@ const AnalyticsTab = () => {
 							options={timeRangeOptions}
 							value={timeRange}
 							placeholder="Time Range"
-							buttonClassName="!rounded-xl !py-1 !px-2 font-medium text-xs text-zinc-700 h-[32px]"
+							buttonClassName="!rounded-xl !py-1 !px-2 font-medium text-xs text-muted-foreground h-[32px]"
 						/>
 					</div>
 
@@ -476,7 +476,7 @@ const AnalyticsTab = () => {
 					</div>
 
 					{/* Main Chart */}
-					<div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm">
+					<div className="bg-card p-6 rounded-xl border shadow-sm">
 						<div className="h-[300px] w-full">
 							<ResponsiveContainer width="100%" height="100%">
 								<AreaChart data={chartData}>
@@ -532,44 +532,44 @@ const AnalyticsTab = () => {
 					{/* Data Tables */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 						{/* Left Column: Pages */}
-						<div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-							<div className="flex border-b border-zinc-200">
+						<div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+							<div className="flex border-b border">
 								{["Pages", "Routes"].map((tab) => (
 									<button
 										key={tab}
 										onClick={() => setActiveTab(tab.toLowerCase())}
 										className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
 											activeTab === tab.toLowerCase()
-												? "border-zinc-900 text-zinc-900"
-												: "border-transparent text-zinc-500 hover:text-zinc-700"
+												? "border-primary text-foreground"
+												: "border-transparent text-muted-foreground hover:text-muted-foreground"
 										}`}
 									>
 										{tab}
 									</button>
 								))}
-								<div className="ml-auto px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+								<div className="ml-auto px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
 									Visitors
 								</div>
 							</div>
-							<div className="divide-y divide-zinc-100">
+							<div className="divide-y divide-border">
 								{activeTab === "pages" &&
 									generateMockPages().map((page, i) => (
 										<div
 											key={i}
-											className="flex items-center justify-between px-4 py-3 group hover:bg-zinc-50 transition-colors"
+											className="flex items-center justify-between px-4 py-3 group hover:bg-muted transition-colors"
 										>
 											<div className="flex-1">
 												<div className="flex items-center justify-between mb-1 relative z-10">
-													<span className="text-sm text-zinc-700">
+													<span className="text-sm text-muted-foreground">
 														{page.path}
 													</span>
-													<span className="text-sm font-medium text-zinc-900">
+													<span className="text-sm font-medium text-foreground">
 														{page.visitors}
 													</span>
 												</div>
-												<div className="w-full bg-zinc-100 h-1.5 rounded-full overflow-hidden">
+												<div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
 													<div
-														className="bg-zinc-200 h-full rounded-full"
+														className="bg-muted h-full rounded-full"
 														style={{ width: `${(page.visitors / 50) * 100}%` }}
 													/>
 												</div>
@@ -577,7 +577,7 @@ const AnalyticsTab = () => {
 										</div>
 									))}
 								{activeTab !== "pages" && (
-									<div className="p-8 text-center text-zinc-500 text-sm">
+									<div className="p-8 text-center text-muted-foreground text-sm">
 										No data available for {activeTab}
 									</div>
 								)}
@@ -585,39 +585,39 @@ const AnalyticsTab = () => {
 						</div>
 
 						{/* Right Column: Referrers/Countries */}
-						<div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-							<div className="flex border-b border-zinc-200">
+						<div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+							<div className="flex border-b border">
 								{["Referrers", "Countries"].map((tab) => (
 									<button
 										key={tab}
 										onClick={() => setActiveReferrerTab(tab.toLowerCase())}
 										className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
 											activeReferrerTab === tab.toLowerCase()
-												? "border-zinc-900 text-zinc-900"
-												: "border-transparent text-zinc-500 hover:text-zinc-700"
+												? "border-primary text-foreground"
+												: "border-transparent text-muted-foreground hover:text-muted-foreground"
 										}`}
 									>
 										{tab}
 									</button>
 								))}
-								<div className="ml-auto px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+								<div className="ml-auto px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
 									Visitors
 								</div>
 							</div>
-							<div className="divide-y divide-zinc-100">
+							<div className="divide-y divide-border">
 								{activeReferrerTab === "referrers" &&
 									generateMockReferrers().map((ref, i) => (
 										<div
 											key={i}
-											className="flex items-center justify-between px-4 py-3 group hover:bg-zinc-50 transition-colors"
+											className="flex items-center justify-between px-4 py-3 group hover:bg-muted transition-colors"
 										>
 											<div className="flex items-center gap-2 flex-1">
-												<Globe className="w-4 h-4 text-zinc-400" />
-												<span className="text-sm text-zinc-700 truncate max-w-[200px]">
+												<Globe className="w-4 h-4 text-muted-foreground" />
+												<span className="text-sm text-muted-foreground truncate max-w-[200px]">
 													{ref.source}
 												</span>
 											</div>
-											<span className="text-sm font-medium text-zinc-900">
+											<span className="text-sm font-medium text-foreground">
 												{ref.visitors}
 											</span>
 										</div>
@@ -626,21 +626,21 @@ const AnalyticsTab = () => {
 									countryData.map((country, i) => (
 										<div
 											key={i}
-											className="flex items-center justify-between px-4 py-3 group hover:bg-zinc-50 transition-colors"
+											className="flex items-center justify-between px-4 py-3 group hover:bg-muted transition-colors"
 										>
 											<div className="flex items-center gap-2 flex-1">
-												<span className="text-sm text-zinc-700">
+												<span className="text-sm text-muted-foreground">
 													{country.name}
 												</span>
 											</div>
-											<span className="text-sm font-medium text-zinc-900">
+											<span className="text-sm font-medium text-foreground">
 												{country.value}
 											</span>
 										</div>
 									))}
 								{activeReferrerTab === "countries" &&
 									countryData.length === 0 && (
-										<div className="p-8 text-center text-zinc-500 text-sm">
+										<div className="p-8 text-center text-muted-foreground text-sm">
 											No location data collected yet
 										</div>
 									)}
@@ -651,7 +651,7 @@ const AnalyticsTab = () => {
 			) : (
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
-						<h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
+						<h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
 							<MapPin className="w-5 h-5" />
 							Geographic Distribution
 						</h3>
@@ -659,7 +659,7 @@ const AnalyticsTab = () => {
 							onClick={() =>
 								setMapTheme(mapTheme === "light" ? "dark" : "light")
 							}
-							className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
+							className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
 						>
 							{mapTheme === "light" ? (
 								<Moon className="w-4 h-4" />
@@ -670,12 +670,12 @@ const AnalyticsTab = () => {
 						</button>
 					</div>
 					<div
-						className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm"
+						className="bg-card border rounded-xl overflow-hidden shadow-sm"
 						style={{ height: "600px" }}
 					>
 						{locationGroups.length === 0 ? (
-							<div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
-								<MapPin className="w-12 h-12 text-zinc-300" />
+							<div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-2">
+								<MapPin className="w-12 h-12 text-muted-foreground/50" />
 								<p>No geographic data available yet</p>
 							</div>
 						) : (

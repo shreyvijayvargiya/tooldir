@@ -28,7 +28,9 @@ import {
 	TableCell,
 	TableEmpty,
 } from "../../../lib/ui/Table";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const ProductsTab = () => {
 	const queryClient = useQueryClient();
@@ -139,12 +141,12 @@ const ProductsTab = () => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -272,36 +274,31 @@ const ProductsTab = () => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
+			<div className="flex items-center justify-between border-b py-2 px-4">
 				<div>
-					<h1 className="text-lg text-zinc-900">Products</h1>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h1 className="text-lg text-foreground">Products</h1>
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage your digital products and checkout links
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
 					<ExportDropdown dataType="products" data={sortedProducts} />
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						onClick={handleCreateClick}
-						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
-					>
+					<Button onClick={handleCreateClick} size="sm" className="rounded-xl gap-1.5">
 						<Plus className="w-3.5 h-3.5" />
 						Create New Product
-					</motion.button>
+					</Button>
 				</div>
 			</div>
 
 			{/* Search */}
 			<div className="relative mx-4">
-				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					type="text"
 					placeholder="Search products..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+					className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 				/>
 			</div>
 
@@ -365,7 +362,7 @@ const ProductsTab = () => {
 														{bannerImages.slice(0, 3).map((imgUrl, idx) => (
 															<div
 																key={idx}
-																className="relative w-12 h-12 rounded-xl overflow-hidden border border-zinc-200 flex-shrink-0 bg-zinc-100 group"
+																className="relative w-12 h-12 rounded-xl overflow-hidden border flex-shrink-0 bg-muted group"
 															>
 																<img
 																	src={imgUrl}
@@ -378,32 +375,32 @@ const ProductsTab = () => {
 																		if (fallback) fallback.style.display = "flex";
 																	}}
 																/>
-																<div className="absolute inset-0 hidden items-center justify-center bg-zinc-100 z-0">
-																	<ImageIcon className="w-4 h-4 text-zinc-400" />
+																<div className="absolute inset-0 hidden items-center justify-center bg-muted z-0">
+																	<ImageIcon className="w-4 h-4 text-muted-foreground" />
 																</div>
 															</div>
 														))}
 														{bannerImages.length > 3 && (
-															<div className="w-12 h-12 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-xs font-medium text-zinc-600 flex-shrink-0">
+															<div className="w-12 h-12 rounded-xl bg-muted border flex items-center justify-center text-xs font-medium text-muted-foreground flex-shrink-0">
 																+{bannerImages.length - 3}
 															</div>
 														)}
 													</div>
 												) : (
-													<div className="w-12 h-12 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center">
-														<ImageIcon className="w-4 h-4 text-zinc-400" />
+													<div className="w-12 h-12 rounded-xl bg-muted border flex items-center justify-center">
+														<ImageIcon className="w-4 h-4 text-muted-foreground" />
 													</div>
 												)}
 											</TableCell>
 											<TableCell>
 												<button
 													onClick={() => handleViewClick(product)}
-													className="text-left w-full hover:text-zinc-600 transition-colors cursor-pointer"
+													className="text-left w-full hover:text-muted-foreground transition-colors cursor-pointer"
 												>
-													<div className="text-sm font-medium text-zinc-900 hover:underline">
+													<div className="text-sm font-medium text-foreground hover:underline">
 														{product.name || "Unnamed Product"}
 													</div>
-													<div className="text-xs text-zinc-500 mt-0.5">
+													<div className="text-xs text-muted-foreground mt-0.5">
 														ID: {product.id?.substring(0, 8)}...
 													</div>
 												</button>
@@ -411,20 +408,20 @@ const ProductsTab = () => {
 											<TableCell>
 												<button
 													onClick={() => handleViewClick(product)}
-													className="text-left w-full hover:text-zinc-600 transition-colors cursor-pointer"
+													className="text-left w-full hover:text-muted-foreground transition-colors cursor-pointer"
 												>
-													<div className="text-sm text-zinc-700 max-w-xs truncate hover:underline">
+													<div className="text-sm text-muted-foreground max-w-xs truncate hover:underline">
 														{product.description || "No description"}
 													</div>
 												</button>
 											</TableCell>
 											<TableCell>
-												<div className="text-sm font-medium text-zinc-900">
+												<div className="text-sm font-medium text-foreground">
 													{formatPrice(product)}
 												</div>
 											</TableCell>
 											<TableCell>
-												<div className="text-sm text-zinc-600">
+												<div className="text-sm text-muted-foreground">
 													{getBillingInterval(product)}
 												</div>
 											</TableCell>
@@ -442,34 +439,30 @@ const ProductsTab = () => {
 														<ExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
 													</a>
 												) : (
-													<span className="text-sm text-zinc-400">No link</span>
+													<span className="text-sm text-muted-foreground">No link</span>
 												)}
 											</TableCell>
-											<TableCell className="text-zinc-600">
+											<TableCell className="text-muted-foreground">
 												<div className="text-sm">
 													{formatDate(product.created_at || product.createdAt)}
 												</div>
 											</TableCell>
 											<TableCell className="text-right">
 												<div className="flex items-center justify-end gap-2">
-													<motion.button
-														whileHover={{ scale: 1.1 }}
-														whileTap={{ scale: 0.9 }}
+													<Button
 														onClick={() => handleEditClick(product)}
-														className="p-1.5 text-zinc-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+														className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
 														title="Edit"
 													>
 														<Edit className="w-4 h-4" />
-													</motion.button>
-													<motion.button
-														whileHover={{ scale: 1.1 }}
-														whileTap={{ scale: 0.9 }}
+													</Button>
+													<Button
 														onClick={() => handleDeleteClick(product)}
-														className="p-1.5 text-zinc-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+														className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
 														title="Delete"
 													>
 														<Trash2 className="w-4 h-4" />
-													</motion.button>
+													</Button>
 												</div>
 											</TableCell>
 										</TableRow>

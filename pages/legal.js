@@ -4,6 +4,13 @@ import Link from "next/link";
 import Navbar from "../app/components/Navbar";
 import Footer from "../app/components/Footer";
 import { FileText, Shield, Scale } from "lucide-react";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 
 const LegalPage = () => {
 	const legalDocuments = [
@@ -42,13 +49,13 @@ const LegalPage = () => {
 			<div className="min-h-screen flex flex-col">
 				<Navbar />
 
-				<section className="flex-1 py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50">
+				<section className="flex-1 py-20 px-4 sm:px-6 lg:px-8 bg-muted">
 					<div className="max-w-6xl mx-auto">
 						<div className="text-center mb-12">
-							<h1 className="text-4xl font-bold text-zinc-900 mb-4">
+							<h1 className="text-4xl font-bold text-foreground mb-4">
 								Legal Information
 							</h1>
-							<p className="text-lg text-zinc-600 max-w-2xl mx-auto">
+							<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
 								Access our legal documents and policies. We are committed to
 								transparency and protecting your rights.
 							</p>
@@ -58,56 +65,59 @@ const LegalPage = () => {
 							{legalDocuments.map((doc, index) => {
 								const Icon = doc.icon;
 								return (
-									<Link
-										key={index}
-										href={doc.href}
-										className="group p-6 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 transition-colors"
-									>
-										<div className="flex items-start gap-4">
-											<div className="p-3 bg-zinc-900 text-white rounded-xl flex-shrink-0 group-hover:bg-zinc-800 transition-colors">
-												<Icon className="w-5 h-5" />
-											</div>
-											<div className="flex-1">
-												<h3 className="text-lg font-semibold text-zinc-900 mb-2 group-hover:text-zinc-700 transition-colors">
-													{doc.title}
-												</h3>
-												<p className="text-sm text-zinc-600">
-													{doc.description}
-												</p>
-											</div>
-										</div>
+									<Link key={index} href={doc.href} className="group">
+										<Card className="h-full transition-colors hover:border-foreground/20">
+											<CardContent className="p-6">
+												<div className="flex items-start gap-4">
+													<div className="p-3 bg-primary text-primary-foreground rounded-xl flex-shrink-0">
+														<Icon className="w-5 h-5" />
+													</div>
+													<div className="flex-1">
+														<h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-foreground/80 transition-colors">
+															{doc.title}
+														</h3>
+														<p className="text-sm text-muted-foreground">
+															{doc.description}
+														</p>
+													</div>
+												</div>
+											</CardContent>
+										</Card>
 									</Link>
 								);
 							})}
 						</div>
 
-						<div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 md:p-12">
-							<h2 className="text-2xl font-semibold text-zinc-900 mb-4">
-								Legal Compliance
-							</h2>
-							<p className="text-zinc-700 leading-relaxed mb-6">
-								We are committed to maintaining the highest standards of legal
-								compliance and protecting the rights of our users. Our legal
-								documents are regularly reviewed and updated to ensure they
-								reflect current best practices and applicable laws.
-							</p>
-
-							<h3 className="text-xl font-semibold text-zinc-900 mt-6 mb-3">
-								Questions or Concerns?
-							</h3>
-							<p className="text-zinc-700 leading-relaxed mb-4">
-								If you have any questions about our legal documents or need to
-								contact us regarding legal matters, please reach out to our
-								legal team:
-							</p>
-							<div className="bg-zinc-50 rounded-xl p-4 border border-zinc-200">
-								<p className="text-zinc-700">
-									<strong>Email:</strong> legal@yourapp.com
-									<br />
-									<strong>Address:</strong> [Your Company Address]
+						<Card>
+							<CardHeader>
+								<CardTitle>Legal Compliance</CardTitle>
+								<CardDescription>
+									We are committed to maintaining the highest standards of legal
+									compliance and protecting the rights of our users. Our legal
+									documents are regularly reviewed and updated to ensure they
+									reflect current best practices and applicable laws.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<h3 className="text-xl font-semibold text-foreground mb-3">
+									Questions or Concerns?
+								</h3>
+								<p className="text-muted-foreground leading-relaxed mb-4">
+									If you have any questions about our legal documents or need to
+									contact us regarding legal matters, please reach out to our
+									legal team:
 								</p>
-							</div>
-						</div>
+								<div className="bg-muted rounded-xl p-4 border">
+									<p className="text-muted-foreground">
+										<strong className="text-foreground">Email:</strong>{" "}
+										legal@yourapp.com
+										<br />
+										<strong className="text-foreground">Address:</strong> [Your
+										Company Address]
+									</p>
+								</div>
+							</CardContent>
+						</Card>
 					</div>
 				</section>
 

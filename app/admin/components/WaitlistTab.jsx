@@ -31,7 +31,10 @@ import {
 	TableCell,
 	TableEmpty,
 } from "../../../lib/ui/Table";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const WaitlistTab = ({ queryClient }) => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -119,12 +122,12 @@ const WaitlistTab = ({ queryClient }) => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -274,10 +277,10 @@ const WaitlistTab = ({ queryClient }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
+			<div className="flex items-center justify-between border-b py-2 px-4">
 				<div>
-					<h1 className="text-lg text-zinc-900">Waitlist</h1>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h1 className="text-lg text-foreground">Waitlist</h1>
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage your waitlist entries
 					</p>
 				</div>
@@ -289,27 +292,25 @@ const WaitlistTab = ({ queryClient }) => {
 							joinedAt: e.joinedAt || e.createdAt,
 						}))}
 					/>
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
+					<Button
 						onClick={() => setShowAddModal(true)}
-						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+						className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
 					>
 						<Plus className="w-3.5 h-3.5" />
 						Add New Member
-					</motion.button>
+					</Button>
 				</div>
 			</div>
 
 			{/* Search */}
 			<div className="relative mx-4">
-				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					type="text"
 					placeholder="Search waitlist by name or email..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+					className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 				/>
 			</div>
 
@@ -361,17 +362,17 @@ const WaitlistTab = ({ queryClient }) => {
 								sortedWaitlist.map((entry) => (
 									<TableRow key={entry.id}>
 										<TableCell>
-											<div className="font-medium text-sm text-zinc-900">
+											<div className="font-medium text-sm text-foreground">
 												{entry.name || ""}
 											</div>
 										</TableCell>
 										<TableCell>
-											<div className="text-sm text-zinc-600 flex items-center gap-1">
+											<div className="text-sm text-muted-foreground flex items-center gap-1">
 												<Mail className="w-3 h-3" />
 												{entry.email || ""}
 											</div>
 										</TableCell>
-										<TableCell className="text-zinc-600">
+										<TableCell className="text-muted-foreground">
 											<div className="text-xs flex items-center gap-1">
 												<Calendar className="w-3 h-3" />
 												{formatDate(entry.createdAt)}
@@ -379,24 +380,20 @@ const WaitlistTab = ({ queryClient }) => {
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-2">
-												<motion.button
-													whileHover={{ scale: 1.1 }}
-													whileTap={{ scale: 0.9 }}
+												<Button
 													onClick={() => handleSendMessageClick(entry)}
 													className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-xl transition-colors"
 													title="Send Message"
 												>
 													<Send className="w-4 h-4" />
-												</motion.button>
-												<motion.button
-													whileHover={{ scale: 1.1 }}
-													whileTap={{ scale: 0.9 }}
+												</Button>
+												<Button
 													onClick={() => handleDeleteClick(entry)}
 													className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
 													title="Remove"
 												>
 													<Trash2 className="w-4 h-4" />
-												</motion.button>
+												</Button>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -422,21 +419,21 @@ const WaitlistTab = ({ queryClient }) => {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
 							onClick={(e) => e.stopPropagation()}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col"
 						>
 							{/* Modal Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
+							<div className="flex items-center justify-between p-4 border-b border">
 								<div className="flex items-center gap-3">
-									<div className="p-2 rounded-full bg-zinc-100 text-zinc-600">
+									<div className="p-2 rounded-full bg-muted text-muted-foreground">
 										<Plus className="w-5 h-5" />
 									</div>
-									<h3 className="text-lg font-bold text-zinc-900">
+									<h3 className="text-lg font-bold text-foreground">
 										Add Waitlist Member
 									</h3>
 								</div>
 								<button
 									onClick={handleCloseModal}
-									className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+									className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 								>
 									<X className="w-4 h-4" />
 								</button>
@@ -445,7 +442,7 @@ const WaitlistTab = ({ queryClient }) => {
 							{/* Modal Body */}
 							<div className="p-6 space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Name *
 									</label>
 									<input
@@ -454,12 +451,12 @@ const WaitlistTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setNewEntry({ ...newEntry, name: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 										placeholder="Enter name"
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Email *
 									</label>
 									<input
@@ -468,32 +465,24 @@ const WaitlistTab = ({ queryClient }) => {
 										onChange={(e) =>
 											setNewEntry({ ...newEntry, email: e.target.value })
 										}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 										placeholder="Enter email address"
 									/>
 								</div>
 							</div>
 
 							{/* Modal Footer */}
-							<div className="flex items-center justify-end gap-3 p-4 border-t border-zinc-200 bg-zinc-50">
-								<motion.button
-									whileHover={{ scale: 1.02 }}
-									whileTap={{ scale: 0.98 }}
+							<div className="flex items-center justify-end gap-3 p-4 border-t bg-muted">
+								<Button
 									onClick={handleCloseModal}
-									className="px-4 py-2 text-sm text-zinc-700 bg-white hover:bg-zinc-100 rounded-xl font-medium transition-colors border border-zinc-300"
+									className="px-4 py-2 text-sm text-muted-foreground bg-card hover:bg-muted rounded-xl font-medium transition-colors border border"
 								>
 									Cancel
-								</motion.button>
-								<motion.button
-									whileHover={{ scale: 1.02 }}
-									whileTap={{ scale: 0.98 }}
-									onClick={handleAddWaitlistEntry}
-									disabled={addWaitlistMutation.isPending}
-									className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								>
+								</Button>
+								<Button onClick={handleAddWaitlistEntry} disabled={addWaitlistMutation.isPending} className="rounded-xl gap-2 disabled:opacity-50">
 									<Save className="w-4 h-4" />
 									{addWaitlistMutation.isPending ? "Adding..." : "Add Member"}
-								</motion.button>
+								</Button>
 							</div>
 						</motion.div>
 					</motion.div>
@@ -515,26 +504,26 @@ const WaitlistTab = ({ queryClient }) => {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
 							onClick={(e) => e.stopPropagation()}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col"
 						>
 							{/* Modal Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
+							<div className="flex items-center justify-between p-4 border-b border">
 								<div className="flex items-center gap-3">
 									<div className="p-2 rounded-full bg-green-100 text-green-600">
 										<Send className="w-5 h-5" />
 									</div>
 									<div>
-										<h3 className="text-lg font-bold text-zinc-900">
+										<h3 className="text-lg font-bold text-foreground">
 											Send Message
 										</h3>
-										<p className="text-xs text-zinc-600">
+										<p className="text-xs text-muted-foreground">
 											To: {selectedEntry.name || "N/A"} ({selectedEntry.email})
 										</p>
 									</div>
 								</div>
 								<button
 									onClick={handleCloseSendMessageModal}
-									className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+									className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 								>
 									<X className="w-4 h-4" />
 								</button>
@@ -543,7 +532,7 @@ const WaitlistTab = ({ queryClient }) => {
 							{/* Modal Body */}
 							<div className="flex-1 overflow-y-auto p-6 space-y-4">
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Subject / Title *
 									</label>
 									<input
@@ -555,12 +544,12 @@ const WaitlistTab = ({ queryClient }) => {
 												subject: e.target.value,
 											})
 										}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 										placeholder="Enter message subject"
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
+									<label className="block text-sm font-medium text-muted-foreground mb-2">
 										Message *
 									</label>
 									<textarea
@@ -572,33 +561,25 @@ const WaitlistTab = ({ queryClient }) => {
 											})
 										}
 										rows={8}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm resize-none"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm resize-none"
 										placeholder="Type your message here..."
 									/>
 								</div>
 							</div>
 
 							{/* Modal Footer */}
-							<div className="flex items-center justify-end gap-3 p-4 border-t border-zinc-200 bg-zinc-50">
-								<motion.button
-									whileHover={{ scale: 1.02 }}
-									whileTap={{ scale: 0.98 }}
+							<div className="flex items-center justify-end gap-3 p-4 border-t bg-muted">
+								<Button
 									onClick={handleCloseSendMessageModal}
 									disabled={isSendingMessage}
-									className="px-4 py-2 text-sm text-zinc-700 bg-white hover:bg-zinc-100 rounded-xl font-medium transition-colors border border-zinc-300 disabled:opacity-50"
+									className="px-4 py-2 text-sm text-muted-foreground bg-card hover:bg-muted rounded-xl font-medium transition-colors border disabled:opacity-50"
 								>
 									Cancel
-								</motion.button>
-								<motion.button
-									whileHover={{ scale: 1.02 }}
-									whileTap={{ scale: 0.98 }}
-									onClick={handleSendMessage}
-									disabled={isSendingMessage}
-									className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								>
+								</Button>
+								<Button onClick={handleSendMessage} disabled={isSendingMessage} className="rounded-xl gap-2 disabled:opacity-50">
 									<Send className="w-4 h-4" />
 									{isSendingMessage ? "Sending..." : "Send Message"}
-								</motion.button>
+								</Button>
 							</div>
 						</motion.div>
 					</motion.div>

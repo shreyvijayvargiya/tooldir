@@ -40,6 +40,7 @@ import { getAllMessages } from "../../../lib/api/messages";
 import { getAllSubscribers } from "../../../lib/api/subscribers";
 import { getAllUsers } from "../../../lib/api/users";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
+import { Button } from "@/components/ui/button";
 
 const HomeTab = ({ onNavigate }) => {
 	const [activeTab, setActiveTab] = useState("overview");
@@ -239,7 +240,7 @@ const HomeTab = ({ onNavigate }) => {
 					count: communicationStats.unreadMessages,
 					label: "unread message",
 					action: () => onNavigate?.("messages"),
-					color: "bg-zinc-50 border-zinc-300 text-zinc-900",
+					color: "bg-muted border text-foreground",
 					icon: MessageSquare,
 				},
 			]
@@ -251,7 +252,7 @@ const HomeTab = ({ onNavigate }) => {
 					count: financialStats.unpaidInvoices,
 					label: "unpaid invoice",
 					action: () => onNavigate?.("invoices"),
-					color: "bg-zinc-50 border-zinc-300 text-zinc-900",
+					color: "bg-muted border text-foreground",
 					icon: Receipt,
 				},
 			]
@@ -300,10 +301,10 @@ const HomeTab = ({ onNavigate }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 px-4 pb-2">
+			<div className="flex items-center justify-between border-b px-4 pb-2">
 				<div>
-					<h1 className="text-lg text-zinc-900 text-shadow-sm">Dashboard</h1>
-					<p className="text-sm text-zinc-500 font-medium mt-1">
+					<h1 className="text-lg text-foreground text-shadow-sm">Dashboard</h1>
+					<p className="text-sm text-muted-foreground font-medium mt-1">
 						Welcome back! Here's what's happening with your business.
 					</p>
 				</div>
@@ -320,31 +321,31 @@ const HomeTab = ({ onNavigate }) => {
 										animate={{ opacity: 1, x: 0 }}
 										transition={{ delay: index * 0.1 }}
 										onClick={alert.action}
-										className={`group flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-zinc-200 cursor-pointer transition-all hover:bg-zinc-50 hover:shadow-md hover:-translate-y-0.5 ${alert.color}`}
+										className={`group flex items-center gap-3 px-4 py-2.5 rounded-2xl border cursor-pointer transition-all hover:bg-muted hover:shadow-md hover:-translate-y-0.5 ${alert.color}`}
 									>
-										<div className="p-1.5 rounded-xl bg-white/80 shadow-sm transition-transform group-hover:scale-110">
-											<Icon className="w-4 h-4 text-zinc-900" />
+										<div className="p-1.5 rounded-xl bg-card/80 shadow-sm transition-transform group-hover:scale-110">
+											<Icon className="w-4 h-4 text-foreground" />
 										</div>
 										<div>
-											<p className="text-xs font-bold text-zinc-900 leading-none">
+											<p className="text-xs font-bold text-foreground leading-none">
 												{alert.count} {alert.label}{alert.count > 1 ? "s" : ""}
 											</p>
-											<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1 group-hover:text-zinc-600 transition-colors">Attention Required</p>
+											<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1 group-hover:text-muted-foreground transition-colors">Attention Required</p>
 										</div>
-										<ArrowRight className="w-3.5 h-3.5 text-zinc-300 group-hover:text-zinc-900 transition-colors" />
+										<ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
 									</motion.div>
 								);
 							})}
 						</div>
 					)}
-					<div className="h-10 w-px bg-zinc-100 mx-2" />
+					<div className="h-10 w-px bg-muted mx-2" />
 					<div className="flex flex-col items-end">
-						<div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+						<div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
 							<div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
 							Live System Status
 						</div>
-						<div className="flex items-center gap-2 text-sm font-bold text-zinc-900 mt-1">
-							<Activity className="w-4 h-4 text-zinc-400" />
+						<div className="flex items-center gap-2 text-sm font-bold text-foreground mt-1">
+							<Activity className="w-4 h-4 text-muted-foreground" />
 							<span>Updated Just now</span>
 						</div>
 					</div>
@@ -360,28 +361,28 @@ const HomeTab = ({ onNavigate }) => {
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: index * 0.1 }}
 						onClick={() => onNavigate?.(metric.tab)}
-						className="relative group p-6 rounded-3xl overflow-hidden bg-white border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+						className="relative group p-6 rounded-3xl overflow-hidden bg-card border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
 					>
 						{/* Background Glow */}
 						<div className={`absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br ${metric.color} opacity-[0.03] rounded-full group-hover:scale-150 transition-transform duration-500`} />
 
 						<div className="relative flex items-center justify-between mb-4">
 							<div className={`p-3 rounded-2xl bg-gradient-to-br ${metric.color} shadow-lg shadow-indigo-500/10`}>
-								<metric.icon className="w-6 h-6 text-white" />
+								<metric.icon className="w-6 h-6 text-primary-foreground" />
 							</div>
-							<div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-50 rounded-full border border-zinc-100">
+							<div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-full border border">
 								<TrendingUp className="w-3 h-3 text-emerald-500" />
-								<span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">+12%</span>
+								<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">+12%</span>
 							</div>
 						</div>
 
 						<div className="relative">
-							<p className="text-3xl font-black text-zinc-900 tracking-tight mb-1">
+							<p className="text-3xl font-black text-foreground tracking-tight mb-1">
 								{metric.value}
 							</p>
 							<div className="flex items-center justify-between">
-								<p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">{metric.title}</p>
-								<p className="text-[10px] font-medium text-zinc-400">{metric.subtitle}</p>
+								<p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">{metric.title}</p>
+								<p className="text-[10px] font-medium text-muted-foreground">{metric.subtitle}</p>
 							</div>
 						</div>
 					</motion.div>
@@ -391,7 +392,7 @@ const HomeTab = ({ onNavigate }) => {
 			{/* Quick Actions & Help */}
 			<div className="flex items-center justify-between gap-4 flex-wrap px-4">
 				<div className="flex items-center gap-3">
-					<Zap className="w-5 h-5 text-zinc-600" />
+					<Zap className="w-5 h-5 text-muted-foreground" />
 					<div className="w-64">
 						<AnimatedDropdown
 							isOpen={isQuickActionsDropdownOpen}
@@ -411,26 +412,23 @@ const HomeTab = ({ onNavigate }) => {
 						href="/docs"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white border border-zinc-200 rounded-xl hover:bg-zinc-100 transition-colors text-zinc-700"
+						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-card border rounded-xl hover:bg-muted transition-colors text-muted-foreground"
 					>
 						<BookOpen className="w-4 h-4" />
 						View Docs
 						<ExternalLink className="w-3 h-3" />
 					</a>
-					<button
-						onClick={() => onNavigate?.("teams")}
-						className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors"
-					>
+					<Button onClick={() => onNavigate?.("teams")}  className="rounded-xl gap-2">
 						<Settings className="w-4 h-4" />
 						Settings
-					</button>
+					</Button>
 				</div>
 			</div>
 
 			<div className="flex flex-col lg:flex-row gap-8 px-4">
 				<div className="flex-1 min-w-0 space-y-6">
 					{/* Tabs */}
-					<div className="border-b border-zinc-200">
+					<div className="border-b border">
 						<div className="flex gap-1 overflow-x-auto no-scrollbar">
 							{tabs.map((tab) => {
 								const Icon = tab.icon;
@@ -439,8 +437,8 @@ const HomeTab = ({ onNavigate }) => {
 										key={tab.id}
 										onClick={() => setActiveTab(tab.id)}
 										className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === tab.id
-											? "border-zinc-900 text-zinc-900"
-											: "border-transparent text-zinc-600 hover:text-zinc-900"
+											? "border-primary text-foreground"
+											: "border-transparent text-muted-foreground hover:text-foreground"
 											}`}
 									>
 										<Icon className="w-4 h-4" />
@@ -457,13 +455,13 @@ const HomeTab = ({ onNavigate }) => {
 						{activeTab === "overview" && (
 							<div className="space-y-6">
 								{/* Content Activity Chart */}
-								<div className="p-5 rounded-3xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+								<div className="p-5 rounded-3xl border bg-card shadow-sm overflow-hidden">
 									<div className="flex items-center justify-between mb-6">
-										<h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
-											<Activity className="w-4 h-4 text-zinc-600" />
+										<h3 className="text-base font-bold text-foreground flex items-center gap-2">
+											<Activity className="w-4 h-4 text-muted-foreground" />
 											Content Activity
 										</h3>
-										<div className="flex items-center gap-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+										<div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
 											<div className="flex items-center gap-1.5">
 												<div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
 												Blogs
@@ -475,10 +473,10 @@ const HomeTab = ({ onNavigate }) => {
 										</div>
 									</div>
 									{blogsLoading || emailsLoading ? (
-										<div className="h-64 flex items-center justify-center text-zinc-500">
+										<div className="h-64 flex items-center justify-center text-muted-foreground">
 											<div className="flex flex-col items-center gap-3">
-												<div className="w-8 h-8 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
-												<span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Syncing Data...</span>
+												<div className="w-8 h-8 border-4 border border-t-zinc-900 rounded-full animate-spin" />
+												<span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Syncing Data...</span>
 											</div>
 										</div>
 									) : (
@@ -549,62 +547,62 @@ const HomeTab = ({ onNavigate }) => {
 						{activeTab === "content" && (
 							<div className="space-y-6">
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-									<div className="p-6 rounded-3xl border border-zinc-200 bg-white shadow-sm">
+									<div className="p-6 rounded-3xl border bg-card shadow-sm">
 										<div className="flex items-center justify-between mb-6">
 											<div className="p-2.5 rounded-2xl bg-blue-50">
 												<FileText className="w-5 h-5 text-blue-600" />
 											</div>
 											<button
 												onClick={() => onNavigate?.("blogs")}
-												className="p-2 text-zinc-400 hover:text-zinc-600 transition-all"
+												className="p-2 text-muted-foreground hover:text-muted-foreground transition-all"
 											>
 												<ArrowRight className="w-4 h-4" />
 											</button>
 										</div>
-										<h4 className="text-sm font-bold text-zinc-900 mb-1">Blog Content</h4>
-										<p className="text-xs text-zinc-500 mb-6">Manage your articles and posts</p>
+										<h4 className="text-sm font-bold text-foreground mb-1">Blog Content</h4>
+										<p className="text-xs text-muted-foreground mb-6">Manage your articles and posts</p>
 										<div className="grid grid-cols-3 gap-2">
-											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
-												<p className="text-lg font-black text-zinc-900">{contentStats.blogs.total}</p>
-												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total</p>
+											<div className="p-3 rounded-2xl bg-muted text-center">
+												<p className="text-lg font-black text-foreground">{contentStats.blogs.total}</p>
+												<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total</p>
 											</div>
-											<div className="p-3 rounded-2xl bg-zinc-50 text-center border border-zinc-100">
+											<div className="p-3 rounded-2xl bg-muted text-center border border">
 												<p className="text-lg font-black text-emerald-600">{contentStats.blogs.published}</p>
-												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Live</p>
+												<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Live</p>
 											</div>
-											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
-												<p className="text-lg font-black text-zinc-400">{contentStats.blogs.draft}</p>
-												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Draft</p>
+											<div className="p-3 rounded-2xl bg-muted text-center">
+												<p className="text-lg font-black text-muted-foreground">{contentStats.blogs.draft}</p>
+												<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Draft</p>
 											</div>
 										</div>
 									</div>
 
-									<div className="p-6 rounded-3xl border border-zinc-200 bg-white shadow-sm">
+									<div className="p-6 rounded-3xl border bg-card shadow-sm">
 										<div className="flex items-center justify-between mb-6">
 											<div className="p-2.5 rounded-2xl bg-purple-50">
 												<Mail className="w-5 h-5 text-purple-600" />
 											</div>
 											<button
 												onClick={() => onNavigate?.("emails")}
-												className="p-2 text-zinc-400 hover:text-zinc-600 transition-all"
+												className="p-2 text-muted-foreground hover:text-muted-foreground transition-all"
 											>
 												<ArrowRight className="w-4 h-4" />
 											</button>
 										</div>
-										<h4 className="text-sm font-bold text-zinc-900 mb-1">Email Campaigns</h4>
-										<p className="text-xs text-zinc-500 mb-6">Monitor your email outreach</p>
+										<h4 className="text-sm font-bold text-foreground mb-1">Email Campaigns</h4>
+										<p className="text-xs text-muted-foreground mb-6">Monitor your email outreach</p>
 										<div className="grid grid-cols-3 gap-2">
-											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
-												<p className="text-lg font-black text-zinc-900">{contentStats.emails.total}</p>
-												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total</p>
+											<div className="p-3 rounded-2xl bg-muted text-center">
+												<p className="text-lg font-black text-foreground">{contentStats.emails.total}</p>
+												<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Total</p>
 											</div>
-											<div className="p-3 rounded-2xl bg-zinc-50 text-center border border-zinc-100">
+											<div className="p-3 rounded-2xl bg-muted text-center border border">
 												<p className="text-lg font-black text-emerald-600">{contentStats.emails.published}</p>
-												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sent</p>
+												<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sent</p>
 											</div>
-											<div className="p-3 rounded-2xl bg-zinc-50 text-center">
-												<p className="text-lg font-black text-zinc-400">{contentStats.emails.draft}</p>
-												<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Draft</p>
+											<div className="p-3 rounded-2xl bg-muted text-center">
+												<p className="text-lg font-black text-muted-foreground">{contentStats.emails.draft}</p>
+												<p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Draft</p>
 											</div>
 										</div>
 									</div>
@@ -615,56 +613,53 @@ const HomeTab = ({ onNavigate }) => {
 						{/* Communication Tab */}
 						{activeTab === "communication" && (
 							<div className="space-y-6">
-								<div className="p-6 rounded-3xl border border-zinc-200 bg-white shadow-sm">
+								<div className="p-6 rounded-3xl border bg-card shadow-sm">
 									<div className="flex items-center justify-between mb-6">
 										<div className="flex items-center gap-3">
-											<div className="p-2.5 rounded-2xl bg-zinc-900">
-												<MessageSquare className="w-5 h-5 text-white" />
+											<div className="p-2.5 rounded-2xl bg-primary">
+												<MessageSquare className="w-5 h-5 text-primary-foreground" />
 											</div>
 											<div>
-												<h4 className="text-sm font-bold text-zinc-900">Inbox activity</h4>
-												<p className="text-xs text-zinc-500">Respond to customer inquiries</p>
+												<h4 className="text-sm font-bold text-foreground">Inbox activity</h4>
+												<p className="text-xs text-muted-foreground">Respond to customer inquiries</p>
 											</div>
 										</div>
-										<button
-											onClick={() => onNavigate?.("messages")}
-											className="px-4 py-2 text-[10px] font-bold bg-zinc-50 hover:bg-zinc-100 text-zinc-900 rounded-xl transition-all border border-zinc-200 uppercase tracking-widest"
-										>
+										<Button variant="secondary" size="sm" onClick={() => onNavigate?.("messages")}  className="rounded-xl">
 											Open Inbox
-										</button>
+										</Button>
 									</div>
 									{messagesLoading ? (
 										<div className="text-center py-20">
-											<div className="inline-block w-6 h-6 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin mb-4" />
-											<p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Checking Messages...</p>
+											<div className="inline-block w-6 h-6 border-2 border-t-zinc-900 rounded-full animate-spin mb-4" />
+											<p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Checking Messages...</p>
 										</div>
 									) : recentMessages.length === 0 ? (
-										<div className="text-center py-20 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200">
+										<div className="text-center py-20 bg-muted rounded-2xl border border-dashed border">
 											<CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
-											<p className="text-sm font-bold text-zinc-900">All caught up!</p>
-											<p className="text-xs text-zinc-400 mt-1">Consistency is key. Keep up the great work.</p>
+											<p className="text-sm font-bold text-foreground">All caught up!</p>
+											<p className="text-xs text-muted-foreground mt-1">Consistency is key. Keep up the great work.</p>
 										</div>
 									) : (
 										<div className="space-y-3">
 											{recentMessages.map((message) => (
 												<div
 													key={message.id}
-													className="p-4 rounded-2xl border border-zinc-100 bg-white hover:border-zinc-300 transition-all cursor-pointer group shadow-sm hover:shadow-md"
+													className="p-4 rounded-2xl border bg-card hover:border transition-all cursor-pointer group shadow-sm hover:shadow-md"
 													onClick={() => onNavigate?.("messages")}
 												>
 													<div className="flex items-start justify-between">
 														<div className="flex-1">
-															<p className="text-sm font-bold text-zinc-900 group-hover:text-zinc-600 transition-colors">
+															<p className="text-sm font-bold text-foreground group-hover:text-muted-foreground transition-colors">
 																{message.name || "Anonymous"}
 															</p>
-															<p className="text-xs text-zinc-500 mt-1 line-clamp-1 font-medium">
+															<p className="text-xs text-muted-foreground mt-1 line-clamp-1 font-medium">
 																{message.subject || message.message}
 															</p>
-															<p className="text-[10px] text-zinc-400 mt-2 font-bold uppercase tracking-widest group-hover:text-zinc-600">
+															<p className="text-[10px] text-muted-foreground mt-2 font-bold uppercase tracking-widest group-hover:text-muted-foreground">
 																{formatDate(message.createdAt)}
 															</p>
 														</div>
-														<div className="w-2 h-2 bg-zinc-900 rounded-full mt-1.5 shadow-sm shadow-zinc-900/20" />
+														<div className="w-2 h-2 bg-primary rounded-full mt-1.5 shadow-sm shadow-primary/20" />
 													</div>
 												</div>
 											))}
@@ -681,47 +676,47 @@ const HomeTab = ({ onNavigate }) => {
 					<div className="space-y-6">
 						<div className="flex items-center justify-between">
 							<div>
-								<h3 className="text-base font-bold text-zinc-900">Recent Users</h3>
-								<p className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Community update</p>
+								<h3 className="text-base font-bold text-foreground">Recent Users</h3>
+								<p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Community update</p>
 							</div>
 							<button
 								onClick={() => onNavigate?.("users")}
-								className="p-2 text-zinc-400 hover:text-zinc-900 transition-all"
+								className="p-2 text-muted-foreground hover:text-foreground transition-all"
 							>
 								<ArrowRight className="w-5 h-5" />
 							</button>
 						</div>
 
-						<div className="bg-white border border-zinc-200 rounded-3xl overflow-hidden shadow-sm">
+						<div className="bg-card border rounded-3xl overflow-hidden shadow-sm">
 							{usersLoading ? (
 								<div className="p-20 text-center">
-									<div className="inline-block w-8 h-8 border-4 border-zinc-100 border-t-zinc-900 rounded-full animate-spin" />
+									<div className="inline-block w-8 h-8 border-4 border border-t-zinc-900 rounded-full animate-spin" />
 								</div>
 							) : (
 								<div className="divide-y divide-zinc-50">
 									{users.slice(0, 6).map((u, i) => (
-										<div key={u.id || i} className="p-4 hover:bg-zinc-50 transition-all group flex items-center justify-between">
+										<div key={u.id || i} className="p-4 hover:bg-muted transition-all group flex items-center justify-between">
 											<div className="flex items-center gap-3">
-												<div className="w-10 h-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-600 font-bold border border-zinc-200 group-hover:bg-white transition-colors">
+												<div className="w-10 h-10 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground font-bold border group-hover:bg-card transition-colors">
 													{u.email?.substring(0, 1).toUpperCase() || "U"}
 												</div>
 												<div className="flex flex-col">
-													<span className="text-sm font-bold text-zinc-900 group-hover:text-blue-600 transition-colors">
+													<span className="text-sm font-bold text-foreground group-hover:text-blue-600 transition-colors">
 														{u.username || "Anonymous"}
 													</span>
-													<span className={`text-[10px] font-bold uppercase tracking-widest mt-0.5 ${u.role === "admin" ? "text-zinc-900" : "text-zinc-400"
+													<span className={`text-[10px] font-bold uppercase tracking-widest mt-0.5 ${u.role === "admin" ? "text-foreground" : "text-muted-foreground"
 														}`}>
 														{u.role || "user"}
 													</span>
 												</div>
 											</div>
 											<div className="flex flex-col items-end">
-												<span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+												<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
 													{formatDate(u.createdAt)}
 												</span>
 												<button
 													onClick={() => onNavigate?.("users")}
-													className="mt-1 text-zinc-300 hover:text-zinc-900 transition-all opacity-0 group-hover:opacity-100"
+													className="mt-1 text-muted-foreground/50 hover:text-foreground transition-all opacity-0 group-hover:opacity-100"
 												>
 													<ExternalLink className="w-3.5 h-3.5" />
 												</button>
@@ -730,7 +725,7 @@ const HomeTab = ({ onNavigate }) => {
 									))}
 									<button
 										onClick={() => onNavigate?.("users")}
-										className="w-full p-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-zinc-900 transition-colors bg-zinc-50/50"
+										className="w-full p-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors bg-muted/50"
 									>
 										Show all registration data
 									</button>

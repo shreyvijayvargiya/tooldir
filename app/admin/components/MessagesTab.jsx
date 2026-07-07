@@ -32,7 +32,9 @@ import {
 	TableCell,
 	TableEmpty,
 } from "../../../lib/ui/Table";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const MessagesTab = () => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -221,12 +223,12 @@ const MessagesTab = () => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -247,16 +249,16 @@ const MessagesTab = () => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
+			<div className="flex items-center justify-between border-b py-2 px-4">
 				<div>
-					<h1 className="text-lg text-zinc-900">Messages</h1>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h1 className="text-lg text-foreground">Messages</h1>
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage customer inquiries and support messages
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
 					{unreadCount > 0 && (
-						<div className="px-3 py-1 bg-zinc-900 text-white rounded-xl text-xs font-semibold">
+						<div className="px-3 py-1 bg-primary text-primary-foreground rounded-xl text-xs font-semibold">
 							{unreadCount} Unread
 						</div>
 					)}
@@ -267,32 +269,30 @@ const MessagesTab = () => {
 							status: m.replied ? "replied" : m.read ? "read" : "unread",
 						}))}
 					/>
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
+					<Button
 						onClick={() =>
 							toast.info(
 								"Messages are created from the contact form. Reply to a message from the Actions column."
 							)
 						}
-						className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+						className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
 					>
 						<Plus className="w-3.5 h-3.5" />
 						New Message
-					</motion.button>
+					</Button>
 				</div>
 			</div>
 
 			{/* Filters */}
 			<div className="flex items-center gap-4 mx-4">
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 					<input
 						type="text"
 						placeholder="Search messages by name, email, subject, or message..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+						className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 					/>
 				</div>
 				<AnimatedDropdown
@@ -388,29 +388,29 @@ const MessagesTab = () => {
 									>
 										<TableCell>
 											<div>
-												<div className="font-medium text-sm text-zinc-900 flex items-center gap-2">
+												<div className="font-medium text-sm text-foreground flex items-center gap-2">
 													{!message.read && (
 														<span className="w-2 h-2 bg-blue-600 rounded-full"></span>
 													)}
 													{message.name || "Anonymous"}
 												</div>
-												<div className="text-xs text-zinc-600 flex items-center gap-1 mt-1">
+												<div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
 													<Mail className="w-3 h-3" />
 													{message.email}
 												</div>
 											</div>
 										</TableCell>
 										<TableCell>
-											<div className="font-medium text-sm text-zinc-900">
+											<div className="font-medium text-sm text-foreground">
 												{message.subject}
 											</div>
 										</TableCell>
 										<TableCell>
-											<div className="text-xs text-zinc-600 line-clamp-2 max-w-md">
+											<div className="text-xs text-muted-foreground line-clamp-2 max-w-md">
 												{message.message}
 											</div>
 										</TableCell>
-										<TableCell className="text-zinc-600">
+										<TableCell className="text-muted-foreground">
 											<div className="text-xs flex items-center gap-1">
 												<Calendar className="w-3 h-3" />
 												{formatDate(message.createdAt)}
@@ -424,12 +424,12 @@ const MessagesTab = () => {
 														<span className="font-medium">Replied</span>
 													</div>
 												) : (
-													<div className="flex items-center gap-1.5 text-xs text-zinc-500">
+													<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
 														<span>Not replied</span>
 													</div>
 												)}
 												{message.read ? (
-													<div className="text-xs text-zinc-500">Read</div>
+													<div className="text-xs text-muted-foreground">Read</div>
 												) : (
 													<div className="text-xs text-blue-600 font-medium">
 														Unread
@@ -449,7 +449,7 @@ const MessagesTab = () => {
 												{!message.read && (
 													<button
 														onClick={() => markAsReadMutation.mutate(message.id)}
-														className="p-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
+														className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
 														title="Mark as read"
 													>
 														<Eye className="w-4 h-4" />
@@ -499,34 +499,34 @@ const MessagesTab = () => {
 								animate={{ opacity: 1, scale: 1, y: 0 }}
 								exit={{ opacity: 0, scale: 0.95, y: 20 }}
 								onClick={(e) => e.stopPropagation()}
-								className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+								className="bg-card rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
 							>
 								{/* Header */}
-								<div className="flex items-center justify-between p-6 border-b border-zinc-200">
+								<div className="flex items-center justify-between p-6 border-b border">
 									<div>
-										<h2 className="text-xl font-bold text-zinc-900">
+										<h2 className="text-xl font-bold text-foreground">
 											Reply to Message
 										</h2>
-										<p className="text-sm text-zinc-600 mt-1">
+										<p className="text-sm text-muted-foreground mt-1">
 											To: {selectedMessage.name || "Anonymous"} (
 											{selectedMessage.email})
 										</p>
 									</div>
 									<button
 										onClick={() => setReplyModalOpen(false)}
-										className="p-2 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"
+										className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors"
 									>
 										<X className="w-5 h-5" />
 									</button>
 								</div>
 
 								{/* Original Message Preview */}
-								<div className="p-6 bg-zinc-50 border-b border-zinc-200">
-									<p className="text-xs font-semibold text-zinc-700 mb-2">
+								<div className="p-6 bg-muted border-b border">
+									<p className="text-xs font-semibold text-muted-foreground mb-2">
 										Original Message:
 									</p>
-									<div className="text-sm text-zinc-600 bg-white p-4 rounded-xl border border-zinc-200">
-										<p className="font-medium text-zinc-900 mb-2">
+									<div className="text-sm text-muted-foreground bg-card p-4 rounded-xl border border">
+										<p className="font-medium text-foreground mb-2">
 											{selectedMessage.subject}
 										</p>
 										<p className="whitespace-pre-wrap">
@@ -541,7 +541,7 @@ const MessagesTab = () => {
 									className="flex-1 overflow-y-auto p-6 space-y-4"
 								>
 									<div>
-										<label className="block text-sm font-medium text-zinc-900 mb-1">
+										<label className="block text-sm font-medium text-foreground mb-1">
 											Subject
 										</label>
 										<input
@@ -554,11 +554,11 @@ const MessagesTab = () => {
 												})
 											}
 											required
-											className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+											className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 										/>
 									</div>
 									<div>
-										<label className="block text-sm font-medium text-zinc-900 mb-1">
+										<label className="block text-sm font-medium text-foreground mb-1">
 											Message
 										</label>
 										<textarea
@@ -572,25 +572,21 @@ const MessagesTab = () => {
 											required
 											rows={8}
 											placeholder="Type your reply here..."
-											className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm resize-none"
+											className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm resize-none"
 										/>
 									</div>
-									<div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200">
+									<div className="flex items-center justify-end gap-3 pt-4 border-t border">
 										<button
 											type="button"
 											onClick={() => setReplyModalOpen(false)}
-											className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors"
+											className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-xl transition-colors"
 										>
 											Cancel
 										</button>
-										<button
-											type="submit"
-											disabled={isSendingReply}
-											className="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors flex items-center gap-2 disabled:opacity-50"
-										>
+										<Button type="submit" disabled={isSendingReply}  className="rounded-xl gap-2 disabled:opacity-50">
 											<Send className="w-4 h-4" />
 											{isSendingReply ? "Sending..." : "Send Reply"}
-										</button>
+										</Button>
 									</div>
 								</form>
 							</motion.div>

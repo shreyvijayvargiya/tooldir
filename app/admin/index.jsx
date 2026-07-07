@@ -37,8 +37,9 @@ import {
 	removeUserCookie,
 	setUserCookie,
 } from "../../lib/utils/cookies";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { useAppQueryClient } from "../../lib/hooks/useQueryClient";
+import { Button } from "@/components/ui/button";
 
 const Admin = () => {
 	const queryClient = useAppQueryClient();
@@ -238,7 +239,7 @@ const Admin = () => {
 	};
 
 	return (
-		<div className="h-screen w-screen bg-zinc-50 flex flex-col overflow-hidden">
+		<div className="h-screen w-screen bg-muted flex flex-col overflow-hidden">
 			{/* Main Layout */}
 			<div className="flex flex-1 overflow-hidden relative">
 				{/* Mobile Overlay */}
@@ -268,11 +269,10 @@ const Admin = () => {
 				/>
 
 				{/* Mobile Menu Toggle */}
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
+				<Button
+					variant="outline"
 					onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-					className="md:hidden fixed flex items-center gap-1 border border-zinc-100 bottom-4 z-50 right-4 p-2 text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors shadow-lg bg-white"
+					className="md:hidden fixed flex items-center gap-1 bottom-4 z-50 right-4 rounded-xl shadow-lg"
 				>
 					{isSidebarOpen ? "Close" : "Open"} Sidebar
 					{isSidebarOpen ? (
@@ -280,12 +280,12 @@ const Admin = () => {
 					) : (
 						<Menu className="w-5 h-5" />
 					)}
-				</motion.button>
+				</Button>
 
 				{/* Content Area */}
 				<main className="flex-1 w-full h-full overflow-y-auto">
 					<div className="h-full w-full md:p-2">
-						<div className="h-full w-full bg-white border border-zinc-200 rounded-2xl py-2 overflow-y-auto">
+						<div className="h-full w-full bg-card border rounded-2xl py-2 overflow-y-auto">
 							{activeTab === "home" && <HomeTab onNavigate={setActiveTab} />}
 							{activeTab === "blogs" && <BlogTab queryClient={queryClient} />}
 							{activeTab === "emails" && (
@@ -345,11 +345,11 @@ const Admin = () => {
 								"docs-editor",
 							].includes(activeTab) && (
 									<div className="p-6">
-										<div className="border border-zinc-200 rounded-2xl bg-zinc-50 p-6">
-											<p className="text-sm font-semibold text-zinc-900">
+										<div className="border rounded-2xl bg-muted p-6">
+											<p className="text-sm font-semibold text-foreground">
 												Coming soon
 											</p>
-											<p className="text-sm text-zinc-600 mt-1">
+											<p className="text-sm text-muted-foreground mt-1">
 												This section (<span className="font-mono">{activeTab}</span>)
 												is not implemented yet.
 											</p>

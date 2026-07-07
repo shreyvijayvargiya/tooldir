@@ -2,6 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Navbar from "../app/components/Navbar";
 import Footer from "../app/components/Footer";
+import { Card, CardContent } from "@/components/ui/card";
 
 const TermsAndConditionsPage = () => {
 	return (
@@ -16,13 +17,14 @@ const TermsAndConditionsPage = () => {
 			<div className="min-h-screen flex flex-col">
 				<Navbar />
 
-				<section className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-zinc-50">
+				<section className="flex-1 py-12 px-4 sm:px-6 lg:px-8 bg-muted">
 					<div className="max-w-4xl mx-auto">
-						<div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-8 md:p-12">
-							<h1 className="text-4xl font-bold text-zinc-900 mb-4">
+						<Card>
+							<CardContent className="p-8 md:p-12">
+							<h1 className="text-4xl font-bold text-foreground mb-4">
 								Terms and Conditions
 							</h1>
-							<p className="text-sm text-zinc-600 mb-8">
+							<p className="text-sm text-muted-foreground mb-8">
 								Last updated:{" "}
 								{new Date().toLocaleDateString("en-US", {
 									year: "numeric",
@@ -33,10 +35,10 @@ const TermsAndConditionsPage = () => {
 
 							<div className="prose prose-zinc max-w-none space-y-6">
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										1. Agreement to Terms
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										By accessing or using our service, you agree to be bound by
 										these Terms and Conditions. If you disagree with any part of
 										these terms, then you may not access the service.
@@ -44,16 +46,16 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										2. Use License
 									</h2>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										Permission is granted to temporarily use our service for
 										personal, non-commercial transitory viewing only. This is
 										the grant of a license, not a transfer of title, and under
 										this license you may not:
 									</p>
-									<ul className="list-disc list-inside text-zinc-700 space-y-2 ml-4">
+									<ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
 										<li>Modify or copy the materials</li>
 										<li>
 											Use the materials for any commercial purpose or for any
@@ -75,16 +77,16 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										3. User Accounts
 									</h2>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										When you create an account with us, you must provide
 										information that is accurate, complete, and current at all
 										times. You are responsible for safeguarding the password and
 										for all activities that occur under your account.
 									</p>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										You agree not to disclose your password to any third party.
 										You must notify us immediately upon becoming aware of any
 										breach of security or unauthorized use of your account.
@@ -92,32 +94,32 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										4. Subscription and Payment
 									</h2>
-									<h3 className="text-xl font-semibold text-zinc-900 mt-6 mb-3">
+									<h3 className="text-xl font-semibold text-foreground mt-6 mb-3">
 										4.1 Subscription Terms
 									</h3>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										Some parts of our service are billed on a subscription
 										basis. You will be billed in advance on a recurring and
 										periodic basis.
 									</p>
 
-									<h3 className="text-xl font-semibold text-zinc-900 mt-6 mb-3">
+									<h3 className="text-xl font-semibold text-foreground mt-6 mb-3">
 										4.2 Payment Terms
 									</h3>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										Payment is due on the billing date specified in your
 										subscription. If payment is not received by the due date, we
 										reserve the right to suspend or terminate your access to the
 										service.
 									</p>
 
-									<h3 className="text-xl font-semibold text-zinc-900 mt-6 mb-3">
+									<h3 className="text-xl font-semibold text-foreground mt-6 mb-3">
 										4.3 Refunds
 									</h3>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										Refund policies are subject to our discretion and may vary
 										based on the type of subscription. Please contact us for
 										specific refund information.
@@ -125,13 +127,13 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										5. Prohibited Uses
 									</h2>
-									<p className="text-zinc-700 leading-relaxed mb-4">
+									<p className="text-muted-foreground leading-relaxed mb-4">
 										You may not use our service:
 									</p>
-									<ul className="list-disc list-inside text-zinc-700 space-y-2 ml-4">
+									<ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
 										<li>
 											In any way that violates any applicable national or
 											international law or regulation
@@ -156,10 +158,10 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										6. Intellectual Property
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										The service and its original content, features, and
 										functionality are and will remain the exclusive property of
 										YourApp and its licensors. The service is protected by
@@ -168,10 +170,10 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										7. Termination
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										We may terminate or suspend your account and bar access to
 										the service immediately, without prior notice or liability,
 										for any reason whatsoever, including without limitation if
@@ -180,10 +182,10 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										8. Disclaimer
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										The information on this service is provided on an "as is"
 										basis. To the fullest extent permitted by law, we exclude
 										all representations, warranties, and conditions relating to
@@ -192,10 +194,10 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										9. Limitation of Liability
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										In no event shall YourApp, nor its directors, employees,
 										partners, agents, suppliers, or affiliates, be liable for
 										any indirect, incidental, special, consequential, or
@@ -206,10 +208,10 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										10. Governing Law
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										These Terms shall be interpreted and governed by the laws of
 										[Your Jurisdiction], without regard to its conflict of law
 										provisions.
@@ -217,10 +219,10 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										11. Changes to Terms
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										We reserve the right, at our sole discretion, to modify or
 										replace these Terms at any time. If a revision is material,
 										we will provide at least 30 days notice prior to any new
@@ -229,21 +231,22 @@ const TermsAndConditionsPage = () => {
 								</section>
 
 								<section>
-									<h2 className="text-2xl font-semibold text-zinc-900 mt-8 mb-4">
+									<h2 className="text-2xl font-semibold text-foreground mt-8 mb-4">
 										12. Contact Information
 									</h2>
-									<p className="text-zinc-700 leading-relaxed">
+									<p className="text-muted-foreground leading-relaxed">
 										If you have any questions about these Terms and Conditions,
 										please contact us at:
 									</p>
-									<p className="text-zinc-700 leading-relaxed mt-2">
+									<p className="text-muted-foreground leading-relaxed mt-2">
 										Email: legal@yourapp.com
 										<br />
 										Address: [Your Company Address]
 									</p>
 								</section>
 							</div>
-						</div>
+							</CardContent>
+						</Card>
 					</div>
 				</section>
 

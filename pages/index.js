@@ -14,17 +14,26 @@ import {
 	CreditCard,
 	Users,
 	BarChart3,
-	ChevronDown,
-	ChevronUp,
 	Send,
 	Mail,
 	MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const HomePage = () => {
-	const [expandedFaq, setExpandedFaq] = useState(null);
 	const [contactForm, setContactForm] = useState({
 		name: "",
 		email: "",
@@ -199,16 +208,16 @@ const HomePage = () => {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.5 }}
-							className="text-4xl sm:text-5xl lg:text-6xl font-bold text-zinc-900 mb-6"
+							className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6"
 						>
 							Build Amazing SaaS Products{" "}
-							<span className="text-zinc-600">Faster</span>
+							<span className="text-muted-foreground">Faster</span>
 						</motion.h1>
 						<motion.p
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.5, delay: 0.1 }}
-							className="text-lg text-zinc-600 mb-8 max-w-2xl mx-auto"
+							className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
 						>
 							Start building your SaaS product today with our complete starter
 							template. Includes authentication, payments, admin panel, and
@@ -220,31 +229,27 @@ const HomePage = () => {
 							transition={{ duration: 0.5, delay: 0.2 }}
 							className="flex flex-col sm:flex-row items-center justify-center gap-4"
 						>
-							<Link
-								href="/pricing"
-								className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-medium hover:bg-zinc-800 transition-colors"
-							>
-								Get Started
-								<ArrowRight className="w-4 h-4" />
-							</Link>
-							<Link
-								href="/docs"
-								className="inline-flex items-center gap-2 px-6 py-3 border border-zinc-200 text-zinc-900 rounded-xl font-medium hover:bg-zinc-50 transition-colors"
-							>
-								Learn More
-							</Link>
+							<Button asChild size="lg">
+								<Link href="/pricing">
+									Get Started
+									<ArrowRight className="w-4 h-4" />
+								</Link>
+							</Button>
+							<Button asChild variant="outline" size="lg">
+								<Link href="/docs">Learn More</Link>
+							</Button>
 						</motion.div>
 					</div>
 				</section>
 
 				{/* Features Section */}
-				<section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50">
+				<section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted">
 					<div className="max-w-6xl mx-auto">
 						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-zinc-900 mb-4">
+							<h2 className="text-3xl font-bold text-foreground mb-4">
 								Everything You Need
 							</h2>
-							<p className="text-zinc-600 max-w-2xl mx-auto">
+							<p className="text-muted-foreground max-w-2xl mx-auto">
 								All the essential features to launch your SaaS product quickly
 								and efficiently.
 							</p>
@@ -259,17 +264,20 @@ const HomePage = () => {
 										whileInView={{ opacity: 1, y: 0 }}
 										viewport={{ once: true }}
 										transition={{ delay: index * 0.1 }}
-										className="p-6 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 transition-colors"
 									>
-										<div className="p-3 bg-zinc-900 text-white rounded-xl w-fit mb-4">
-											<Icon className="w-5 h-5" />
-										</div>
-										<h3 className="text-lg font-semibold text-zinc-900 mb-2">
-											{feature.title}
-										</h3>
-										<p className="text-sm text-zinc-600">
-											{feature.description}
-										</p>
+										<Card className="h-full hover:shadow-md transition-shadow">
+											<CardContent className="p-6">
+												<div className="p-3 bg-primary text-primary-foreground rounded-xl w-fit mb-4">
+													<Icon className="w-5 h-5" />
+												</div>
+												<h3 className="text-lg font-semibold text-foreground mb-2">
+													{feature.title}
+												</h3>
+												<p className="text-sm text-muted-foreground">
+													{feature.description}
+												</p>
+											</CardContent>
+										</Card>
 									</motion.div>
 								);
 							})}
@@ -281,10 +289,10 @@ const HomePage = () => {
 				<section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
 					<div className="max-w-6xl mx-auto">
 						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-zinc-900 mb-4">
+							<h2 className="text-3xl font-bold text-foreground mb-4">
 								Simple, Transparent Pricing
 							</h2>
-							<p className="text-zinc-600 max-w-2xl mx-auto">
+							<p className="text-muted-foreground max-w-2xl mx-auto">
 								Choose the plan that works best for you. All plans include a
 								14-day free trial.
 							</p>
@@ -298,50 +306,53 @@ const HomePage = () => {
 									whileInView={{ opacity: 1, y: 0 }}
 									viewport={{ once: true }}
 									transition={{ delay: index * 0.1 }}
-									className={`relative p-8 bg-white border-2 rounded-xl ${
-										plan.popular
-											? "border-zinc-900 shadow-lg"
-											: "border-zinc-200"
-									}`}
+									className="relative"
 								>
-									{plan.popular && (
-										<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-											<span className="px-4 py-1 bg-zinc-900 text-white text-xs font-semibold rounded-full">
-												Most Popular
-											</span>
-										</div>
-									)}
-									<div className="text-center mb-6">
-										<h3 className="text-2xl font-bold text-zinc-900 mb-2">
-											{plan.name}
-										</h3>
-										<div className="mb-2">
-											<span className="text-4xl font-bold text-zinc-900">
-												{plan.price}
-											</span>
-											<span className="text-zinc-600">/{plan.period}</span>
-										</div>
-										<p className="text-sm text-zinc-600">{plan.description}</p>
-									</div>
-									<ul className="space-y-3 mb-6">
-										{plan.features.map((feature, idx) => (
-											<li key={idx} className="flex items-start gap-2">
-												<Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-												<span className="text-sm text-zinc-700">{feature}</span>
-											</li>
-										))}
-									</ul>
-									<Link
-										href="/pricing"
-										className={`w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+									<Card
+										className={`h-full ${
 											plan.popular
-												? "bg-zinc-900 text-white hover:bg-zinc-800"
-												: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+												? "border-primary border-2 shadow-lg"
+												: ""
 										}`}
 									>
-										Get Started
-										<ArrowRight className="w-4 h-4" />
-									</Link>
+										{plan.popular && (
+											<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+												<Badge>Most Popular</Badge>
+											</div>
+										)}
+										<CardContent className="p-8">
+											<div className="text-center mb-6">
+												<h3 className="text-2xl font-bold text-foreground mb-2">
+													{plan.name}
+												</h3>
+												<div className="mb-2">
+													<span className="text-4xl font-bold text-foreground">
+														{plan.price}
+													</span>
+													<span className="text-muted-foreground">/{plan.period}</span>
+												</div>
+												<p className="text-sm text-muted-foreground">{plan.description}</p>
+											</div>
+											<ul className="space-y-3 mb-6">
+												{plan.features.map((feature, idx) => (
+													<li key={idx} className="flex items-start gap-2">
+														<Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+														<span className="text-sm text-foreground">{feature}</span>
+													</li>
+												))}
+											</ul>
+											<Button
+												asChild
+												variant={plan.popular ? "default" : "secondary"}
+												className="w-full"
+											>
+												<Link href="/pricing">
+													Get Started
+													<ArrowRight className="w-4 h-4" />
+												</Link>
+											</Button>
+										</CardContent>
+									</Card>
 								</motion.div>
 							))}
 						</div>
@@ -349,50 +360,39 @@ const HomePage = () => {
 				</section>
 
 				{/* FAQ Section */}
-				<section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50">
+				<section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted">
 					<div className="max-w-3xl mx-auto">
 						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-zinc-900 mb-4">
+							<h2 className="text-3xl font-bold text-foreground mb-4">
 								Frequently Asked Questions
 							</h2>
-							<p className="text-zinc-600">
+							<p className="text-muted-foreground">
 								Everything you need to know about our SaaS starter template.
 							</p>
 						</div>
 
-						<div className="space-y-4">
-							{faqs.map((faq, index) => (
-								<motion.div
-									key={index}
-									initial={{ opacity: 0, y: 20 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ delay: index * 0.1 }}
-									className="bg-white border border-zinc-200 rounded-xl overflow-hidden"
-								>
-									<button
-										onClick={() =>
-											setExpandedFaq(expandedFaq === index ? null : index)
-										}
-										className="w-full p-4 flex items-center justify-between text-left hover:bg-zinc-50 transition-colors"
-									>
-										<span className="font-semibold text-zinc-900">
-											{faq.question}
-										</span>
-										{expandedFaq === index ? (
-											<ChevronUp className="w-5 h-5 text-zinc-600 flex-shrink-0" />
-										) : (
-											<ChevronDown className="w-5 h-5 text-zinc-600 flex-shrink-0" />
-										)}
-									</button>
-									{expandedFaq === index && (
-										<div className="px-4 pb-4 text-sm text-zinc-600">
-											{faq.answer}
-										</div>
-									)}
-								</motion.div>
-							))}
-						</div>
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true }}
+						>
+							<Card>
+								<CardContent className="p-6">
+									<Accordion type="single" collapsible className="w-full">
+										{faqs.map((faq, index) => (
+											<AccordionItem key={index} value={`item-${index}`}>
+												<AccordionTrigger className="text-left">
+													{faq.question}
+												</AccordionTrigger>
+												<AccordionContent className="text-muted-foreground">
+													{faq.answer}
+												</AccordionContent>
+											</AccordionItem>
+										))}
+									</Accordion>
+								</CardContent>
+							</Card>
+						</motion.div>
 					</div>
 				</section>
 
@@ -400,10 +400,10 @@ const HomePage = () => {
 				<section id="contact" className="py-20 px-4 sm:px-6 lg:px-8">
 					<div className="max-w-4xl mx-auto">
 						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-zinc-900 mb-4">
+							<h2 className="text-3xl font-bold text-foreground mb-4">
 								Get in Touch
 							</h2>
-							<p className="text-zinc-600">
+							<p className="text-muted-foreground">
 								Have a question? We'd love to hear from you.
 							</p>
 						</div>
@@ -411,150 +411,153 @@ const HomePage = () => {
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 							{/* Contact Info */}
 							<div className="space-y-6">
-								<div className="p-6 bg-white border border-zinc-200 rounded-xl">
-									<div className="flex items-start gap-4">
-										<div className="p-3 bg-zinc-900 text-white rounded-xl">
-											<Mail className="w-5 h-5" />
+								<Card>
+									<CardContent className="p-6">
+										<div className="flex items-start gap-4">
+											<div className="p-3 bg-primary text-primary-foreground rounded-xl">
+												<Mail className="w-5 h-5" />
+											</div>
+											<div>
+												<h3 className="font-semibold text-foreground mb-1">
+													Email
+												</h3>
+												<p className="text-sm text-muted-foreground">
+													support@yourapp.com
+												</p>
+											</div>
 										</div>
-										<div>
-											<h3 className="font-semibold text-zinc-900 mb-1">
-												Email
-											</h3>
-											<p className="text-sm text-zinc-600">
-												support@yourapp.com
-											</p>
+									</CardContent>
+								</Card>
+								<Card>
+									<CardContent className="p-6">
+										<div className="flex items-start gap-4">
+											<div className="p-3 bg-primary text-primary-foreground rounded-xl">
+												<MessageSquare className="w-5 h-5" />
+											</div>
+											<div>
+												<h3 className="font-semibold text-foreground mb-1">
+													Response Time
+												</h3>
+												<p className="text-sm text-muted-foreground">
+													We typically respond within 24 hours
+												</p>
+											</div>
 										</div>
-									</div>
-								</div>
-								<div className="p-6 bg-white border border-zinc-200 rounded-xl">
-									<div className="flex items-start gap-4">
-										<div className="p-3 bg-zinc-900 text-white rounded-xl">
-											<MessageSquare className="w-5 h-5" />
-										</div>
-										<div>
-											<h3 className="font-semibold text-zinc-900 mb-1">
-												Response Time
-											</h3>
-											<p className="text-sm text-zinc-600">
-												We typically respond within 24 hours
-											</p>
-										</div>
-									</div>
-								</div>
+									</CardContent>
+								</Card>
 							</div>
 
 							{/* Contact Form */}
-							<form
-								onSubmit={handleContactSubmit}
-								className="p-6 bg-white border border-zinc-200 rounded-xl space-y-4"
-							>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Name
-									</label>
-									<input
-										type="text"
-										name="name"
-										value={contactForm.name}
-										onChange={(e) =>
-											setContactForm({
-												...contactForm,
-												[e.target.name]: e.target.value,
-											})
-										}
-										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Email
-									</label>
-									<input
-										type="email"
-										name="email"
-										value={contactForm.email}
-										onChange={(e) =>
-											setContactForm({
-												...contactForm,
-												[e.target.name]: e.target.value,
-											})
-										}
-										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Subject
-									</label>
-									<input
-										type="text"
-										name="subject"
-										value={contactForm.subject}
-										onChange={(e) =>
-											setContactForm({
-												...contactForm,
-												[e.target.name]: e.target.value,
-											})
-										}
-										required
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-zinc-900 mb-1">
-										Message
-									</label>
-									<textarea
-										name="message"
-										value={contactForm.message}
-										onChange={(e) =>
-											setContactForm({
-												...contactForm,
-												[e.target.name]: e.target.value,
-											})
-										}
-										required
-										rows={4}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-									/>
-								</div>
-								<button
-									type="submit"
-									disabled={isSubmittingContact}
-									className="w-full py-3 bg-zinc-900 text-white rounded-xl font-medium hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
-								>
-									<Send className="w-4 h-4" />
-									{isSubmittingContact ? "Sending..." : "Send Message"}
-								</button>
-							</form>
+							<Card>
+								<CardContent className="p-6">
+									<form onSubmit={handleContactSubmit} className="space-y-4">
+										<div className="space-y-2">
+											<Label htmlFor="name">Name</Label>
+											<Input
+												id="name"
+												type="text"
+												name="name"
+												value={contactForm.name}
+												onChange={(e) =>
+													setContactForm({
+														...contactForm,
+														[e.target.name]: e.target.value,
+													})
+												}
+												required
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="email">Email</Label>
+											<Input
+												id="email"
+												type="email"
+												name="email"
+												value={contactForm.email}
+												onChange={(e) =>
+													setContactForm({
+														...contactForm,
+														[e.target.name]: e.target.value,
+													})
+												}
+												required
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="subject">Subject</Label>
+											<Input
+												id="subject"
+												type="text"
+												name="subject"
+												value={contactForm.subject}
+												onChange={(e) =>
+													setContactForm({
+														...contactForm,
+														[e.target.name]: e.target.value,
+													})
+												}
+												required
+											/>
+										</div>
+										<div className="space-y-2">
+											<Label htmlFor="message">Message</Label>
+											<Textarea
+												id="message"
+												name="message"
+												value={contactForm.message}
+												onChange={(e) =>
+													setContactForm({
+														...contactForm,
+														[e.target.name]: e.target.value,
+													})
+												}
+												required
+												rows={4}
+											/>
+										</div>
+										<Button
+											type="submit"
+											disabled={isSubmittingContact}
+											className="w-full"
+										>
+											<Send className="w-4 h-4" />
+											{isSubmittingContact ? "Sending..." : "Send Message"}
+										</Button>
+									</form>
+								</CardContent>
+							</Card>
 						</div>
 					</div>
 				</section>
 
 				{/* CTA Section */}
-				<section className="py-20 px-4 sm:px-6 lg:px-8 bg-zinc-50">
+				<section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted">
 					<div className="max-w-4xl mx-auto text-center">
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}
-							className="p-8 bg-zinc-900 rounded-xl text-white"
 						>
-							<h2 className="text-3xl font-bold mb-4">
-								Ready to Get Started?
-							</h2>
-							<p className="text-zinc-300 mb-6">
-								Join thousands of developers building amazing SaaS products.
-							</p>
-							<Link
-								href="/pricing"
-								className="inline-flex items-center gap-2 px-6 py-3 bg-white text-zinc-900 rounded-xl font-medium hover:bg-zinc-100 transition-colors"
-							>
-								View Pricing
-								<ArrowRight className="w-4 h-4" />
-							</Link>
+							<Card className="bg-primary text-primary-foreground border-primary">
+								<CardContent className="p-8">
+									<h2 className="text-3xl font-bold mb-4">
+										Ready to Get Started?
+									</h2>
+									<p className="text-primary-foreground/80 mb-6">
+										Join thousands of developers building amazing SaaS products.
+									</p>
+									<Button
+										asChild
+										variant="secondary"
+										size="lg"
+									>
+										<Link href="/pricing">
+											View Pricing
+											<ArrowRight className="w-4 h-4" />
+										</Link>
+									</Button>
+								</CardContent>
+							</Card>
 						</motion.div>
 					</div>
 				</section>

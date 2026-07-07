@@ -40,9 +40,12 @@ import {
 	formatFileSize,
 	getFileTypeCategory,
 } from "../../../lib/api/assets";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const AssetsTab = ({ queryClient }) => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -144,12 +147,12 @@ const AssetsTab = ({ queryClient }) => {
 	// Get sort icon
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -262,7 +265,7 @@ const AssetsTab = ({ queryClient }) => {
 			case "pdf":
 				return <FileText className="w-5 h-5 text-red-600" />;
 			default:
-				return <File className="w-5 h-5 text-zinc-600" />;
+				return <File className="w-5 h-5 text-muted-foreground" />;
 		}
 	};
 
@@ -293,22 +296,20 @@ const AssetsTab = ({ queryClient }) => {
 	return (
 		<div className="space-y-4">
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-zinc-200 py-2 px-4">
+			<div className="flex items-center justify-between border-b py-2 px-4">
 				<div>
-					<h1 className="text-lg text-zinc-900">Assets</h1>
-					<p className="text-sm text-zinc-600 mt-1">
+					<h1 className="text-lg text-foreground">Assets</h1>
+					<p className="text-sm text-muted-foreground mt-1">
 						Manage files, images, PDFs, and videos
 					</p>
 				</div>
-				<motion.button
-					whileHover={{ scale: 1.02 }}
-					whileTap={{ scale: 0.98 }}
+				<Button
 					onClick={() => setShowUploadModal(true)}
-					className="flex items-center gap-2 bg-zinc-900 text-white px-4 py-2 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
+					className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors text-sm"
 				>
 					<Plus className="w-4 h-4" />
 					Add New File
-				</motion.button>
+				</Button>
 			</div>
 
 			<div className="flex flex-col lg:flex-row gap-6 items-start px-4">
@@ -316,13 +317,13 @@ const AssetsTab = ({ queryClient }) => {
 					{/* Search and Filters */}
 					<div className="flex items-center gap-4">
 						<div className="relative flex-1">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 							<input
 								type="text"
 								placeholder="Search assets by name or type..."
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+								className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 							/>
 						</div>
 						<div className="w-48">
@@ -406,18 +407,18 @@ const AssetsTab = ({ queryClient }) => {
 													</div>
 												</TableCell>
 												<TableCell>
-													<div className="font-medium text-sm text-zinc-900 group-hover:text-blue-600 transition-colors">
+													<div className="font-medium text-sm text-foreground group-hover:text-blue-600 transition-colors">
 														{asset.name}
 													</div>
 												</TableCell>
-												<TableCell className="text-zinc-600">
+												<TableCell className="text-muted-foreground">
 													{asset.type || "Unknown"}
 												</TableCell>
-												<TableCell className="text-zinc-600">
+												<TableCell className="text-muted-foreground">
 													{formatFileSize(asset.size || 0)}
 													{asset.originalSize &&
 														asset.originalSize !== asset.size && (
-															<span className="text-xs text-zinc-400 ml-1">
+															<span className="text-xs text-muted-foreground ml-1">
 																(was {formatFileSize(asset.originalSize)})
 															</span>
 														)}
@@ -429,7 +430,7 @@ const AssetsTab = ({ queryClient }) => {
 																e.stopPropagation();
 																setSelectedAssetForView(asset);
 															}}
-															className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+															className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
 															title="View details"
 														>
 															<Eye className="w-4 h-4" />
@@ -439,14 +440,14 @@ const AssetsTab = ({ queryClient }) => {
 																e.stopPropagation();
 																handleCopyLink(asset);
 															}}
-															className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+															className="p-1.5 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
 															title="Copy link"
 														>
 															<Copy className="w-4 h-4" />
 														</button>
 													</div>
 												</TableCell>
-												<TableCell className="text-zinc-600">
+												<TableCell className="text-muted-foreground">
 													{formatDate(asset.createdAt)}
 												</TableCell>
 												<TableCell>
@@ -455,7 +456,7 @@ const AssetsTab = ({ queryClient }) => {
 															e.stopPropagation();
 															handleDelete(asset.id);
 														}}
-														className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+														className="p-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
 														title="Delete asset"
 													>
 														<Trash2 className="w-4 h-4" />
@@ -472,9 +473,9 @@ const AssetsTab = ({ queryClient }) => {
 
 				{/* Storage Overview Card */}
 				{!isLoading && assets.length > 0 && (
-					<div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm w-full lg:w-80 shrink-0 sticky top-4">
+					<div className="bg-card p-5 rounded-2xl border shadow-sm w-full lg:w-80 shrink-0 sticky top-4">
 						<div className="flex items-center justify-between mb-4">
-							<h2 className="text-sm font-bold text-zinc-900">Storage Overview</h2>
+							<h2 className="text-sm font-bold text-foreground">Storage Overview</h2>
 						</div>
 
 						{(() => {
@@ -500,7 +501,7 @@ const AssetsTab = ({ queryClient }) => {
 							return (
 								<div className="space-y-4">
 									{/* Segmented Progress Bar */}
-									<div className="relative w-full h-2 bg-zinc-100 rounded-full overflow-hidden flex">
+									<div className="relative w-full h-2 bg-muted rounded-full overflow-hidden flex">
 										<div
 											className="h-full bg-violet-500 transition-all duration-500"
 											style={{ width: getWidth(stats.images) }}
@@ -514,66 +515,66 @@ const AssetsTab = ({ queryClient }) => {
 											style={{ width: getWidth(stats.documents) }}
 										/>
 										<div
-											className="h-full bg-zinc-400 transition-all duration-500"
+											className="h-full bg-muted-foreground/40 transition-all duration-500"
 											style={{ width: getWidth(stats.other) }}
 										/>
 									</div>
 
 									<div className="flex items-center justify-between">
-										<p className="text-xs text-zinc-500 font-medium">
-											<span className="text-zinc-900 font-bold">
+										<p className="text-xs text-muted-foreground font-medium">
+											<span className="text-foreground font-bold">
 												{formatFileSize(stats.total)}
 											</span>{" "}
 											of 15 GB used
 										</p>
-										<p className="text-xs font-bold text-zinc-900">
+										<p className="text-xs font-bold text-foreground">
 											{usedPercent}%
 										</p>
 									</div>
 
 									{/* Category Breakdown - Small Cards */}
 									<div className="space-y-2">
-										<div className="flex items-center justify-between p-2 rounded-xl bg-zinc-50 border border-zinc-100">
+										<div className="flex items-center justify-between p-2 rounded-xl bg-muted border border">
 											<div className="flex items-center gap-2">
 												<div className="w-2 h-2 rounded-full bg-violet-500" />
-												<span className="text-[11px] font-medium text-zinc-600">
+												<span className="text-[11px] font-medium text-muted-foreground">
 													Images
 												</span>
 											</div>
-											<span className="text-[11px] font-bold text-zinc-900">
+											<span className="text-[11px] font-bold text-foreground">
 												{formatFileSize(stats.images)}
 											</span>
 										</div>
-										<div className="flex items-center justify-between p-2 rounded-xl bg-zinc-50 border border-zinc-100">
+										<div className="flex items-center justify-between p-2 rounded-xl bg-muted border border">
 											<div className="flex items-center gap-2">
 												<div className="w-2 h-2 rounded-full bg-pink-500" />
-												<span className="text-[11px] font-medium text-zinc-600">
+												<span className="text-[11px] font-medium text-muted-foreground">
 													Videos
 												</span>
 											</div>
-											<span className="text-[11px] font-bold text-zinc-900">
+											<span className="text-[11px] font-bold text-foreground">
 												{formatFileSize(stats.videos)}
 											</span>
 										</div>
-										<div className="flex items-center justify-between p-2 rounded-xl bg-zinc-50 border border-zinc-100">
+										<div className="flex items-center justify-between p-2 rounded-xl bg-muted border border">
 											<div className="flex items-center gap-2">
 												<div className="w-2 h-2 rounded-full bg-amber-500" />
-												<span className="text-[11px] font-medium text-zinc-600">
+												<span className="text-[11px] font-medium text-muted-foreground">
 													Documents
 												</span>
 											</div>
-											<span className="text-[11px] font-bold text-zinc-900">
+											<span className="text-[11px] font-bold text-foreground">
 												{formatFileSize(stats.documents)}
 											</span>
 										</div>
-										<div className="flex items-center justify-between p-2 rounded-xl bg-zinc-50 border border-zinc-100">
+										<div className="flex items-center justify-between p-2 rounded-xl bg-muted border border">
 											<div className="flex items-center gap-2">
-												<div className="w-2 h-2 rounded-full bg-zinc-400" />
-												<span className="text-[11px] font-medium text-zinc-600">
+												<div className="w-2 h-2 rounded-full bg-muted-foreground/40" />
+												<span className="text-[11px] font-medium text-muted-foreground">
 													Other
 												</span>
 											</div>
-											<span className="text-[11px] font-bold text-zinc-900">
+											<span className="text-[11px] font-bold text-foreground">
 												{formatFileSize(stats.other)}
 											</span>
 										</div>
@@ -602,17 +603,17 @@ const AssetsTab = ({ queryClient }) => {
 								animate={{ opacity: 1, scale: 1, y: 0 }}
 								exit={{ opacity: 0, scale: 0.95, y: 20 }}
 								onClick={(e) => e.stopPropagation()}
-								className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+								className="bg-card rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
 							>
 								{/* Modal Header */}
-								<div className="flex items-center justify-between p-6 border-b border-zinc-200">
-									<h2 className="text-xl font-bold text-zinc-900">
+								<div className="flex items-center justify-between p-6 border-b border">
+									<h2 className="text-xl font-bold text-foreground">
 										Upload Files
 									</h2>
 									<button
 										onClick={handleCloseUploadModal}
 										disabled={isUploading}
-										className="p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors disabled:opacity-50"
+										className="p-2 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-xl transition-colors disabled:opacity-50"
 									>
 										<X className="w-5 h-5" />
 									</button>
@@ -622,18 +623,18 @@ const AssetsTab = ({ queryClient }) => {
 								<div className="flex-1 overflow-y-auto p-6 space-y-4">
 									{/* File Input */}
 									<div>
-										<label className="block text-sm font-medium text-zinc-900 mb-2">
+										<label className="block text-sm font-medium text-foreground mb-2">
 											Select Files
 										</label>
 										<div
 											onClick={() => !isUploading && fileInputRef.current?.click()}
-											className="border-2 border-dashed border-zinc-300 rounded-xl p-8 text-center cursor-pointer hover:border-zinc-400 transition-colors"
+											className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-ring transition-colors"
 										>
-											<Upload className="w-12 h-12 text-zinc-400 mx-auto mb-2" />
-											<p className="text-sm text-zinc-600 mb-1">
+											<Upload className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+											<p className="text-sm text-muted-foreground mb-1">
 												Click to select files or drag and drop
 											</p>
-											<p className="text-xs text-zinc-500">
+											<p className="text-xs text-muted-foreground">
 												Supports images, PDFs, videos, and documents
 											</p>
 											<input
@@ -651,7 +652,7 @@ const AssetsTab = ({ queryClient }) => {
 									{/* Selected Files */}
 									{selectedFiles.length > 0 && (
 										<div>
-											<label className="block text-sm font-medium text-zinc-900 mb-2">
+											<label className="block text-sm font-medium text-foreground mb-2">
 												Selected Files ({selectedFiles.length})
 											</label>
 											<div className="space-y-2 max-h-48 overflow-y-auto">
@@ -663,15 +664,15 @@ const AssetsTab = ({ queryClient }) => {
 													return (
 														<div
 															key={index}
-															className="border border-zinc-200 rounded-xl p-3"
+															className="border rounded-xl p-3"
 														>
 															<div className="flex items-center justify-between mb-2">
 																<div className="flex items-center gap-2 flex-1 min-w-0">
 																	{getFileIcon(file.type)}
-																	<span className="text-sm text-zinc-900 truncate">
+																	<span className="text-sm text-foreground truncate">
 																		{file.name}
 																	</span>
-																	<span className="text-xs text-zinc-500">
+																	<span className="text-xs text-muted-foreground">
 																		({formatFileSize(file.size)})
 																	</span>
 																</div>
@@ -682,7 +683,7 @@ const AssetsTab = ({ queryClient }) => {
 																				selectedFiles.filter((_, i) => i !== index)
 																			);
 																		}}
-																		className="p-1 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+																		className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded transition-colors"
 																	>
 																		<X className="w-4 h-4" />
 																	</button>
@@ -691,18 +692,18 @@ const AssetsTab = ({ queryClient }) => {
 															{isUploadingFile && (
 																<div className="space-y-1">
 																	<div className="flex items-center justify-between text-xs">
-																		<span className="text-zinc-600">
+																		<span className="text-muted-foreground">
 																			Uploading...
 																		</span>
-																		<span className="text-zinc-900 font-medium">
+																		<span className="text-foreground font-medium">
 																			{progress}%
 																		</span>
 																	</div>
-																	<div className="w-full bg-zinc-200 rounded-full h-2">
+																	<div className="w-full bg-muted rounded-full h-2">
 																		<motion.div
 																			initial={{ width: 0 }}
 																			animate={{ width: `${progress}%` }}
-																			className="bg-zinc-900 h-2 rounded-full transition-all"
+																			className="bg-primary h-2 rounded-full transition-all"
 																		/>
 																	</div>
 																</div>
@@ -722,22 +723,18 @@ const AssetsTab = ({ queryClient }) => {
 								</div>
 
 								{/* Modal Footer */}
-								<div className="flex items-center justify-end gap-3 p-6 border-t border-zinc-200">
+								<div className="flex items-center justify-end gap-3 p-6 border-t border">
 									<button
 										onClick={handleCloseUploadModal}
 										disabled={isUploading}
-										className="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-xl transition-colors disabled:opacity-50"
+										className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted rounded-xl transition-colors disabled:opacity-50"
 									>
 										Cancel
 									</button>
-									<button
-										onClick={handleUpload}
-										disabled={isUploading || selectedFiles.length === 0}
-										className="px-4 py-2 text-sm font-medium bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-									>
+									<Button onClick={handleUpload} disabled={isUploading || selectedFiles.length === 0}  className="rounded-xl gap-2 disabled:opacity-50">
 										<Upload className="w-4 h-4" />
 										{isUploading ? "Uploading..." : "Upload Files"}
-									</button>
+									</Button>
 								</div>
 							</motion.div>
 						</div>
@@ -761,13 +758,13 @@ const AssetsTab = ({ queryClient }) => {
 								initial={{ opacity: 0, scale: 0.95, y: 20 }}
 								animate={{ opacity: 1, scale: 1, y: 0 }}
 								exit={{ opacity: 0, scale: 0.95, y: 20 }}
-								className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+								className="bg-card rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
 							>
 								{/* Left Side: Preview */}
-								<div className="flex-1 bg-zinc-100 flex items-center justify-center p-4 min-h-[300px] relative">
+								<div className="flex-1 bg-muted flex items-center justify-center p-4 min-h-[300px] relative">
 									<button
 										onClick={() => setSelectedAssetForView(null)}
-										className="absolute top-4 right-4 md:hidden p-2 bg-white/80 rounded-full shadow-sm text-zinc-500 hover:text-zinc-900 z-10"
+										className="absolute top-4 right-4 md:hidden p-2 bg-card/80 rounded-full shadow-sm text-muted-foreground hover:text-foreground z-10"
 									>
 										<X className="w-5 h-5" />
 									</button>
@@ -786,10 +783,10 @@ const AssetsTab = ({ queryClient }) => {
 										/>
 									) : (
 										<div className="text-center space-y-4">
-											<div className="w-24 h-24 bg-white rounded-3xl shadow-sm flex items-center justify-center mx-auto ring-1 ring-zinc-200">
+											<div className="w-24 h-24 bg-card rounded-3xl shadow-sm flex items-center justify-center mx-auto ring-1 ring-border">
 												{getFileIcon(selectedAssetForView.type)}
 											</div>
-											<p className="text-sm font-medium text-zinc-500 uppercase tracking-wider">
+											<p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
 												Preview not available
 											</p>
 										</div>
@@ -797,14 +794,14 @@ const AssetsTab = ({ queryClient }) => {
 								</div>
 
 								{/* Right Side: Details */}
-								<div className="w-full md:w-80 lg:w-96 bg-white border-l border-zinc-100 flex flex-col p-6 space-y-6">
+								<div className="w-full md:w-80 lg:w-96 bg-card border-l flex flex-col p-6 space-y-6">
 									<div className="flex items-center justify-between">
-										<h2 className="text-lg text-zinc-900 truncate pr-4">
+										<h2 className="text-lg text-foreground truncate pr-4">
 											Asset Details
 										</h2>
 										<button
 											onClick={() => setSelectedAssetForView(null)}
-											className="hidden md:block p-1 text-zinc-400 hover:text-zinc-600 transition-colors"
+											className="hidden md:block p-1 text-muted-foreground hover:text-muted-foreground transition-colors"
 										>
 											<X className="w-5 h-5" />
 										</button>
@@ -824,7 +821,7 @@ const AssetsTab = ({ queryClient }) => {
 											download={selectedAssetForView.name}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="p-2.5 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-all shadow-sm"
+											className="p-2.5 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-sm"
 										>
 											<Download className="w-5 h-5" />
 										</a>
@@ -833,52 +830,52 @@ const AssetsTab = ({ queryClient }) => {
 									{/* Metadata List */}
 									<div className="space-y-4">
 										<div className="space-y-1">
-											<label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+											<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
 												<Type className="w-3 h-3" />
 												Name
 											</label>
-											<p className="text-sm font-medium text-zinc-900 break-all leading-relaxed">
+											<p className="text-sm font-medium text-foreground break-all leading-relaxed">
 												{selectedAssetForView.name}
 											</p>
 										</div>
 
 										<div className="grid grid-cols-2 gap-4 pt-2">
 											<div className="space-y-1">
-												<label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+												<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
 													<Hash className="w-3 h-3" />
 													Size
 												</label>
-												<p className="text-sm font-medium text-zinc-900">
+												<p className="text-sm font-medium text-foreground">
 													{formatFileSize(selectedAssetForView.size)}
 												</p>
 											</div>
 											<div className="space-y-1">
-												<label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+												<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
 													<ImageIcon className="w-3 h-3" />
 													Format
 												</label>
-												<p className="text-sm font-medium text-zinc-900 truncate">
+												<p className="text-sm font-medium text-foreground truncate">
 													{selectedAssetForView.type?.split("/")[1]?.toUpperCase() || "N/A"}
 												</p>
 											</div>
 										</div>
 
 										<div className="space-y-1 pt-2">
-											<label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+											<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
 												<Calendar className="w-3 h-3" />
 												Uploaded On
 											</label>
-											<p className="text-sm font-medium text-zinc-900">
+											<p className="text-sm font-medium text-foreground">
 												{formatDate(selectedAssetForView.createdAt)}
 											</p>
 										</div>
 
 										<div className="space-y-1 pt-2">
-											<label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+											<label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
 												<ExternalLink className="w-3 h-3" />
 												Storage Path
 											</label>
-											<p className="text-[11px] font-mono text-zinc-500 truncate bg-zinc-50 p-2 rounded-xl border border-zinc-100">
+											<p className="text-[11px] font-mono text-muted-foreground truncate bg-muted p-2 rounded-xl border border">
 												{selectedAssetForView.storagePath || "N/A"}
 											</p>
 										</div>

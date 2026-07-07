@@ -1,12 +1,12 @@
 import React from "react";
 
 /**
- * Table Component - Shadcn-style white table
+ * Table Component - Shadcn-style semantic table
  * Reusable table component for admin panels
  */
 export const Table = ({ className = "", children, ...props }) => {
 	return (
-		<div className="w-full border border-zinc-200 rounded-xl overflow-hidden bg-white">
+		<div className="w-full border rounded-xl overflow-hidden bg-card">
 			<table className={`w-full ${className}`} {...props}>
 				{children}
 			</table>
@@ -20,7 +20,7 @@ export const Table = ({ className = "", children, ...props }) => {
 export const TableHeader = ({ className = "", children, ...props }) => {
 	return (
 		<thead
-			className={`bg-white border-b border-zinc-200 ${className}`}
+			className={`bg-card border-b ${className}`}
 			{...props}
 		>
 			{children}
@@ -34,7 +34,7 @@ export const TableHeader = ({ className = "", children, ...props }) => {
 export const TableBody = ({ className = "", children, ...props }) => {
 	return (
 		<tbody
-			className={`bg-white divide-y divide-zinc-200 ${className}`}
+			className={`bg-card divide-y divide-border ${className}`}
 			{...props}
 		>
 			{children}
@@ -54,8 +54,8 @@ export const TableRow = ({
 }) => {
 	return (
 		<tr
-			className={`border-b border-zinc-200 last:border-b-0 ${
-				hover ? "hover:bg-zinc-50/50 transition-colors" : ""
+			className={`border-b last:border-b-0 ${
+				hover ? "hover:bg-muted/50 transition-colors" : ""
 			} ${onClick ? "cursor-pointer" : ""} ${className}`}
 			onClick={onClick}
 			{...props}
@@ -77,9 +77,9 @@ export const TableHead = ({
 }) => {
 	return (
 		<th
-			className={`px-4 py-3 text-left text-xs font-semibold text-zinc-700 uppercase tracking-wider ${
+			className={`px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider ${
 				sortable || onClick
-					? "cursor-pointer hover:bg-zinc-50 transition-colors"
+					? "cursor-pointer hover:bg-muted transition-colors"
 					: ""
 			} ${className}`}
 			onClick={onClick}
@@ -95,7 +95,7 @@ export const TableHead = ({
  */
 export const TableCell = ({ className = "", children, ...props }) => {
 	return (
-		<td className={`px-4 py-3 text-sm text-zinc-900 ${className}`} {...props}>
+		<td className={`px-4 py-3 text-sm text-foreground ${className}`} {...props}>
 			{children}
 		</td>
 	);
@@ -115,13 +115,13 @@ export const TableContainer = ({
 }) => {
 	if (isLoading) {
 		return (
-			<div className="w-full border border-zinc-200 rounded-xl overflow-hidden bg-white">
+			<div className="w-full border rounded-xl overflow-hidden bg-card">
 				<div className="p-8 text-center">
 					<div className="animate-pulse space-y-3">
 						{Array.from({ length: rows || 5 }).map((_, i) => (
 							<div key={i} className="flex gap-4">
 								{Array.from({ length: columns || 5 }).map((_, j) => (
-									<div key={j} className="h-4 bg-zinc-200 rounded flex-1"></div>
+									<div key={j} className="h-4 bg-muted rounded flex-1"></div>
 								))}
 							</div>
 						))}
@@ -151,10 +151,10 @@ export const TableEmpty = ({
 			<td colSpan={colSpan} className="px-4 py-12 text-center">
 				{Icon && (
 					<div className="flex justify-center mb-3">
-						<Icon className="w-12 h-12 text-zinc-400" />
+						<Icon className="w-12 h-12 text-muted-foreground" />
 					</div>
 				)}
-				<p className="text-sm text-zinc-500">{message}</p>
+				<p className="text-sm text-muted-foreground">{message}</p>
 			</td>
 		</tr>
 	);

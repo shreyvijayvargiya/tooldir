@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-	X,
 	Save,
 	Trash2,
 	Upload,
@@ -11,8 +9,24 @@ import {
 	Info,
 } from "lucide-react";
 import { createProduct, updateProduct } from "../api/products";
-import AnimatedDropdown from "./AnimatedDropdown";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ProductModal = ({
 	isOpen,
@@ -363,391 +377,316 @@ const ProductModal = ({
 		{ value: "gbp", label: "GBP (£)" },
 	];
 
+	const selectClassName =
+		"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+
 	return (
-		<AnimatePresence>
-			{isOpen && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-					onClick={onClose}
-				>
-					<motion.div
-						initial={{ scale: 0.9, opacity: 0 }}
-						animate={{ scale: 1, opacity: 1 }}
-						exit={{ scale: 0.9, opacity: 0 }}
-						onClick={(e) => e.stopPropagation()}
-						className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
-					>
-						{/* Header */}
-						<div className="flex items-center justify-between p-3 border-b border-zinc-200">
-							<h3 className="text-lg text-zinc-900">
-								{productToEdit ? "Edit Product" : "Create New Product"}
-							</h3>
-							<button
-								onClick={onClose}
-								className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors rounded-xl hover:bg-zinc-100"
-							>
-								<X className="w-5 h-5" />
-							</button>
+		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0">
+				<DialogHeader className="p-3 border-b border-border">
+					<DialogTitle>
+						{productToEdit ? "Edit Product" : "Create New Product"}
+					</DialogTitle>
+				</DialogHeader>
+
+				<div className="flex-1 overflow-y-auto p-6">
+					<div className="space-y-4">
+						<div className="space-y-2">
+							<Label htmlFor="product-name">Product Name *</Label>
+							<Input
+								id="product-name"
+								type="text"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								placeholder="Enter product name"
+								required
+							/>
 						</div>
 
-						{/* Body */}
-						<div className="flex-1 overflow-y-auto p-6">
-							<div className="space-y-4">
-								{/* Product Name */}
-								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
-										Product Name *
-									</label>
-									<input
-										type="text"
-										value={name}
-										onChange={(e) => setName(e.target.value)}
-										placeholder="Enter product name"
-										className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
+						<div className="space-y-2">
+							<Label htmlFor="product-description">Description</Label>
+							<Textarea
+								id="product-description"
+								value={description}
+								onChange={(e) => setDescription(e.target.value)}
+								placeholder="Enter product description"
+								rows={4}
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label>Banner Images</Label>
+							<div className="mb-3">
+								<input
+									ref={fileInputRef}
+									type="file"
+									accept="image/*"
+									multiple
+									onChange={handleFileInputChange}
+									className="hidden"
+									disabled={uploadingImages}
+								/>
+								<DropdownMenu
+									open={isImageDropdownOpen}
+									onOpenChange={setIsImageDropdownOpen}
+								>
+									<DropdownMenuTrigger asChild>
+										<Button
+											type="button"
+											variant="outline"
+											disabled={uploadingImages}
+											className="w-full border-dashed"
+										>
+											{uploadingImages ? (
+												<>
+													<Loader2 className="w-4 h-4 animate-spin" />
+													<span>Uploading...</span>
+												</>
+											) : (
+												<>
+													<Upload className="w-4 h-4" />
+													<span>Upload Images (Multiple)</span>
+													<ChevronDown
+														className={`w-4 h-4 opacity-50 ml-auto transition-transform ${isImageDropdownOpen ? "rotate-180" : ""}`}
+													/>
+												</>
+											)}
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+										<DropdownMenuItem
+											onClick={() => {
+												handleImageSelect("upload");
+												setIsImageDropdownOpen(false);
+											}}
+										>
+											<Upload className="w-4 h-4" />
+											Upload Images
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+								<p className="text-xs text-muted-foreground mt-1 text-center">
+									Select multiple images (Max 10MB per image)
+								</p>
+							</div>
+
+							{bannerImages.length > 0 && (
+								<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+									{bannerImages.map((imageData, index) => {
+										const previewUrl =
+											typeof imageData === "string"
+												? imageData
+												: imageData.previewUrl || imageData.base64;
+										const hasBase64 =
+											typeof imageData === "string"
+												? imageData.startsWith("data:")
+												: !!imageData.base64;
+
+										return (
+											<div
+												key={index}
+												className="relative group rounded-xl overflow-hidden border border-border"
+											>
+												{uploadingIndex === index && (
+													<div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
+														<Loader2 className="w-6 h-6 animate-spin text-foreground" />
+													</div>
+												)}
+												{!hasBase64 && (
+													<div className="absolute inset-0 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-700 flex items-center justify-center z-10">
+														<span className="text-xs text-yellow-700 dark:text-yellow-400 text-center px-2">
+															Will be re-uploaded
+														</span>
+													</div>
+												)}
+												<img
+													src={previewUrl}
+													alt={`Banner ${index + 1}`}
+													className="w-full h-32 object-cover"
+													onError={(e) => {
+														e.target.src =
+															"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='12'%3EInvalid Image%3C/text%3E%3C/svg%3E";
+													}}
+												/>
+												<Button
+													type="button"
+													variant="destructive"
+													size="icon"
+													onClick={() => {
+														setBannerImages(
+															bannerImages.filter((_, i) => i !== index)
+														);
+													}}
+													disabled={uploadingImages}
+													className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+													title="Delete image"
+												>
+													<Trash2 className="w-3.5 h-3.5" />
+												</Button>
+											</div>
+										);
+									})}
+								</div>
+							)}
+						</div>
+
+						{productToEdit && (
+							<div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl flex items-start gap-2">
+								<Info className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+								<div className="text-sm text-yellow-800 dark:text-yellow-300">
+									<p className="font-medium mb-1">Editing Restrictions</p>
+									<p className="text-xs">
+										Billing interval and currency cannot be changed after
+										product creation. To change these, you&apos;ll need to create
+										a new product.
+									</p>
+								</div>
+							</div>
+						)}
+
+						<div className="space-y-2">
+							<Label htmlFor="price-type">Price Type *</Label>
+							<select
+								id="price-type"
+								value={priceType}
+								onChange={(e) => setPriceType(e.target.value)}
+								className={selectClassName}
+							>
+								<option value="fixed">Fixed Price</option>
+								<option value="custom">Pay What You Want</option>
+							</select>
+						</div>
+
+						{priceType === "fixed" ? (
+							<div className="grid grid-cols-2 gap-4">
+								<div className="space-y-2">
+									<Label htmlFor="price-amount">Price *</Label>
+									<Input
+										id="price-amount"
+										type="number"
+										value={priceAmount}
+										onChange={(e) => setPriceAmount(e.target.value)}
+										placeholder="0.00"
+										min="0"
+										step="0.01"
 										required
 									/>
 								</div>
-
-								{/* Description */}
-								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
-										Description
-									</label>
-									<textarea
-										value={description}
-										onChange={(e) => setDescription(e.target.value)}
-										placeholder="Enter product description"
-										rows={4}
-										className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900 resize-none"
-									/>
-								</div>
-
-								{/* Banner Images */}
-								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
-										Banner Images
-									</label>
-
-									{/* File Upload with AnimatedDropdown */}
-									<div className="mb-3">
-										<input
-											ref={fileInputRef}
-											type="file"
-											accept="image/*"
-											multiple
-											onChange={handleFileInputChange}
-											className="hidden"
-											disabled={uploadingImages}
-										/>
-										<AnimatedDropdown
-											isOpen={isImageDropdownOpen}
-											onToggle={() =>
-												setIsImageDropdownOpen(!isImageDropdownOpen)
-											}
-											onSelect={handleImageSelect}
-											options={[{ value: "upload", label: "Upload Images" }]}
-											value={null}
-											placeholder={
-												uploadingImages
-													? "Uploading..."
-													: "Select to upload images"
-											}
-											buttonClassName="w-full px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-xl transition-colors border-2 border-dashed border-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed"
-											renderButton={(selectedOption, isOpen) => (
-												<motion.button
-													whileHover={{ scale: 1.02 }}
-													whileTap={{ scale: 0.98 }}
-													type="button"
-													onClick={() =>
-														setIsImageDropdownOpen(!isImageDropdownOpen)
-													}
-													disabled={uploadingImages}
-													className="w-full px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded-xl transition-colors flex items-center justify-center gap-2 border-2 border-dashed border-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed"
-												>
-													{uploadingImages ? (
-														<>
-															<Loader2 className="w-4 h-4 animate-spin" />
-															<span>Uploading...</span>
-														</>
-													) : (
-														<>
-															<Upload className="w-4 h-4" />
-															<span>Upload Images (Multiple)</span>
-															<ChevronDown
-																className={`w-4 h-4 text-zinc-400 transition-transform ml-auto ${isOpen ? "rotate-180" : ""
-																	}`}
-															/>
-														</>
-													)}
-												</motion.button>
-											)}
-											renderOption={(option) => (
-												<motion.button
-													key={option.value}
-													whileHover={{ backgroundColor: "#f4f4f5" }}
-													onClick={() => {
-														handleImageSelect(option.value);
-														setIsImageDropdownOpen(false);
-													}}
-													className="w-full px-4 py-3 text-left flex items-center gap-2 transition-colors text-zinc-700 hover:bg-zinc-50"
-												>
-													<Upload className="w-4 h-4" />
-													<span>{option.label}</span>
-												</motion.button>
-											)}
-										/>
-										<p className="text-xs text-zinc-500 mt-1 text-center">
-											Select multiple images (Max 10MB per image)
-										</p>
-									</div>
-
-									{/* Images Grid */}
-									{bannerImages.length > 0 && (
-										<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-											{bannerImages.map((imageData, index) => {
-												// Support both new format (object) and legacy format (string)
-												const previewUrl =
-													typeof imageData === "string"
-														? imageData
-														: imageData.previewUrl || imageData.base64;
-												const hasBase64 =
-													typeof imageData === "string"
-														? imageData.startsWith("data:")
-														: !!imageData.base64;
-
-												return (
-													<div
-														key={index}
-														className="relative group rounded-xl overflow-hidden border border-zinc-200"
-													>
-														{uploadingIndex === index && (
-															<div className="absolute inset-0 bg-zinc-900/50 flex items-center justify-center z-10">
-																<Loader2 className="w-6 h-6 animate-spin text-white" />
-															</div>
-														)}
-														{!hasBase64 && (
-															<div className="absolute inset-0 bg-yellow-50 border-2 border-yellow-300 flex items-center justify-center z-10">
-																<span className="text-xs text-yellow-700 text-center px-2">
-																	Will be re-uploaded
-																</span>
-															</div>
-														)}
-														<img
-															src={previewUrl}
-															alt={`Banner ${index + 1}`}
-															className="w-full h-32 object-cover"
-															onError={(e) => {
-																e.target.src =
-																	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-size='12'%3EInvalid Image%3C/text%3E%3C/svg%3E";
-															}}
-														/>
-														<motion.button
-															whileHover={{ scale: 1.1 }}
-															whileTap={{ scale: 0.9 }}
-															type="button"
-															onClick={() => {
-																setBannerImages(
-																	bannerImages.filter((_, i) => i !== index)
-																);
-															}}
-															disabled={uploadingImages}
-															className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity shadow-lg disabled:opacity-0"
-															title="Delete image"
-														>
-															<Trash2 className="w-3.5 h-3.5" />
-														</motion.button>
-													</div>
-												);
-											})}
-										</div>
-									)}
-								</div>
-
-								{/* Info message for editing restrictions */}
-								{productToEdit && (
-									<div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-2">
-										<Info className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-										<div className="text-sm text-yellow-800">
-											<p className="font-medium mb-1">Editing Restrictions</p>
-											<p className="text-xs">
-												Billing interval and currency cannot be changed after
-												product creation. To change these, you'll need to create
-												a new product.
-											</p>
-										</div>
-									</div>
-								)}
-
-								{/* Price Type */}
-								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
-										Price Type *
-									</label>
+								<div className="space-y-2">
+									<Label htmlFor="currency">Currency *</Label>
 									<select
-										value={priceType}
-										onChange={(e) => setPriceType(e.target.value)}
-										className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
-									>
-										<option value="fixed">Fixed Price</option>
-										<option value="custom">Pay What You Want</option>
-									</select>
-								</div>
-
-								{/* Price Fields */}
-								{priceType === "fixed" ? (
-									<div className="grid grid-cols-2 gap-4">
-										<div>
-											<label className="block text-sm font-medium text-zinc-700 mb-2">
-												Price *
-											</label>
-											<input
-												type="number"
-												value={priceAmount}
-												onChange={(e) => setPriceAmount(e.target.value)}
-												placeholder="0.00"
-												min="0"
-												step="0.01"
-												className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
-												required
-											/>
-										</div>
-										<div>
-											<label className="block text-sm font-medium text-zinc-700 mb-2">
-												Currency *
-											</label>
-											<select
-												value={currency}
-												onChange={(e) => setCurrency(e.target.value)}
-												disabled={!!productToEdit}
-												className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900 disabled:bg-zinc-100 disabled:cursor-not-allowed disabled:text-zinc-500"
-											>
-												{currencyOptions.map((option) => (
-													<option key={option.value} value={option.value}>
-														{option.label}
-													</option>
-												))}
-											</select>
-											{productToEdit && (
-												<p className="text-xs text-zinc-500 mt-1">
-													Currency cannot be changed after creation
-												</p>
-											)}
-										</div>
-									</div>
-								) : (
-									<div className="space-y-4">
-										<div className="grid grid-cols-3 gap-4">
-											<div>
-												<label className="block text-sm font-medium text-zinc-700 mb-2">
-													Min Amount
-												</label>
-												<input
-													type="number"
-													value={minAmount}
-													onChange={(e) => setMinAmount(e.target.value)}
-													placeholder="0.00"
-													min="0"
-													step="0.01"
-													className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
-												/>
-											</div>
-											<div>
-												<label className="block text-sm font-medium text-zinc-700 mb-2">
-													Max Amount
-												</label>
-												<input
-													type="number"
-													value={maxAmount}
-													onChange={(e) => setMaxAmount(e.target.value)}
-													placeholder="0.00"
-													min="0"
-													step="0.01"
-													className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900"
-												/>
-											</div>
-											<div>
-												<label className="block text-sm font-medium text-zinc-700 mb-2">
-													Currency *
-												</label>
-												<select
-													value={currency}
-													onChange={(e) => setCurrency(e.target.value)}
-													disabled={!!productToEdit}
-													className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900 disabled:bg-zinc-100 disabled:cursor-not-allowed disabled:text-zinc-500"
-												>
-													{currencyOptions.map((option) => (
-														<option key={option.value} value={option.value}>
-															{option.label}
-														</option>
-													))}
-												</select>
-												{productToEdit && (
-													<p className="text-xs text-zinc-500 mt-1">
-														Currency cannot be changed after creation
-													</p>
-												)}
-											</div>
-										</div>
-									</div>
-								)}
-
-								{/* Billing Interval */}
-								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
-										Billing Interval *
-									</label>
-									<select
-										value={billingInterval}
-										onChange={(e) => setBillingInterval(e.target.value)}
+										id="currency"
+										value={currency}
+										onChange={(e) => setCurrency(e.target.value)}
 										disabled={!!productToEdit}
-										className="w-full px-4 py-2.5 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:border-transparent text-zinc-900 disabled:bg-zinc-100 disabled:cursor-not-allowed disabled:text-zinc-500"
+										className={selectClassName}
 									>
-										{billingIntervalOptions.map((option) => (
+										{currencyOptions.map((option) => (
 											<option key={option.value} value={option.value}>
 												{option.label}
 											</option>
 										))}
 									</select>
 									{productToEdit && (
-										<p className="text-xs text-zinc-500 mt-1">
-											Billing interval cannot be changed after creation. Create
-											a new product to use a different billing cycle.
+										<p className="text-xs text-muted-foreground">
+											Currency cannot be changed after creation
 										</p>
 									)}
 								</div>
 							</div>
-						</div>
+						) : (
+							<div className="grid grid-cols-3 gap-4">
+								<div className="space-y-2">
+									<Label htmlFor="min-amount">Min Amount</Label>
+									<Input
+										id="min-amount"
+										type="number"
+										value={minAmount}
+										onChange={(e) => setMinAmount(e.target.value)}
+										placeholder="0.00"
+										min="0"
+										step="0.01"
+									/>
+								</div>
+								<div className="space-y-2">
+									<Label htmlFor="max-amount">Max Amount</Label>
+									<Input
+										id="max-amount"
+										type="number"
+										value={maxAmount}
+										onChange={(e) => setMaxAmount(e.target.value)}
+										placeholder="0.00"
+										min="0"
+										step="0.01"
+									/>
+								</div>
+								<div className="space-y-2">
+									<Label htmlFor="currency-custom">Currency *</Label>
+									<select
+										id="currency-custom"
+										value={currency}
+										onChange={(e) => setCurrency(e.target.value)}
+										disabled={!!productToEdit}
+										className={selectClassName}
+									>
+										{currencyOptions.map((option) => (
+											<option key={option.value} value={option.value}>
+												{option.label}
+											</option>
+										))}
+									</select>
+									{productToEdit && (
+										<p className="text-xs text-muted-foreground">
+											Currency cannot be changed after creation
+										</p>
+									)}
+								</div>
+							</div>
+						)}
 
-						{/* Footer */}
-						<div className="flex items-center justify-end gap-3 p-6 border-t border-zinc-200">
-							<motion.button
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								onClick={handleSave}
-								disabled={isSaving}
-								className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						<div className="space-y-2">
+							<Label htmlFor="billing-interval">Billing Interval *</Label>
+							<select
+								id="billing-interval"
+								value={billingInterval}
+								onChange={(e) => setBillingInterval(e.target.value)}
+								disabled={!!productToEdit}
+								className={selectClassName}
 							>
-								<Loader2
-									className={`w-4 h-4 animate-spin ${isSaving ? "block" : "hidden"
-										}`}
-								/>
-								<Save className={`w-4 h-4 ${isSaving ? "hidden" : "block"}`} />
-								{isSaving
-									? productToEdit
-										? "Updating..."
-										: "Creating..."
-									: productToEdit
-										? "Update Product"
-										: "Create Product"}
-							</motion.button>
+								{billingIntervalOptions.map((option) => (
+									<option key={option.value} value={option.value}>
+										{option.label}
+									</option>
+								))}
+							</select>
+							{productToEdit && (
+								<p className="text-xs text-muted-foreground">
+									Billing interval cannot be changed after creation. Create
+									a new product to use a different billing cycle.
+								</p>
+							)}
 						</div>
-					</motion.div>
-				</motion.div>
-			)}
-		</AnimatePresence>
+					</div>
+				</div>
+
+				<DialogFooter className="p-6 border-t border-border">
+					<Button onClick={handleSave} disabled={isSaving}>
+						{isSaving ? (
+							<Loader2 className="w-4 h-4 animate-spin" />
+						) : (
+							<Save className="w-4 h-4" />
+						)}
+						{isSaving
+							? productToEdit
+								? "Updating..."
+								: "Creating..."
+							: productToEdit
+								? "Update Product"
+								: "Create Product"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

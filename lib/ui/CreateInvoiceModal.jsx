@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AnimatedDropdown from "./AnimatedDropdown";
 import { getAllUsers } from "../api/users";
 import { getAllCustomers } from "../api/customers";
 import { getAllSubscribers } from "../api/subscribers";
 import { createInvoice, updateInvoice } from "../api/invoice";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 
 const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 	const [selectedClientType, setSelectedClientType] = useState("users");
@@ -330,542 +341,457 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 		{ value: "subscribers", label: "Subscribers" },
 	];
 
+	const selectClassName =
+		"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
 	return (
-		<AnimatePresence>
-			{isOpen && (
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-					onClick={onClose}
-				>
-					<motion.div
-						initial={{ scale: 0.9, opacity: 0 }}
-						animate={{ scale: 1, opacity: 1 }}
-						exit={{ scale: 0.9, opacity: 0 }}
-						onClick={(e) => e.stopPropagation()}
-						className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden max-h-[90vh] flex flex-col"
-					>
-						{/* Header */}
-						<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-							<h3 className="text-lg font-bold text-zinc-900">
-								{invoiceToEdit ? "Edit Invoice" : "Create New Invoice"}
-							</h3>
-							<button
-								onClick={onClose}
-								className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
-							>
-								<X className="w-5 h-5" />
-							</button>
+		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
+				<DialogHeader className="p-4 border-b border-border">
+					<DialogTitle>
+						{invoiceToEdit ? "Edit Invoice" : "Create New Invoice"}
+					</DialogTitle>
+				</DialogHeader>
+
+				<div className="p-6 overflow-y-auto flex-1">
+					<div className="space-y-6">
+						<div className="space-y-4">
+							<div className="flex items-center gap-2">
+								<input
+									type="checkbox"
+									id="useCustomEmail"
+									checked={useCustomEmail}
+									onChange={(e) => {
+										setUseCustomEmail(e.target.checked);
+										if (e.target.checked) {
+											setSelectedClient(null);
+											setToDetails({
+												name: "",
+												email: "",
+												address: "",
+												city: "",
+												state: "",
+												zip: "",
+												country: "",
+											});
+										}
+									}}
+									className="w-4 h-4 rounded border-input"
+								/>
+								<Label htmlFor="useCustomEmail" className="cursor-pointer">
+									Use custom email instead of selecting from list
+								</Label>
+							</div>
+							{!useCustomEmail ? (
+								<div className="grid grid-cols-2 gap-4">
+									<div className="space-y-2">
+										<Label>Client Type</Label>
+										<AnimatedDropdown
+											isOpen={isClientTypeDropdownOpen}
+											onToggle={() =>
+												setIsClientTypeDropdownOpen(
+													!isClientTypeDropdownOpen
+												)
+											}
+											onSelect={(value) => {
+												setSelectedClientType(value);
+												setSelectedClient(null);
+												setToDetails({
+													name: "",
+													email: "",
+													address: "",
+													city: "",
+													state: "",
+													zip: "",
+													country: "",
+												});
+												setIsClientTypeDropdownOpen(false);
+											}}
+											options={clientTypeOptions}
+											value={selectedClientType}
+											placeholder="Select client type"
+										/>
+									</div>
+									<div className="space-y-2">
+										<Label>Select Client</Label>
+										<AnimatedDropdown
+											isOpen={isClientDropdownOpen}
+											onToggle={() =>
+												setIsClientDropdownOpen(!isClientDropdownOpen)
+											}
+											onSelect={handleClientSelect}
+											options={getClientOptions()}
+											value={selectedClient}
+											placeholder="Select a client"
+										/>
+									</div>
+								</div>
+							) : null}
 						</div>
 
-						{/* Body */}
-						<div className="p-6 overflow-y-auto flex-1">
-							<div className="space-y-6">
-								{/* Client Selection */}
-								<div className="space-y-4">
-									<div className="flex items-center gap-2">
-										<input
-											type="checkbox"
-											id="useCustomEmail"
-											checked={useCustomEmail}
-											onChange={(e) => {
-												setUseCustomEmail(e.target.checked);
-												if (e.target.checked) {
-													setSelectedClient(null);
-													setToDetails({
-														name: "",
-														email: "",
-														address: "",
-														city: "",
-														state: "",
-														zip: "",
-														country: "",
-													});
-												}
-											}}
-											className="w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-100"
-										/>
-										<label
-											htmlFor="useCustomEmail"
-											className="text-sm font-medium text-zinc-700 cursor-pointer"
-										>
-											Use custom email instead of selecting from list
-										</label>
-									</div>
-									{!useCustomEmail ? (
-										<div className="grid grid-cols-2 gap-4">
-											<div>
-												<label className="block text-sm font-medium text-zinc-700 mb-2">
-													Client Type
-												</label>
-												<AnimatedDropdown
-													isOpen={isClientTypeDropdownOpen}
-													onToggle={() =>
-														setIsClientTypeDropdownOpen(
-															!isClientTypeDropdownOpen
-														)
-													}
-													onSelect={(value) => {
-														setSelectedClientType(value);
-														setSelectedClient(null);
-														setToDetails({
-															name: "",
-															email: "",
-															address: "",
-															city: "",
-															state: "",
-															zip: "",
-															country: "",
-														});
-														setIsClientTypeDropdownOpen(false);
-													}}
-													options={clientTypeOptions}
-													value={selectedClientType}
-													placeholder="Select client type"
-												/>
-											</div>
-											<div>
-												<label className="block text-sm font-medium text-zinc-700 mb-2">
-													Select Client
-												</label>
-												<AnimatedDropdown
-													isOpen={isClientDropdownOpen}
-													onToggle={() =>
-														setIsClientDropdownOpen(!isClientDropdownOpen)
-													}
-													onSelect={handleClientSelect}
-													options={getClientOptions()}
-													value={selectedClient}
-													placeholder="Select a client"
-												/>
-											</div>
-										</div>
-									) : null}
-								</div>
-
-								{/* Invoice Details */}
-								<div className="grid grid-cols-3 gap-4">
-									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
-											Invoice Number *
-										</label>
-										<input
-											type="text"
-											value={invoiceNumber}
-											onChange={(e) => setInvoiceNumber(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											placeholder="INV-001"
-										/>
-									</div>
-									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
-											Invoice Date
-										</label>
-										<input
-											type="date"
-											value={invoiceDate}
-											onChange={(e) => setInvoiceDate(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-										/>
-									</div>
-									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
-											Due Date
-										</label>
-										<input
-											type="date"
-											value={dueDate}
-											onChange={(e) => setDueDate(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-										/>
-									</div>
-								</div>
-
-								{/* From/To Section */}
-								<div className="grid grid-cols-2 gap-6">
-									{/* From */}
-									<div className="border border-zinc-200 rounded-xl p-4">
-										<h4 className="text-sm font-semibold text-zinc-900 mb-3">
-											From
-										</h4>
-										<div className="space-y-3">
-											<input
-												type="text"
-												placeholder="Company Name"
-												value={fromDetails.name}
-												onChange={(e) =>
-													setFromDetails({
-														...fromDetails,
-														name: e.target.value,
-													})
-												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											/>
-											<input
-												type="email"
-												placeholder="Email"
-												value={fromDetails.email}
-												onChange={(e) =>
-													setFromDetails({
-														...fromDetails,
-														email: e.target.value,
-													})
-												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											/>
-											<input
-												type="text"
-												placeholder="Address"
-												value={fromDetails.address}
-												onChange={(e) =>
-													setFromDetails({
-														...fromDetails,
-														address: e.target.value,
-													})
-												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											/>
-											<div className="grid grid-cols-2 gap-2">
-												<input
-													type="text"
-													placeholder="City"
-													value={fromDetails.city}
-													onChange={(e) =>
-														setFromDetails({
-															...fromDetails,
-															city: e.target.value,
-														})
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-												<input
-													type="text"
-													placeholder="State"
-													value={fromDetails.state}
-													onChange={(e) =>
-														setFromDetails({
-															...fromDetails,
-															state: e.target.value,
-														})
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-											</div>
-											<div className="grid grid-cols-2 gap-2">
-												<input
-													type="text"
-													placeholder="ZIP"
-													value={fromDetails.zip}
-													onChange={(e) =>
-														setFromDetails({
-															...fromDetails,
-															zip: e.target.value,
-														})
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-												<input
-													type="text"
-													placeholder="Country"
-													value={fromDetails.country}
-													onChange={(e) =>
-														setFromDetails({
-															...fromDetails,
-															country: e.target.value,
-														})
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-											</div>
-										</div>
-									</div>
-
-									{/* To */}
-									<div className="border border-zinc-200 rounded-xl p-4">
-										<h4 className="text-sm font-semibold text-zinc-900 mb-3">
-											To
-										</h4>
-										<div className="space-y-3">
-											<input
-												type="text"
-												placeholder="Client Name *"
-												value={toDetails.name}
-												onChange={(e) =>
-													setToDetails({ ...toDetails, name: e.target.value })
-												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											/>
-											<input
-												type="email"
-												placeholder="Email *"
-												value={toDetails.email}
-												onChange={(e) =>
-													setToDetails({ ...toDetails, email: e.target.value })
-												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											/>
-											<input
-												type="text"
-												placeholder="Address"
-												value={toDetails.address}
-												onChange={(e) =>
-													setToDetails({
-														...toDetails,
-														address: e.target.value,
-													})
-												}
-												className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											/>
-											<div className="grid grid-cols-2 gap-2">
-												<input
-													type="text"
-													placeholder="City"
-													value={toDetails.city}
-													onChange={(e) =>
-														setToDetails({ ...toDetails, city: e.target.value })
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-												<input
-													type="text"
-													placeholder="State"
-													value={toDetails.state}
-													onChange={(e) =>
-														setToDetails({
-															...toDetails,
-															state: e.target.value,
-														})
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-											</div>
-											<div className="grid grid-cols-2 gap-2">
-												<input
-													type="text"
-													placeholder="ZIP"
-													value={toDetails.zip}
-													onChange={(e) =>
-														setToDetails({ ...toDetails, zip: e.target.value })
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-												<input
-													type="text"
-													placeholder="Country"
-													value={toDetails.country}
-													onChange={(e) =>
-														setToDetails({
-															...toDetails,
-															country: e.target.value,
-														})
-													}
-													className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-												/>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								{/* Items Table */}
-								<div className="border border-zinc-200 rounded-xl overflow-hidden">
-									<div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
-										<h4 className="text-sm font-semibold text-zinc-900">
-											Items
-										</h4>
-										<motion.button
-											whileHover={{ scale: 1.05 }}
-											whileTap={{ scale: 0.95 }}
-											onClick={addRow}
-											className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-zinc-700 bg-white border border-zinc-300 rounded-xl hover:bg-zinc-100 transition-colors"
-										>
-											<Plus className="w-3.5 h-3.5" />
-											Add Row
-										</motion.button>
-									</div>
-									<table className="w-full">
-										<thead className="bg-zinc-50 border-b border-zinc-200">
-											<tr>
-												<th className="py-2 px-4 text-left text-xs font-semibold text-zinc-700">
-													Description
-												</th>
-												<th className="py-2 px-4 text-left text-xs font-semibold text-zinc-700">
-													Quantity
-												</th>
-												<th className="py-2 px-4 text-left text-xs font-semibold text-zinc-700">
-													Price
-												</th>
-												<th className="py-2 px-4 text-left text-xs font-semibold text-zinc-700">
-													Total
-												</th>
-												<th className="py-2 px-4 text-center text-xs font-semibold text-zinc-700">
-													Actions
-												</th>
-											</tr>
-										</thead>
-										<tbody>
-											{items.map((item, index) => (
-												<tr
-													key={index}
-													className={
-														index !== items.length - 1
-															? "border-b border-zinc-200"
-															: ""
-													}
-												>
-													<td className="py-2 px-4">
-														<input
-															type="text"
-															value={item.description}
-															onChange={(e) =>
-																updateItem(index, "description", e.target.value)
-															}
-															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-															placeholder="Item description"
-														/>
-													</td>
-													<td className="py-2 px-4">
-														<input
-															type="number"
-															min="0"
-															step="1"
-															value={item.quantity}
-															onChange={(e) =>
-																updateItem(index, "quantity", e.target.value)
-															}
-															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-														/>
-													</td>
-													<td className="py-2 px-4">
-														<input
-															type="number"
-															min="0"
-															step="0.01"
-															value={item.price}
-															onChange={(e) =>
-																updateItem(index, "price", e.target.value)
-															}
-															className="w-full px-2 py-1 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-														/>
-													</td>
-													<td className="py-2 px-4">
-														<span className="text-sm font-medium text-zinc-900">
-															${calculateItemTotal(item).toFixed(2)}
-														</span>
-													</td>
-													<td className="py-2 px-4 text-center">
-														{items.length > 1 && (
-															<motion.button
-																whileHover={{ scale: 1.1 }}
-																whileTap={{ scale: 0.9 }}
-																onClick={() => removeRow(index)}
-																className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
-															>
-																<Trash2 className="w-4 h-4" />
-															</motion.button>
-														)}
-													</td>
-												</tr>
-											))}
-										</tbody>
-										<tfoot className="bg-zinc-50 border-t-2 border-zinc-300">
-											<tr>
-												<td
-													colSpan={3}
-													className="py-3 px-4 text-sm font-semibold text-zinc-900 text-right"
-												>
-													Grand Total:
-												</td>
-												<td className="py-3 px-4 text-sm font-bold text-zinc-900">
-													${calculateGrandTotal().toFixed(2)}
-												</td>
-												<td></td>
-											</tr>
-										</tfoot>
-									</table>
-								</div>
-
-								{/* Notes */}
-								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
-										Notes
-									</label>
-									<textarea
-										value={notes}
-										onChange={(e) => setNotes(e.target.value)}
-										rows={3}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-										placeholder="Additional notes or terms..."
-									/>
-								</div>
-
-								{/* Signature & Footer */}
-								<div className="space-y-3">
-									<div>
-										<label className="block text-sm font-medium text-zinc-700 mb-2">
-											Signature
-										</label>
-										<input
-											type="text"
-											value={signature}
-											onChange={(e) => setSignature(e.target.value)}
-											className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-											placeholder="Your signature"
-										/>
-									</div>
-									<div className="text-center text-sm text-zinc-600 space-y-1">
-										<p>Cheers!</p>
-										<p>Thank you for your business!</p>
-									</div>
-								</div>
-
-								{/* Status */}
-								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-2">
-										Status
-									</label>
-									<select
-										value={status}
-										onChange={(e) => setStatus(e.target.value)}
-										className="w-full px-3 py-2 border border-zinc-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
-									>
-										<option value="unpaid">Unpaid</option>
-										<option value="paid">Paid</option>
-									</select>
-								</div>
+						<div className="grid grid-cols-3 gap-4">
+							<div className="space-y-2">
+								<Label htmlFor="invoice-number">Invoice Number *</Label>
+								<Input
+									id="invoice-number"
+									type="text"
+									value={invoiceNumber}
+									onChange={(e) => setInvoiceNumber(e.target.value)}
+									placeholder="INV-001"
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="invoice-date">Invoice Date</Label>
+								<Input
+									id="invoice-date"
+									type="date"
+									value={invoiceDate}
+									onChange={(e) => setInvoiceDate(e.target.value)}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="due-date">Due Date</Label>
+								<Input
+									id="due-date"
+									type="date"
+									value={dueDate}
+									onChange={(e) => setDueDate(e.target.value)}
+								/>
 							</div>
 						</div>
 
-						{/* Footer */}
-						<div className="flex items-center justify-end gap-3 p-4 border-t border-zinc-200 bg-zinc-50">
-							<motion.button
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								onClick={onClose}
-								className="px-4 py-2 text-sm text-zinc-700 bg-white hover:bg-zinc-100 rounded-xl font-medium transition-colors border border-zinc-300"
-							>
-								Cancel
-							</motion.button>
-							<motion.button
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-								onClick={handleSave}
-								disabled={isSaving}
-								className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								<Save className="w-4 h-4" />
-								{isSaving
-									? "Saving..."
-									: invoiceToEdit
-										? "Update Invoice"
-										: "Save Invoice"}
-							</motion.button>
+						<div className="grid grid-cols-2 gap-6">
+							<Card>
+								<CardContent className="p-4 space-y-3">
+									<h4 className="text-sm font-semibold text-foreground">From</h4>
+									<Input
+										type="text"
+										placeholder="Company Name"
+										value={fromDetails.name}
+										onChange={(e) =>
+											setFromDetails({
+												...fromDetails,
+												name: e.target.value,
+											})
+										}
+									/>
+									<Input
+										type="email"
+										placeholder="Email"
+										value={fromDetails.email}
+										onChange={(e) =>
+											setFromDetails({
+												...fromDetails,
+												email: e.target.value,
+											})
+										}
+									/>
+									<Input
+										type="text"
+										placeholder="Address"
+										value={fromDetails.address}
+										onChange={(e) =>
+											setFromDetails({
+												...fromDetails,
+												address: e.target.value,
+											})
+										}
+									/>
+									<div className="grid grid-cols-2 gap-2">
+										<Input
+											type="text"
+											placeholder="City"
+											value={fromDetails.city}
+											onChange={(e) =>
+												setFromDetails({
+													...fromDetails,
+													city: e.target.value,
+												})
+											}
+										/>
+										<Input
+											type="text"
+											placeholder="State"
+											value={fromDetails.state}
+											onChange={(e) =>
+												setFromDetails({
+													...fromDetails,
+													state: e.target.value,
+												})
+											}
+										/>
+									</div>
+									<div className="grid grid-cols-2 gap-2">
+										<Input
+											type="text"
+											placeholder="ZIP"
+											value={fromDetails.zip}
+											onChange={(e) =>
+												setFromDetails({
+													...fromDetails,
+													zip: e.target.value,
+												})
+											}
+										/>
+										<Input
+											type="text"
+											placeholder="Country"
+											value={fromDetails.country}
+											onChange={(e) =>
+												setFromDetails({
+													...fromDetails,
+													country: e.target.value,
+												})
+											}
+										/>
+									</div>
+								</CardContent>
+							</Card>
+
+							<Card>
+								<CardContent className="p-4 space-y-3">
+									<h4 className="text-sm font-semibold text-foreground">To</h4>
+									<Input
+										type="text"
+										placeholder="Client Name *"
+										value={toDetails.name}
+										onChange={(e) =>
+											setToDetails({ ...toDetails, name: e.target.value })
+										}
+									/>
+									<Input
+										type="email"
+										placeholder="Email *"
+										value={toDetails.email}
+										onChange={(e) =>
+											setToDetails({ ...toDetails, email: e.target.value })
+										}
+									/>
+									<Input
+										type="text"
+										placeholder="Address"
+										value={toDetails.address}
+										onChange={(e) =>
+											setToDetails({
+												...toDetails,
+												address: e.target.value,
+											})
+										}
+									/>
+									<div className="grid grid-cols-2 gap-2">
+										<Input
+											type="text"
+											placeholder="City"
+											value={toDetails.city}
+											onChange={(e) =>
+												setToDetails({ ...toDetails, city: e.target.value })
+											}
+										/>
+										<Input
+											type="text"
+											placeholder="State"
+											value={toDetails.state}
+											onChange={(e) =>
+												setToDetails({
+													...toDetails,
+													state: e.target.value,
+												})
+											}
+										/>
+									</div>
+									<div className="grid grid-cols-2 gap-2">
+										<Input
+											type="text"
+											placeholder="ZIP"
+											value={toDetails.zip}
+											onChange={(e) =>
+												setToDetails({ ...toDetails, zip: e.target.value })
+											}
+										/>
+										<Input
+											type="text"
+											placeholder="Country"
+											value={toDetails.country}
+											onChange={(e) =>
+												setToDetails({
+													...toDetails,
+													country: e.target.value,
+												})
+											}
+										/>
+									</div>
+								</CardContent>
+							</Card>
 						</div>
-					</motion.div>
-				</motion.div>
-			)}
-		</AnimatePresence>
+
+						<Card className="overflow-hidden">
+							<div className="bg-muted px-4 py-3 border-b border-border flex items-center justify-between">
+								<h4 className="text-sm font-semibold text-foreground">Items</h4>
+								<Button variant="outline" size="sm" onClick={addRow}>
+									<Plus className="w-3.5 h-3.5" />
+									Add Row
+								</Button>
+							</div>
+							<table className="w-full">
+								<thead className="bg-muted border-b border-border">
+									<tr>
+										<th className="py-2 px-4 text-left text-xs font-semibold text-muted-foreground">
+											Description
+										</th>
+										<th className="py-2 px-4 text-left text-xs font-semibold text-muted-foreground">
+											Quantity
+										</th>
+										<th className="py-2 px-4 text-left text-xs font-semibold text-muted-foreground">
+											Price
+										</th>
+										<th className="py-2 px-4 text-left text-xs font-semibold text-muted-foreground">
+											Total
+										</th>
+										<th className="py-2 px-4 text-center text-xs font-semibold text-muted-foreground">
+											Actions
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									{items.map((item, index) => (
+										<tr
+											key={index}
+											className={
+												index !== items.length - 1
+													? "border-b border-border"
+													: ""
+											}
+										>
+											<td className="py-2 px-4">
+												<Input
+													type="text"
+													value={item.description}
+													onChange={(e) =>
+														updateItem(index, "description", e.target.value)
+													}
+													placeholder="Item description"
+													className="h-8"
+												/>
+											</td>
+											<td className="py-2 px-4">
+												<Input
+													type="number"
+													min="0"
+													step="1"
+													value={item.quantity}
+													onChange={(e) =>
+														updateItem(index, "quantity", e.target.value)
+													}
+													className="h-8"
+												/>
+											</td>
+											<td className="py-2 px-4">
+												<Input
+													type="number"
+													min="0"
+													step="0.01"
+													value={item.price}
+													onChange={(e) =>
+														updateItem(index, "price", e.target.value)
+													}
+													className="h-8"
+												/>
+											</td>
+											<td className="py-2 px-4">
+												<span className="text-sm font-medium text-foreground">
+													${calculateItemTotal(item).toFixed(2)}
+												</span>
+											</td>
+											<td className="py-2 px-4 text-center">
+												{items.length > 1 && (
+													<Button
+														variant="ghost"
+														size="icon"
+														onClick={() => removeRow(index)}
+														className="h-8 w-8 text-destructive hover:text-destructive"
+													>
+														<Trash2 className="w-4 h-4" />
+													</Button>
+												)}
+											</td>
+										</tr>
+									))}
+								</tbody>
+								<tfoot className="bg-muted border-t-2 border-border">
+									<tr>
+										<td
+											colSpan={3}
+											className="py-3 px-4 text-sm font-semibold text-foreground text-right"
+										>
+											Grand Total:
+										</td>
+										<td className="py-3 px-4 text-sm font-bold text-foreground">
+											${calculateGrandTotal().toFixed(2)}
+										</td>
+										<td></td>
+									</tr>
+								</tfoot>
+							</table>
+						</Card>
+
+						<div className="space-y-2">
+							<Label htmlFor="invoice-notes">Notes</Label>
+							<Textarea
+								id="invoice-notes"
+								value={notes}
+								onChange={(e) => setNotes(e.target.value)}
+								rows={3}
+								placeholder="Additional notes or terms..."
+							/>
+						</div>
+
+						<div className="space-y-3">
+							<div className="space-y-2">
+								<Label htmlFor="invoice-signature">Signature</Label>
+								<Input
+									id="invoice-signature"
+									type="text"
+									value={signature}
+									onChange={(e) => setSignature(e.target.value)}
+									placeholder="Your signature"
+								/>
+							</div>
+							<div className="text-center text-sm text-muted-foreground space-y-1">
+								<p>Cheers!</p>
+								<p>Thank you for your business!</p>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="invoice-status">Status</Label>
+							<select
+								id="invoice-status"
+								value={status}
+								onChange={(e) => setStatus(e.target.value)}
+								className={selectClassName}
+							>
+								<option value="unpaid">Unpaid</option>
+								<option value="paid">Paid</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<DialogFooter className="p-4 border-t border-border bg-muted/50 gap-2 sm:gap-0">
+					<Button variant="outline" onClick={onClose}>
+						Cancel
+					</Button>
+					<Button onClick={handleSave} disabled={isSaving}>
+						<Save className="w-4 h-4" />
+						{isSaving
+							? "Saving..."
+							: invoiceToEdit
+								? "Update Invoice"
+								: "Save Invoice"}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

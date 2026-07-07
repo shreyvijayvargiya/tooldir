@@ -28,9 +28,12 @@ import { getCachedUserRole, getUserRole } from "../../../lib/utils/getUserRole";
 import { getCurrentUserEmail } from "../../../lib/utils/getCurrentUserEmail";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { ROLE_LABELS } from "../../../lib/config/roles-config";
 import ExportDropdown from "../../../lib/ui/ExportDropdown";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
 	Table,
 	TableHeader,
@@ -212,12 +215,12 @@ const TeamsTab = ({ queryClient }) => {
 	// Get sort icon for column header
 	const getSortIcon = (field) => {
 		if (sortField !== field) {
-			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-zinc-400" />;
+			return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-muted-foreground" />;
 		}
 		return sortDirection === "asc" ? (
-			<ArrowUp className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowUp className="w-3.5 h-3.5 ml-1 text-foreground" />
 		) : (
-			<ArrowDown className="w-3.5 h-3.5 ml-1 text-zinc-900" />
+			<ArrowDown className="w-3.5 h-3.5 ml-1 text-foreground" />
 		);
 	};
 
@@ -376,14 +379,14 @@ const TeamsTab = ({ queryClient }) => {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex justify-between items-center border-b border-zinc-200 py-2 px-4">
+			<div className="flex justify-between items-center border-b py-2 px-4">
 				<div>
-					<h2 className="text-lg text-zinc-900">Team Members</h2>
-					<p className="text-sm text-zinc-600">
+					<h2 className="text-lg text-foreground">Team Members</h2>
+					<p className="text-sm text-muted-foreground">
 						Manage team members and their roles
 						{/* Debug: Show current role */}
 						{process.env.NODE_ENV === "development" && (
-							<span className="ml-2 text-xs text-zinc-400">
+							<span className="ml-2 text-xs text-muted-foreground">
 								(Your role: {userRole}, Can create:{" "}
 								{hasPermission(userRole, "teams", "create") ? "Yes" : "No"}, Can
 								edit: {hasPermission(userRole, "teams", "edit") ? "Yes" : "No"})
@@ -402,15 +405,10 @@ const TeamsTab = ({ queryClient }) => {
 					/>
 					{(hasPermission(effectiveUserRole, "teams", "create") ||
 						canAddSelf) && (
-						<motion.button
-							whileHover={{ scale: 1.02 }}
-							whileTap={{ scale: 0.98 }}
-							onClick={handleCreateTeamMember}
-							className="flex items-center gap-1.5 bg-zinc-900 text-white px-3 py-1.5 rounded-xl hover:bg-zinc-800 transition-colors text-sm"
-						>
+						<Button onClick={handleCreateTeamMember} size="sm" className="rounded-xl gap-1.5">
 							<Plus className="w-3.5 h-3.5" />
 							Add Team Member
-						</motion.button>
+						</Button>
 					)}
 				</div>
 			</div>
@@ -427,13 +425,13 @@ const TeamsTab = ({ queryClient }) => {
 
 			{/* Search */}
 			<div className="relative mx-4">
-				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					type="text"
 					placeholder="Search team members by email, username, or role..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm"
+					className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm"
 				/>
 			</div>
 
@@ -490,70 +488,64 @@ const TeamsTab = ({ queryClient }) => {
 								sortedTeamMembers.map((member) => (
 									<TableRow key={member.id}>
 										<TableCell>
-											<div className="font-medium text-zinc-900">{member.email}</div>
+											<div className="font-medium text-foreground">{member.email}</div>
 										</TableCell>
-										<TableCell className="text-zinc-600">
+										<TableCell className="text-muted-foreground">
 											{member.username || ""}
 										</TableCell>
 										<TableCell>
 											<span
 												className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
 													ROLE_LABELS[member.role]?.color ||
-													"bg-zinc-100 text-zinc-800"
+													"bg-muted text-foreground"
 												}`}
 											>
 												{ROLE_LABELS[member.role]?.label || member.role}
 											</span>
 										</TableCell>
-										<TableCell className="text-sm text-zinc-600">
+										<TableCell className="text-sm text-muted-foreground">
 											{formatDate(member.createdAt || member.created_at)}
 										</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-2">
 												{(hasPermission(effectiveUserRole, "teams", "view") ||
 													canAddSelf) && (
-													<motion.button
-														whileHover={{ scale: 1.05 }}
-														whileTap={{ scale: 0.95 }}
+													<Button
 														onClick={(e) => {
 															e.stopPropagation();
 															handleViewTeamMember(member);
 														}}
-														className="p-2 text-zinc-400 hover:text-blue-600 transition-colors"
+														className="p-2 text-muted-foreground hover:text-blue-600 transition-colors"
 														title="View"
 													>
 														<Eye className="w-4 h-4" />
-													</motion.button>
+													</Button>
 												)}
 												{(hasPermission(effectiveUserRole, "teams", "edit") ||
 													canAddSelf) && (
-													<motion.button
-														whileHover={{ scale: 1.05 }}
-														whileTap={{ scale: 0.95 }}
+													<Button
 														onClick={(e) => {
 															e.stopPropagation();
 															handleEditTeamMember(member);
 														}}
-														className="p-2 text-zinc-400 hover:text-zinc-600 transition-colors"
+														className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
 														title="Edit"
 													>
 														<Edit2 className="w-4 h-4" />
-													</motion.button>
+													</Button>
 												)}
 												{(hasPermission(effectiveUserRole, "teams", "delete") ||
 													canAddSelf) && (
-													<motion.button
-														whileHover={{ scale: 1.05 }}
-														whileTap={{ scale: 0.95 }}
+													<Button
 														onClick={(e) => {
 															e.stopPropagation();
 															handleDeleteTeamMember(member.id);
 														}}
-														className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+														className="p-2 text-muted-foreground hover:text-red-600 transition-colors"
 														title="Delete"
 													>
 														<Trash2 className="w-4 h-4" />
-													</motion.button>
+													</Button>
 												)}
 											</div>
 										</TableCell>
@@ -578,11 +570,11 @@ const TeamsTab = ({ queryClient }) => {
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-visible flex flex-col"
+							className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-visible flex flex-col"
 						>
 							{/* Modal Header */}
-							<div className="flex items-center justify-between p-4 border-b border-zinc-200">
-								<h3 className="text-lg font-bold text-zinc-900">
+							<div className="flex items-center justify-between p-4 border-b border">
+								<h3 className="text-lg font-bold text-foreground">
 									{editingTeam
 										? hasPermission(effectiveUserRole, "teams", "edit") ||
 											canAddSelf
@@ -590,21 +582,19 @@ const TeamsTab = ({ queryClient }) => {
 											: "View Team Member"
 										: "Add Team Member"}
 								</h3>
-								<motion.button
-									whileHover={{ scale: 1.02 }}
-									whileTap={{ scale: 0.98 }}
+								<Button
 									onClick={handleCloseModal}
-									className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors"
+									className="p-1.5 text-muted-foreground hover:text-muted-foreground transition-colors"
 								>
 									<X className="w-5 h-5" />
-								</motion.button>
+								</Button>
 							</div>
 
 							{/* Modal Body */}
 							<div className="p-6 space-y-4 overflow-y-auto overflow-x-visible">
 								{/* Email */}
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-1.5">
+									<label className="block text-sm font-medium text-muted-foreground mb-1.5">
 										Email <span className="text-red-500">*</span>
 									</label>
 									<input
@@ -619,14 +609,14 @@ const TeamsTab = ({ queryClient }) => {
 												canAddSelf
 											)
 										}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm disabled:bg-zinc-100 disabled:cursor-not-allowed"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm disabled:bg-muted disabled:cursor-not-allowed"
 										placeholder="team@example.com"
 									/>
 								</div>
 
 								{/* Username */}
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-1.5">
+									<label className="block text-sm font-medium text-muted-foreground mb-1.5">
 										Username
 									</label>
 									<input
@@ -641,14 +631,14 @@ const TeamsTab = ({ queryClient }) => {
 												canAddSelf
 											)
 										}
-										className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-100 text-sm disabled:bg-zinc-100 disabled:cursor-not-allowed"
+										className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring text-sm disabled:bg-muted disabled:cursor-not-allowed"
 										placeholder="username"
 									/>
 								</div>
 
 								{/* Role */}
 								<div>
-									<label className="block text-sm font-medium text-zinc-700 mb-1.5">
+									<label className="block text-sm font-medium text-muted-foreground mb-1.5">
 										Role
 									</label>
 									{!editingTeam ||
@@ -672,7 +662,7 @@ const TeamsTab = ({ queryClient }) => {
 											/>
 										</div>
 									) : (
-										<div className="w-full px-3 py-2 border border-zinc-200 rounded-xl bg-zinc-100 text-sm">
+										<div className="w-full px-3 py-2 border rounded-xl bg-muted text-sm">
 											{ROLE_LABELS[teamForm.role]?.label || teamForm.role}
 										</div>
 									)}
@@ -685,28 +675,20 @@ const TeamsTab = ({ queryClient }) => {
 								(editingTeam &&
 									(hasPermission(effectiveUserRole, "teams", "edit") ||
 										canAddSelf))) && (
-								<div className="flex items-center justify-end gap-3 p-4 border-t border-zinc-200">
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
+								<div className="flex items-center justify-end gap-3 p-4 border-t border">
+									<Button
 										onClick={handleCloseModal}
-										className="px-4 py-1.5 text-sm text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-xl font-medium transition-colors"
+										className="px-4 py-1.5 text-sm text-muted-foreground bg-muted hover:bg-muted rounded-xl font-medium transition-colors"
 									>
 										Cancel
-									</motion.button>
-									<motion.button
-										whileHover={{ scale: 1.02 }}
-										whileTap={{ scale: 0.98 }}
-										onClick={handleSaveTeamMember}
-										disabled={
+									</Button>
+									<Button onClick={handleSaveTeamMember} disabled={
 											createTeamMemberMutation.isPending ||
 											updateTeamMemberMutation.isPending
-										}
-										className="flex items-center gap-2 px-4 py-1.5 text-sm bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-									>
+										} size="sm" className="rounded-xl gap-2 disabled:opacity-50">
 										<Save className="w-4 h-4" />
 										{editingTeam ? "Update" : "Create"} Member
-									</motion.button>
+									</Button>
 								</div>
 							)}
 						</motion.div>

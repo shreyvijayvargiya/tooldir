@@ -13,6 +13,7 @@ import {
 	Users,
 	BarChart3,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const FeaturesPage = () => {
 	const features = [
@@ -81,10 +82,10 @@ const FeaturesPage = () => {
 				<section className="flex-1 py-20 px-4 sm:px-6 lg:px-8">
 					<div className="max-w-6xl mx-auto">
 						<div className="text-center mb-12">
-							<h1 className="text-4xl font-bold text-zinc-900 mb-4">
+							<h1 className="text-4xl font-bold text-foreground mb-4">
 								Everything You Need to Launch
 							</h1>
-							<p className="text-lg text-zinc-600 max-w-2xl mx-auto">
+							<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
 								Our SaaS starter template includes all the essential features to
 								get your product to market faster.
 							</p>
@@ -100,21 +101,24 @@ const FeaturesPage = () => {
 										whileInView={{ opacity: 1, y: 0 }}
 										viewport={{ once: true }}
 										transition={{ delay: index * 0.1 }}
-										className="p-6 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 transition-colors"
 									>
-										<div className="flex items-start gap-4">
-											<div className="p-3 bg-zinc-900 text-white rounded-xl flex-shrink-0">
-												<Icon className="w-5 h-5" />
-											</div>
-											<div>
-												<h3 className="text-lg font-semibold text-zinc-900 mb-2">
-													{feature.title}
-												</h3>
-												<p className="text-sm text-zinc-600">
-													{feature.description}
-												</p>
-											</div>
-										</div>
+										<Card className="h-full transition-colors hover:border-foreground/20">
+											<CardContent className="p-6">
+												<div className="flex items-start gap-4">
+													<div className="p-3 bg-primary text-primary-foreground rounded-xl flex-shrink-0">
+														<Icon className="w-5 h-5" />
+													</div>
+													<div>
+														<h3 className="text-lg font-semibold text-foreground mb-2">
+															{feature.title}
+														</h3>
+														<p className="text-sm text-muted-foreground">
+															{feature.description}
+														</p>
+													</div>
+												</div>
+											</CardContent>
+										</Card>
 									</motion.div>
 								);
 							})}
