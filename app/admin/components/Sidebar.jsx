@@ -442,10 +442,6 @@ const Sidebar = ({
 			<div className="flex-1 space-y-2 hidescrollbar overflow-y-auto">
 				{/* Project Dropdown / Logo */}
 				<div className="relative project-dropdown mb-2">
-					<div className="flex items-center gap-1 mb-2">
-						<ThemeToggle />
-						<ThemeCustomizerButton />
-					</div>
 					<motion.button
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
@@ -482,6 +478,11 @@ const Sidebar = ({
 						)}
 					</div>
 				</Button>
+
+				<div className="flex items-center gap-1 my-1">
+					<ThemeToggle />
+					<ThemeCustomizerButton />
+				</div>
 
 				<DndContext
 					sensors={sensors}

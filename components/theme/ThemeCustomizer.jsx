@@ -38,10 +38,10 @@ function ThemeSelect({ label, value, options, onChange, renderOption }) {
 		<div className="space-y-1.5">
 			<Label className="text-xs text-muted-foreground">{label}</Label>
 			<Select value={value} onValueChange={onChange}>
-				<SelectTrigger className="h-9 bg-background/50">
+				<SelectTrigger className="h-9 bg-background/80">
 					<SelectValue />
 				</SelectTrigger>
-				<SelectContent>
+				<SelectContent position="popper" sideOffset={4} className="z-[200]">
 					{entries.map(([key, opt]) => (
 						<SelectItem key={key} value={key}>
 							{renderOption ? renderOption(key, opt) : opt.label}
@@ -75,14 +75,14 @@ export function ThemeCustomizer() {
 			/>
 			<div
 				className={cn(
-					"fixed right-0 top-0 z-[101] h-full w-[340px] overflow-y-auto",
+					"fixed right-0 top-0 z-[101] flex h-full w-[340px] flex-col",
 					"border-l border-border/50 shadow-2xl",
-					"bg-background/70 backdrop-blur-xl",
+					"bg-background/95 backdrop-blur-xl",
 					"animate-in slide-in-from-right duration-300"
 				)}
 				style={{ backdropFilter: `blur(var(--backdrop-blur, 16px))` }}
 			>
-				<div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/50 bg-background/60 backdrop-blur-md px-5 py-4 z-50">
+				<div className="flex shrink-0 items-center justify-between border-b border-border/50 bg-background/80 px-5 py-4">
 					<div>
 						<h2 className="text-base font-semibold text-foreground">Theme Customizer</h2>
 						<p className="text-xs text-muted-foreground">Customize your theme</p>
@@ -103,7 +103,7 @@ export function ThemeCustomizer() {
 					</div>
 				</div>
 
-				<div className="px-5 py-4 space-y-1">
+				<div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 space-y-1">
 					<SectionTitle>Colors</SectionTitle>
 
 					<ThemeSelect
