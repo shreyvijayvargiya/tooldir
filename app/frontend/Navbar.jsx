@@ -11,6 +11,7 @@ import {
 	removeUserCookie,
 	setUserCookie,
 } from "../../lib/utils/cookies";
+import { isDemoUser, logoutDemoUser } from "../../lib/utils/demoUser";
 import { signOutUser, onAuthStateChange } from "../../lib/api/auth";
 import { toast } from "@/lib/toast";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -73,6 +74,11 @@ const Navbar = () => {
 	useEffect(() => {
 		if (!mounted) return undefined;
 
+		const handleAuthUpdate = (event) => {
+			queryClient.setQueryData(["currentUser"], event.detail);
+		};
+		window.addEventListener("tooldir:auth", handleAuthUpdate);
+
 		const unsubscribe = onAuthStateChange((supabaseUser) => {
 			if (supabaseUser) {
 				const userData = {
@@ -90,20 +96,26 @@ const Navbar = () => {
 				};
 				setUserCookie(userData);
 				queryClient.setQueryData(["currentUser"], userData);
-			} else {
+			} else if (!isDemoUser(getUserCookie())) {
 				removeUserCookie();
 				queryClient.setQueryData(["currentUser"], null);
 			}
 		});
 
-		return () => unsubscribe();
+		return () => {
+			window.removeEventListener("tooldir:auth", handleAuthUpdate);
+			unsubscribe();
+		};
 	}, [mounted, queryClient]);
 
 	const handleLogout = async () => {
 		try {
-			removeUserCookie();
-			queryClient.setQueryData(["currentUser"], null);
-			await signOutUser();
+			if (isDemoUser(user)) {
+				logoutDemoUser();
+			} else {
+				removeUserCookie();
+				await signOutUser();
+			}
 			queryClient.setQueryData(["currentUser"], null);
 			await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 			setIsMobileMenuOpen(false);

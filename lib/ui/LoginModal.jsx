@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Mail, Lock, LogOut, User } from "lucide-react";
+import { Mail, Lock, LogOut, User, Sparkles } from "lucide-react";
 import {
 	signInWithEmail,
 	signInWithGoogle,
@@ -12,6 +12,13 @@ import {
 	removeUserCookie,
 } from "../utils/cookies";
 import { toast } from "@/lib/toast";
+import {
+	DEMO_USER_EMAIL,
+	DEMO_USER_PASSWORD,
+	isDemoUser,
+	loginAsDemoUser,
+	logoutDemoUser,
+} from "../utils/demoUser";
 import SignupModal from "./SignupModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +64,7 @@ const LoginModal = ({ isOpen, onClose }) => {
 				setUserCookie(userData);
 				setUser(userData);
 				toast.success("Logged in successfully!");
-			} else {
+			} else if (!isDemoUser(getUserCookie())) {
 				removeUserCookie();
 				setUser(null);
 			}
@@ -71,6 +78,13 @@ const LoginModal = ({ isOpen, onClose }) => {
 			toast.error("Please enter both email and password");
 			return;
 		}
+		if (
+			email.toLowerCase().trim() === DEMO_USER_EMAIL &&
+			password === DEMO_USER_PASSWORD
+		) {
+			handleDemoLogin();
+			return;
+		}
 		setIsLoading(true);
 		try {
 			await signInWithEmail(email, password);
@@ -79,6 +93,13 @@ const LoginModal = ({ isOpen, onClose }) => {
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const handleDemoLogin = () => {
+		const demoUser = loginAsDemoUser();
+		setUser(demoUser);
+		toast.success("Logged in as demo user!");
+		onClose();
 	};
 
 	const handleGoogleLogin = async () => {
@@ -95,8 +116,12 @@ const LoginModal = ({ isOpen, onClose }) => {
 	const handleLogout = async () => {
 		setIsLoading(true);
 		try {
-			await signOutUser();
-			removeUserCookie();
+			if (isDemoUser(user)) {
+				logoutDemoUser();
+			} else {
+				await signOutUser();
+				removeUserCookie();
+			}
 			setUser(null);
 			toast.success("Logged out successfully!");
 			onClose();
@@ -128,7 +153,11 @@ const LoginModal = ({ isOpen, onClose }) => {
 									<h4 className="text-lg font-semibold">{user.displayName}</h4>
 									<p className="text-sm text-muted-foreground">{user.email}</p>
 									<Badge variant="secondary" className="mt-1">
-										{user.provider === "google" ? "Google" : "Email"}
+										{user.provider === "google"
+											? "Google"
+											: user.provider === "demo"
+												? "Demo"
+												: "Email"}
 									</Badge>
 								</div>
 							</div>
@@ -144,14 +173,14 @@ const LoginModal = ({ isOpen, onClose }) => {
 									<Label htmlFor="login-email">Email</Label>
 									<div className="relative">
 										<Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-										<Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" className="pl-10" required />
+										<Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={DEMO_USER_EMAIL} className="pl-10" required />
 									</div>
 								</div>
 								<div className="space-y-2">
 									<Label htmlFor="login-password">Password</Label>
 									<div className="relative">
 										<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-										<Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" className="pl-10" required />
+										<Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
 									</div>
 								</div>
 								<Button type="submit" className="w-full" disabled={isLoading}>
@@ -166,6 +195,18 @@ const LoginModal = ({ isOpen, onClose }) => {
 								<svg className="w-5 h-5" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
 								{isLoading ? "Logging in..." : "Google"}
 							</Button>
+							<Button
+								variant="secondary"
+								className="w-full"
+								onClick={handleDemoLogin}
+								disabled={isLoading}
+							>
+								<Sparkles className="w-4 h-4" />
+								Try demo ({DEMO_USER_EMAIL})
+							</Button>
+							<p className="text-xs text-center text-muted-foreground">
+								One-click demo — no Supabase or Google setup required.
+							</p>
 							<p className="text-sm text-center text-muted-foreground">
 								New user?{" "}
 								<button type="button" onClick={() => { setIsSignupModalOpen(true); onClose(); }} className="text-foreground font-medium hover:underline">

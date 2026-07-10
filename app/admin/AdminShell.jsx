@@ -11,6 +11,7 @@ import {
 	removeUserCookie,
 	setUserCookie,
 } from "../../lib/utils/cookies";
+import { isDemoUser } from "../../lib/utils/demoUser";
 import { Button } from "@/components/ui/button";
 import {
 	SidebarInset,
@@ -57,6 +58,11 @@ const AdminShell = ({
 	}, []);
 
 	useEffect(() => {
+		const handleAuthUpdate = (event) => {
+			setUser(event.detail);
+		};
+		window.addEventListener("tooldir:auth", handleAuthUpdate);
+
 		const unsubscribe = onAuthStateChange(async (authUser) => {
 			if (authUser) {
 				const userData = {
@@ -74,12 +80,15 @@ const AdminShell = ({
 				};
 				setUserCookie(userData);
 				setUser(userData);
-			} else {
+			} else if (!isDemoUser(getUserCookie())) {
 				removeUserCookie();
 				setUser(null);
 			}
 		});
-		return () => unsubscribe();
+		return () => {
+			window.removeEventListener("tooldir:auth", handleAuthUpdate);
+			unsubscribe();
+		};
 	}, []);
 
 	useEffect(() => {
