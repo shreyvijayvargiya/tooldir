@@ -33,7 +33,7 @@ import {
 	Loader2,
 } from "lucide-react";
 import { toast } from "@/lib/toast";
-import { uploadBlogContentImage } from "@/lib/api/storage";
+import { uploadBlogEditorImage } from "@/lib/api/storage";
 import { isSupabaseConfigured } from "@/lib/config/supabase";
 import { htmlToMarkdown } from "@/lib/utils/htmlToMarkdown";
 import { cn } from "@/lib/utils";
@@ -156,7 +156,8 @@ const BlogTiptapEditor = ({
 			try {
 				let imageUrl;
 				if (isSupabaseConfigured()) {
-					imageUrl = await uploadBlogContentImage(file, blogId);
+					imageUrl = await uploadBlogEditorImage(file, blogId);
+					toast.success("Image uploaded to Supabase Storage");
 				} else {
 					imageUrl = await new Promise((resolve, reject) => {
 						const reader = new FileReader();
@@ -164,11 +165,12 @@ const BlogTiptapEditor = ({
 						reader.onerror = reject;
 						reader.readAsDataURL(file);
 					});
+					toast.warning("Supabase not configured — image embedded as data URL");
 				}
 				editor?.chain().focus().setImage({ src: imageUrl }).run();
 			} catch (error) {
 				console.error("Image upload failed:", error);
-				toast.error("Failed to upload image");
+				toast.error(error.message || "Failed to upload image to Storage");
 			} finally {
 				setIsUploadingImage(false);
 				event.target.value = "";

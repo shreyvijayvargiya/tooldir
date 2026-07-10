@@ -7,9 +7,10 @@ const nextConfig = {
 	poweredByHeader: false,
 	compress: true,
 	images: {
-		domains: [
-			"lh3.googleusercontent.com",
-			"images.unsplash.com",
+		remotePatterns: [
+			{ protocol: "https", hostname: "lh3.googleusercontent.com" },
+			{ protocol: "https", hostname: "images.unsplash.com" },
+			{ protocol: "https", hostname: "**.supabase.co" },
 		],
 		minimumCacheTTL: 60,
 	},

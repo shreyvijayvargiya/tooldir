@@ -19,6 +19,7 @@ export default async function handler(req, res) {
 			slotPrice,
 			slotIsPaid,
 			submitterEmail,
+			requiresCheckout,
 		} = req.body;
 
 		if (!name || !website || !description) {
@@ -38,6 +39,7 @@ export default async function handler(req, res) {
 			slotPrice,
 			slotIsPaid,
 			submitterEmail,
+			requiresCheckout,
 		});
 
 		return res.status(201).json({ success: true, submission });

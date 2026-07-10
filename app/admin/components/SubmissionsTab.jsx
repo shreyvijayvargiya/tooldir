@@ -7,6 +7,10 @@ import {
 	CheckCircle2,
 	Trash2,
 	Upload,
+	Calendar,
+	Mail,
+	Shield,
+	CreditCard,
 } from "lucide-react";
 import {
 	getAllToolSubmissions,
@@ -28,9 +32,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+
+const slugFromName = (name) =>
+	(name || "")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/(^-|-$)/g, "");
 
 const SubmissionsTab = ({ queryClient }) => {
 	const [searchQuery, setSearchQuery] = useState("");
+	const [selected, setSelected] = useState(null);
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [confirmAction, setConfirmAction] = useState(null);
 	const [confirmData, setConfirmData] = useState({
@@ -66,6 +86,11 @@ const SubmissionsTab = ({ queryClient }) => {
 			queryClient.invalidateQueries({ queryKey: ["toolSubmissions"] });
 			queryClient.invalidateQueries({ queryKey: ["directoryTools"] });
 			toast.success("Tool listed on website!");
+			setSelected((prev) =>
+				prev?.id === submissionId
+					? { ...prev, status: "listed", directoryToolId: tool.id }
+					: prev
+			);
 		},
 		onError: (err) => {
 			toast.error(err.message || "Failed to list tool");
@@ -88,9 +113,10 @@ const SubmissionsTab = ({ queryClient }) => {
 
 	const deleteMutation = useMutation({
 		mutationFn: deleteToolSubmission,
-		onSuccess: () => {
+		onSuccess: (_data, deletedId) => {
 			queryClient.invalidateQueries({ queryKey: ["toolSubmissions"] });
 			toast.success("Submission deleted");
+			if (selected?.id === deletedId) setSelected(null);
 		},
 		onError: () => toast.error("Failed to delete submission"),
 	});
@@ -137,6 +163,44 @@ const SubmissionsTab = ({ queryClient }) => {
 		}
 	};
 
+	const paymentBadge = (submission) => {
+		const ps = submission.paymentStatus || "unpaid";
+		if (ps === "paid") {
+			return (
+				<Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+					Paid
+				</Badge>
+			);
+		}
+		if (ps === "not_required") {
+			return <span className="text-xs text-muted-foreground">Free</span>;
+		}
+		if (ps === "failed") {
+			return (
+				<Badge variant="destructive" className="text-xs">
+					Failed
+				</Badge>
+			);
+		}
+		if (ps === "pending") {
+			return (
+				<Badge variant="secondary" className="text-xs">
+					Pending
+				</Badge>
+			);
+		}
+		return submission.slotIsPaid ? (
+			<Badge variant="outline" className="text-xs">
+				Unpaid
+			</Badge>
+		) : (
+			<span className="text-xs text-muted-foreground">—</span>
+		);
+	};
+
+	const toolPublicPath = (submission) =>
+		`/tool/${publishedSlugs[submission.id] || slugFromName(submission.name)}`;
+
 	return (
 		<div className="p-6 space-y-4">
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -181,7 +245,7 @@ const SubmissionsTab = ({ queryClient }) => {
 			</div>
 
 			{isLoading ? (
-				<TableSkeleton columns={8} rows={5} />
+				<TableSkeleton columns={9} rows={5} />
 			) : error ? (
 				<p className="text-sm text-destructive">Failed to load submissions.</p>
 			) : (
@@ -194,21 +258,23 @@ const SubmissionsTab = ({ queryClient }) => {
 							<TableHead className="hidden lg:table-cell">Tags</TableHead>
 							<TableHead>Badge</TableHead>
 							<TableHead className="hidden sm:table-cell">Launch Slot</TableHead>
+							<TableHead>Payment</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead>Actions</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{filtered.length === 0 ? (
-							<TableEmpty
-								message="No tool submissions yet"
-								colSpan={8}
-							/>
+							<TableEmpty message="No tool submissions yet" colSpan={9} />
 						) : (
 							filtered.map((submission) => (
 								<TableRow key={submission.id}>
 									<TableCell>
-										<div className="flex items-center gap-2 font-medium">
+										<button
+											type="button"
+											onClick={() => setSelected(submission)}
+											className="flex items-center gap-2 font-medium text-left hover:text-primary transition-colors group"
+										>
 											{submission.logoUrl ? (
 												<img
 													src={submission.logoUrl}
@@ -220,8 +286,10 @@ const SubmissionsTab = ({ queryClient }) => {
 													{submission.name?.[0]}
 												</div>
 											)}
-											{submission.name}
-										</div>
+											<span className="group-hover:underline underline-offset-2">
+												{submission.name}
+											</span>
+										</button>
 									</TableCell>
 									<TableCell>
 										<a
@@ -271,6 +339,7 @@ const SubmissionsTab = ({ queryClient }) => {
 											"—"
 										)}
 									</TableCell>
+									<TableCell>{paymentBadge(submission)}</TableCell>
 									<TableCell>
 										<span
 											className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${statusColor(submission.status)}`}
@@ -283,9 +352,7 @@ const SubmissionsTab = ({ queryClient }) => {
 											{submission.status !== "listed" && (
 												<Button
 													size="sm"
-													onClick={() =>
-														publishMutation.mutate(submission.id)
-													}
+													onClick={() => publishMutation.mutate(submission.id)}
 													disabled={publishMutation.isPending}
 												>
 													List on Website
@@ -294,10 +361,7 @@ const SubmissionsTab = ({ queryClient }) => {
 											{submission.status === "listed" && (
 												<Button size="sm" variant="outline" asChild>
 													<a
-														href={`/tool/${publishedSlugs[submission.id] || submission.name
-															.toLowerCase()
-															.replace(/[^a-z0-9]+/g, "-")
-															.replace(/(^-|-$)/g, "")}`}
+														href={toolPublicPath(submission)}
 														target="_blank"
 														rel="noopener noreferrer"
 													>
@@ -320,6 +384,192 @@ const SubmissionsTab = ({ queryClient }) => {
 					</TableBody>
 				</Table>
 			)}
+
+			{/* Tool details modal */}
+			<Dialog
+				open={Boolean(selected)}
+				onOpenChange={(open) => {
+					if (!open) setSelected(null);
+				}}
+			>
+				<DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+					{selected && (
+						<>
+							<DialogHeader>
+								<div className="flex items-start gap-3 pr-6">
+									{selected.logoUrl ? (
+										<img
+											src={selected.logoUrl}
+											alt=""
+											className="w-12 h-12 rounded-xl object-contain border bg-muted"
+										/>
+									) : (
+										<div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-lg font-bold text-primary shrink-0">
+											{selected.name?.[0]}
+										</div>
+									)}
+									<div className="min-w-0 space-y-1">
+										<DialogTitle className="text-left leading-tight">
+											{selected.name}
+										</DialogTitle>
+										<DialogDescription className="text-left flex flex-wrap items-center gap-2">
+											<span
+												className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${statusColor(selected.status)}`}
+											>
+												{selected.status}
+											</span>
+											{paymentBadge(selected)}
+										</DialogDescription>
+									</div>
+								</div>
+							</DialogHeader>
+
+							<div className="space-y-4 text-sm">
+								{selected.screenshotUrl && (
+									<img
+										src={selected.screenshotUrl}
+										alt={`${selected.name} screenshot`}
+										className="w-full rounded-xl border object-cover max-h-48"
+									/>
+								)}
+
+								<div>
+									<p className="text-xs font-medium text-muted-foreground mb-1">
+										Description
+									</p>
+									<p className="text-foreground whitespace-pre-wrap">
+										{selected.description || "—"}
+									</p>
+								</div>
+
+								{(selected.tags || []).length > 0 && (
+									<div className="flex flex-wrap gap-1.5">
+										{selected.tags.map((tag) => (
+											<Badge key={tag} variant="secondary">
+												{tag}
+											</Badge>
+										))}
+									</div>
+								)}
+
+								<Separator />
+
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+									<div className="flex items-start gap-2">
+										<Globe className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+										<div className="min-w-0">
+											<p className="text-xs text-muted-foreground">Website</p>
+											<a
+												href={selected.website}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="text-primary hover:underline break-all"
+											>
+												{selected.website?.replace(/^https?:\/\//, "")}
+											</a>
+										</div>
+									</div>
+									<div className="flex items-start gap-2">
+										<Mail className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+										<div>
+											<p className="text-xs text-muted-foreground">Submitter</p>
+											<p>{selected.submitterEmail || "—"}</p>
+										</div>
+									</div>
+									<div className="flex items-start gap-2">
+										<Calendar className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+										<div>
+											<p className="text-xs text-muted-foreground">Launch slot</p>
+											<p>
+												{selected.launchDate
+													? formatDate(selected.launchDate)
+													: "—"}
+											</p>
+											<p className="text-xs text-muted-foreground">
+												{selected.slotLabel || "—"}
+												{selected.slotIsPaid
+													? ` · $${selected.slotPrice}`
+													: " · Free"}
+											</p>
+										</div>
+									</div>
+									<div className="flex items-start gap-2">
+										<CreditCard className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+										<div>
+											<p className="text-xs text-muted-foreground">Payment</p>
+											<div className="mt-0.5">{paymentBadge(selected)}</div>
+											{selected.paymentId && (
+												<p className="text-[10px] font-mono text-muted-foreground mt-1 break-all">
+													{selected.paymentId}
+												</p>
+											)}
+										</div>
+									</div>
+									<div className="flex items-start gap-2">
+										<Shield className="w-4 h-4 mt-0.5 text-muted-foreground shrink-0" />
+										<div>
+											<p className="text-xs text-muted-foreground">Badge</p>
+											<p>
+												{selected.badgeVerified ? "Verified" : "Not verified"}
+											</p>
+										</div>
+									</div>
+									<div>
+										<p className="text-xs text-muted-foreground">Submitted</p>
+										<p>{formatDate(selected.createdAt)}</p>
+									</div>
+								</div>
+							</div>
+
+							<DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+								<Button
+									variant="outline"
+									asChild
+									className="w-full sm:w-auto"
+								>
+									<a
+										href={selected.website}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										<ExternalLink className="w-4 h-4" />
+										Visit site
+									</a>
+								</Button>
+								{selected.status === "listed" ? (
+									<Button variant="outline" asChild className="w-full sm:w-auto">
+										<a
+											href={toolPublicPath(selected)}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											View listing
+										</a>
+									</Button>
+								) : (
+									<Button
+										className="w-full sm:w-auto"
+										onClick={() => publishMutation.mutate(selected.id)}
+										disabled={publishMutation.isPending}
+									>
+										{publishMutation.isPending
+											? "Listing…"
+											: "List on Website"}
+									</Button>
+								)}
+								<Button
+									variant="destructive"
+									className="w-full sm:w-auto"
+									onClick={() => handleDelete(selected)}
+								>
+									<Trash2 className="w-4 h-4" />
+									Delete
+								</Button>
+							</DialogFooter>
+						</>
+					)}
+				</DialogContent>
+			</Dialog>
 
 			<ConfirmationModal
 				isOpen={showConfirmModal}

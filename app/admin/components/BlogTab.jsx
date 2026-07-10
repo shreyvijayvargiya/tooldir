@@ -7,12 +7,14 @@ import {
 	X,
 	Save,
 	Image as ImageIcon,
-	Copy,
 	FileText,
 	Search,
 	ArrowUpDown,
 	ArrowUp,
 	ArrowDown,
+	Pencil,
+	ExternalLink,
+	Code2,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import TiptapEditor from "./TiptapEditor";
@@ -365,15 +367,12 @@ const BlogTab = () => {
 				</div>
 				<div className="flex items-center gap-2">
 					<ExportDropdown dataType="blogs" data={sortedBlogs} />
-					<motion.a
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						href="/admin/blogs/new"
-						className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
-					>
-						<Plus className="w-3.5 h-3.5" />
-						Create New Blog
-					</motion.a>
+					<Button asChild size="sm">
+						<a href="/admin/blogs/new">
+							<Plus className="w-3.5 h-3.5" />
+							New post
+						</a>
+					</Button>
 				</div>
 			</div>
 
@@ -392,11 +391,11 @@ const BlogTab = () => {
 			{/* Table */}
 			<div className="overflow-x-auto px-4">
 				{isLoading ? (
-					<TableSkeleton rows={5} columns={6} />
+					<TableSkeleton rows={5} columns={5} />
 				) : (
 					<Table>
 						<TableHeader>
-							<TableRow>
+							<TableRow hover={false}>
 								<TableHead sortable onClick={() => handleSort("title")}>
 									<div className="flex items-center gap-2">
 										Title
@@ -421,19 +420,20 @@ const BlogTab = () => {
 										{getSortIcon("createdAt")}
 									</div>
 								</TableHead>
-								<TableHead>Copy</TableHead>
-								<TableHead>Actions</TableHead>
+								<TableHead className="text-right w-[1%] whitespace-nowrap">
+									Actions
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{error ? (
 								<TableEmpty
-									colSpan={6}
+									colSpan={5}
 									message="Error loading blogs. Please try again."
 								/>
 							) : sortedBlogs.length === 0 ? (
 								<TableEmpty
-									colSpan={6}
+									colSpan={5}
 									message={
 										searchQuery
 											? "No blogs found matching your search."
@@ -443,19 +443,26 @@ const BlogTab = () => {
 							) : (
 								sortedBlogs.map((blog) => (
 									<TableRow key={blog.id}>
-										<TableCell
-											onClick={() => handleEditBlog(blog)}
-											className="cursor-pointer"
-										>
-											<div className="font-medium text-foreground hover:text-muted-foreground transition-colors">
-												{blog.title}
-											</div>
-											<div className="text-sm text-muted-foreground">{blog.slug}</div>
+										<TableCell>
+											<button
+												type="button"
+												onClick={() => handleEditBlog(blog)}
+												className="text-left group"
+											>
+												<div className="font-medium text-foreground group-hover:text-primary group-hover:underline underline-offset-2 transition-colors">
+													{blog.title}
+												</div>
+												<div className="text-xs text-muted-foreground font-mono">
+													/{blog.slug}
+												</div>
+											</button>
 										</TableCell>
-										<TableCell className="text-muted-foreground">{blog.author}</TableCell>
+										<TableCell className="text-muted-foreground text-sm">
+											{blog.author || "—"}
+										</TableCell>
 										<TableCell>
 											<span
-												className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+												className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
 													blog.status === "published"
 														? "bg-green-100 text-green-800"
 														: blog.status === "scheduled"
@@ -467,43 +474,70 @@ const BlogTab = () => {
 											</span>
 										</TableCell>
 										<TableCell className="text-sm text-muted-foreground">
-											{formatDate(blog.createdAt)}
+											{formatDate(blog.createdAt || blog.created_at)}
 										</TableCell>
 										<TableCell>
-											<div className="flex items-center gap-2">
+											<div className="flex items-center justify-end gap-1">
 												<Button
-													onClick={(e) => {
-														e.stopPropagation();
-														handleCopyHTML(blog.content || "");
-													}}
-													className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
-													title="Copy HTML"
+													type="button"
+													variant="outline"
+													size="sm"
+													onClick={() => handleEditBlog(blog)}
 												>
-													<Copy className="w-4 h-4" />
+													<Pencil className="w-3.5 h-3.5" />
+													Edit
+												</Button>
+												{blog.status === "published" && blog.slug && (
+													<Button
+														type="button"
+														variant="outline"
+														size="sm"
+														asChild
+													>
+														<a
+															href={`/blog/${blog.slug}`}
+															target="_blank"
+															rel="noopener noreferrer"
+														>
+															<ExternalLink className="w-3.5 h-3.5" />
+															View
+														</a>
+													</Button>
+												)}
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8 text-muted-foreground"
+													title="Copy as HTML"
+													onClick={() => handleCopyHTML(blog.content || "")}
+												>
+													<Code2 className="w-3.5 h-3.5" />
+													<span className="sr-only">Copy HTML</span>
 												</Button>
 												<Button
-													onClick={(e) => {
-														e.stopPropagation();
-														handleCopyMarkdown(blog.content || "");
-													}}
-													className="p-2 text-muted-foreground hover:text-purple-600 transition-colors"
-													title="Copy Markdown"
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8 text-muted-foreground"
+													title="Copy as Markdown"
+													onClick={() =>
+														handleCopyMarkdown(blog.content || "")
+													}
 												>
-													<FileText className="w-4 h-4" />
+													<FileText className="w-3.5 h-3.5" />
+													<span className="sr-only">Copy Markdown</span>
 												</Button>
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="flex items-center gap-2">
 												<Button
-													onClick={(e) => {
-														e.stopPropagation();
-														handleDeleteBlog(blog.id);
-													}}
-													className="p-2 text-muted-foreground hover:text-red-600 transition-colors"
+													type="button"
+													variant="ghost"
+													size="icon"
+													className="h-8 w-8 text-muted-foreground hover:text-destructive"
 													title="Delete"
+													onClick={() => handleDeleteBlog(blog.id)}
 												>
-													<Trash2 className="w-4 h-4" />
+													<Trash2 className="w-3.5 h-3.5" />
+													<span className="sr-only">Delete</span>
 												</Button>
 											</div>
 										</TableCell>

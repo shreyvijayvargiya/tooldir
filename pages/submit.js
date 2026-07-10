@@ -25,6 +25,7 @@ import { TOOL_CATEGORIES } from "@/lib/data/tools";
 import { formatDateKey, getSlotPricing } from "@/lib/data/pricing-slots";
 import { usePricingSlots } from "@/lib/hooks/usePricingSlots";
 import { toast } from "@/lib/toast";
+import { getCurrentUserEmail } from "@/lib/utils/getCurrentUserEmail";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -114,6 +115,18 @@ const SubmitPage = () => {
 		setSelectedDate(tomorrow);
 		setSlotInfo(getSlotPricing(tomorrow));
 	}, []);
+
+	useEffect(() => {
+		if (!router.isReady) return;
+		const { payment } = router.query;
+		if (payment === "success") {
+			toast.success("Payment received! We'll review your submission within 24 hours.");
+			router.replace("/dashboard", undefined, { shallow: true });
+		} else if (payment === "cancelled") {
+			toast.warning("Payment cancelled. You can complete checkout from Review when ready.");
+			router.replace("/submit", undefined, { shallow: true });
+		}
+	}, [router.isReady, router.query.payment]);
 
 	const updateForm = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -237,9 +250,13 @@ const SubmitPage = () => {
 	};
 
 	const handleBookSlot = () => {
-		if (slotInfo.isPaid) {
+		if (slotInfo?.isPaid) {
+			const testZero =
+				process.env.NEXT_PUBLIC_STRIPE_TEST_ZERO === "true";
 			toast.info(
-				`Proceed to pay $${slotInfo.price} for your ${slotInfo.label} slot`
+				testZero
+					? `Test mode: checkout will charge $0 for your ${slotInfo.label} slot`
+					: `Next: pay $${slotInfo.price} for your ${slotInfo.label} slot`
 			);
 		} else {
 			toast.success("Free slot reserved! Review your submission below.");
@@ -250,6 +267,11 @@ const SubmitPage = () => {
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		try {
+			const submitterEmail = await getCurrentUserEmail();
+			const launchDate = selectedDate ? formatDateKey(selectedDate) : null;
+			const slotIsPaid = Boolean(slotInfo?.isPaid);
+			const slotPrice = slotInfo?.price ?? 0;
+
 			const res = await fetch("/api/tool-submissions/create", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -262,18 +284,52 @@ const SubmitPage = () => {
 					screenshotUrl: form.screenshotPreviews[0] || null,
 					screenshotUrls: form.screenshotPreviews,
 					badgeVerified,
-					launchDate: selectedDate ? formatDateKey(selectedDate) : null,
+					launchDate,
 					slotLabel: slotInfo?.label,
-					slotPrice: slotInfo?.price ?? 0,
-					slotIsPaid: slotInfo?.isPaid ?? false,
+					slotPrice,
+					slotIsPaid,
+					submitterEmail,
+					requiresCheckout: slotIsPaid,
 				}),
 			});
 			const data = await res.json();
 			if (!res.ok) {
 				throw new Error(data.error || "Submission failed");
 			}
+
+			const submissionId = data.submission?.id;
+
+			// Paid slots → Stripe Checkout (server may force $0 via STRIPE_TEST_ZERO)
+			if (slotIsPaid && submissionId) {
+				const checkoutRes = await fetch("/api/stripe/checkout", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						submissionId,
+						slotLabel: slotInfo?.label,
+						slotPrice,
+						launchDate,
+						userEmail: submitterEmail,
+					}),
+				});
+				const checkout = await checkoutRes.json();
+				if (!checkoutRes.ok || !checkout.checkoutUrl) {
+					throw new Error(
+						checkout.error ||
+							"Could not start payment. Submission saved — retry payment from dashboard."
+					);
+				}
+				toast.success(
+					checkout.testZero
+						? "Opening $0 test checkout…"
+						: `Opening checkout for $${checkout.amount}…`
+				);
+				window.location.href = checkout.checkoutUrl;
+				return;
+			}
+
 			toast.success("Tool submitted successfully! We'll review within 24 hours.");
-			router.push("/");
+			router.push("/dashboard");
 		} catch (err) {
 			toast.error(err.message || "Submission failed. Please try again.");
 		} finally {
@@ -658,7 +714,10 @@ const SubmitPage = () => {
 														onClick={handleBookSlot}
 													>
 														{slotInfo.isPaid
-															? `Pay $${slotInfo.price} & Book Slot`
+															? process.env.NEXT_PUBLIC_STRIPE_TEST_ZERO ===
+															  "true"
+																? `Book slot (test $0)`
+																: `Pay $${slotInfo.price} & Book Slot`
 															: "Book Free Slot"}
 													</Button>
 												</CardContent>
@@ -864,7 +923,15 @@ const SubmitPage = () => {
 							Edit
 						</Button>
 						<Button onClick={handleSubmit} disabled={isSubmitting}>
-							{isSubmitting ? "Submitting..." : "Submit Tool"}
+							{isSubmitting
+								? slotInfo?.isPaid
+									? "Starting checkout…"
+									: "Submitting..."
+								: slotInfo?.isPaid
+									? process.env.NEXT_PUBLIC_STRIPE_TEST_ZERO === "true"
+										? "Submit & pay $0 (test)"
+										: `Submit & pay $${slotInfo.price}`
+									: "Submit Tool"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

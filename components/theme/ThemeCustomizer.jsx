@@ -75,14 +75,14 @@ export function ThemeCustomizer() {
 			/>
 			<div
 				className={cn(
-					"fixed right-0 top-0 z-[101] flex h-full w-[340px] flex-col",
+					"fixed right-2 top-2 bottom-2 z-[101] flex h-full w-[340px] flex-col rounded-xl",
 					"border-l border-border/50 shadow-2xl",
 					"bg-background/95 backdrop-blur-xl",
 					"animate-in slide-in-from-right duration-300"
 				)}
 				style={{ backdropFilter: `blur(var(--backdrop-blur, 16px))` }}
 			>
-				<div className="flex shrink-0 items-center justify-between border-b border-border/50 bg-background/80 px-5 py-4">
+				<div className="flex shrink-0 items-center justify-between border-b border-border/50 px-5 py-4">
 					<div>
 						<h2 className="text-base font-semibold text-foreground">Theme Customizer</h2>
 						<p className="text-xs text-muted-foreground">Customize your theme</p>

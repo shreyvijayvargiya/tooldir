@@ -1,13 +1,20 @@
 -- ============================================
--- ToolDir — Supabase migrations
--- AI tool directory boilerplate
--- Run in the Supabase SQL editor
+-- ToolDir — ONE-FILE Supabase setup
+-- Paste this entire file into Supabase → SQL Editor → Run
+-- Safe to re-run (IF NOT EXISTS / DROP POLICY IF EXISTS)
+-- ============================================
+-- Includes:
+--   • Directory tables (tools, submissions, pricing slots, blogs)
+--   • Auth / billing (users, customers, payments, checkouts, invoices)
+--   • Contact + analytics
+--   • Storage bucket saas-starter-storage (TipTap / blog images)
+--   • Payment columns on tool_submissions
 -- ============================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
--- Core directory tables
+-- 1. Core directory tables
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS blogs (
@@ -66,6 +73,10 @@ CREATE TABLE IF NOT EXISTS tool_submissions (
     slot_price INTEGER DEFAULT 0,
     slot_is_paid BOOLEAN DEFAULT FALSE,
     status TEXT NOT NULL DEFAULT 'pending',
+    payment_status TEXT NOT NULL DEFAULT 'unpaid',
+    payment_id TEXT,
+    stripe_session_id TEXT,
+    stripe_customer_id TEXT,
     directory_tool_id UUID REFERENCES directory_tools(id) ON DELETE SET NULL,
     submitter_email TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -74,6 +85,7 @@ CREATE TABLE IF NOT EXISTS tool_submissions (
 
 CREATE INDEX IF NOT EXISTS idx_tool_submissions_status ON tool_submissions(status);
 CREATE INDEX IF NOT EXISTS idx_tool_submissions_created_at ON tool_submissions(created_at);
+CREATE INDEX IF NOT EXISTS idx_tool_submissions_payment_status ON tool_submissions(payment_status);
 
 CREATE TABLE IF NOT EXISTS pricing_slots (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -88,7 +100,7 @@ CREATE TABLE IF NOT EXISTS pricing_slots (
 );
 
 -- ============================================
--- Auth / admin / billing tables
+-- 2. Auth / admin / billing tables
 -- ============================================
 
 CREATE TABLE IF NOT EXISTS users (
@@ -118,6 +130,7 @@ CREATE TABLE IF NOT EXISTS customers (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- amount is stored in cents (Stripe unit_amount)
 CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     payment_id TEXT UNIQUE,
@@ -132,6 +145,8 @@ CREATE TABLE IF NOT EXISTS payments (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ
 );
+
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 
 CREATE TABLE IF NOT EXISTS checkouts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -202,7 +217,17 @@ CREATE INDEX IF NOT EXISTS idx_app_analytics_first_visit ON app_analytics(first_
 CREATE INDEX IF NOT EXISTS idx_app_analytics_last_visit ON app_analytics(last_visit);
 
 -- ============================================
--- Storage bucket for blog / listing images
+-- 3. Payment columns (idempotent — upgrades older DBs)
+-- ============================================
+
+ALTER TABLE tool_submissions ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'unpaid';
+ALTER TABLE tool_submissions ADD COLUMN IF NOT EXISTS payment_id TEXT;
+ALTER TABLE tool_submissions ADD COLUMN IF NOT EXISTS stripe_session_id TEXT;
+ALTER TABLE tool_submissions ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+
+-- ============================================
+-- 4. Storage — bucket: saas-starter-storage
+--    TipTap inline images + blog banners
 -- ============================================
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -213,7 +238,10 @@ VALUES (
     5242880,
     ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+    public = EXCLUDED.public,
+    file_size_limit = EXCLUDED.file_size_limit,
+    allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 DROP POLICY IF EXISTS "Public read blog storage" ON storage.objects;
 CREATE POLICY "Public read blog storage"
@@ -221,16 +249,26 @@ ON storage.objects FOR SELECT
 USING (bucket_id = 'saas-starter-storage');
 
 DROP POLICY IF EXISTS "Authenticated upload blog storage" ON storage.objects;
-CREATE POLICY "Authenticated upload blog storage"
+DROP POLICY IF EXISTS "Public upload blog storage" ON storage.objects;
+CREATE POLICY "Public upload blog storage"
 ON storage.objects FOR INSERT
 WITH CHECK (bucket_id = 'saas-starter-storage');
 
 DROP POLICY IF EXISTS "Authenticated update blog storage" ON storage.objects;
-CREATE POLICY "Authenticated update blog storage"
+DROP POLICY IF EXISTS "Public update blog storage" ON storage.objects;
+CREATE POLICY "Public update blog storage"
 ON storage.objects FOR UPDATE
 USING (bucket_id = 'saas-starter-storage');
 
 DROP POLICY IF EXISTS "Authenticated delete blog storage" ON storage.objects;
-CREATE POLICY "Authenticated delete blog storage"
+DROP POLICY IF EXISTS "Public delete blog storage" ON storage.objects;
+CREATE POLICY "Public delete blog storage"
 ON storage.objects FOR DELETE
 USING (bucket_id = 'saas-starter-storage');
+
+-- ============================================
+-- Done. Next:
+--   1. Enable Google Auth (Authentication → Providers)
+--   2. Copy Project URL + anon key into .env.local
+--   3. Confirm Storage → saas-starter-storage is Public
+-- ============================================

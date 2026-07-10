@@ -11,6 +11,7 @@ export function ThemeProvider({ children }) {
 			defaultTheme="light"
 			enableSystem={false}
 			disableTransitionOnChange
+			storageKey="tooldir-theme"
 		>
 			<ThemeConfigProvider>{children}</ThemeConfigProvider>
 		</NextThemesProvider>

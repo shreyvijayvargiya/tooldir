@@ -431,7 +431,7 @@ const PaymentsTab = () => {
 									message={
 										searchQuery || statusFilter !== "all"
 											? "No payments found matching your filters."
-											: "No payments yet. Payments will appear here after customers subscribe."
+											: "No payments yet. Paid launch slots from /submit will show here after Stripe webhook."
 									}
 								/>
 							) : (

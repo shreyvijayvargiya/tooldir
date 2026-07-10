@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Sidebar from "./components/Sidebar";
 import SearchModal from "./components/SearchModal";
@@ -13,15 +12,34 @@ import {
 	setUserCookie,
 } from "../../lib/utils/cookies";
 import { Button } from "@/components/ui/button";
+import {
+	SidebarInset,
+	SidebarProvider,
+	useSidebar,
+} from "@/components/ui/sidebar";
+
+const MobileSidebarToggle = () => {
+	const { openMobile, toggleSidebar } = useSidebar();
+
+	return (
+		<Button
+			variant="outline"
+			onClick={toggleSidebar}
+			className="md:hidden fixed flex items-center gap-1 bottom-4 z-50 right-4 rounded-xl shadow-lg"
+		>
+			{openMobile ? "Close" : "Open"} Sidebar
+			{openMobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+		</Button>
+	);
+};
 
 const AdminShell = ({
 	children,
-	activeTab = "analytics",
+	activeTab = "home",
 	onTabSelect,
 	contentClassName = "",
 }) => {
 	const router = useRouter();
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [showSearchModal, setShowSearchModal] = useState(false);
 	const [showLoginModal, setShowLoginModal] = useState(false);
 	const [user, setUser] = useState(null);
@@ -92,39 +110,23 @@ const AdminShell = ({
 	};
 
 	return (
-		<div className="h-screen w-screen bg-muted flex flex-col overflow-hidden">
-			<div className="flex flex-1 overflow-hidden relative">
-				<AnimatePresence>
-					{isSidebarOpen && (
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							onClick={() => setIsSidebarOpen(false)}
-							className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-						/>
-					)}
-				</AnimatePresence>
+		<SidebarProvider
+			defaultOpen
+			style={{
+				"--sidebar-width": "12rem",
+				"--sidebar-width-mobile": "16rem",
+			}}
+			className="h-screen w-screen bg-muted !min-h-0 overflow-hidden"
+		>
+			<Sidebar
+				activeTab={activeTab}
+				onTabSelect={handleTabSelect}
+				setShowSearchModal={setShowSearchModal}
+				setShowLoginModal={setShowLoginModal}
+				user={user}
+			/>
 
-				<Sidebar
-					activeTab={activeTab}
-					onTabSelect={handleTabSelect}
-					isSidebarOpen={isSidebarOpen}
-					setIsSidebarOpen={setIsSidebarOpen}
-					setShowSearchModal={setShowSearchModal}
-					setShowLoginModal={setShowLoginModal}
-					user={user}
-				/>
-
-				<Button
-					variant="outline"
-					onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-					className="md:hidden fixed flex items-center gap-1 bottom-4 z-50 right-4 rounded-xl shadow-lg"
-				>
-					{isSidebarOpen ? "Close" : "Open"} Sidebar
-					{isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-				</Button>
-
+			<SidebarInset className="flex-1 min-w-0 overflow-hidden bg-muted">
 				<main className="flex-1 w-full h-full overflow-y-auto">
 					<div className={`h-full w-full md:p-2 ${contentClassName}`}>
 						<div className="h-full w-full bg-card border rounded-2xl overflow-y-auto">
@@ -132,7 +134,9 @@ const AdminShell = ({
 						</div>
 					</div>
 				</main>
-			</div>
+			</SidebarInset>
+
+			<MobileSidebarToggle />
 
 			<ConfirmationModal
 				isOpen={showConfirmModal}
@@ -162,7 +166,7 @@ const AdminShell = ({
 				isOpen={showLoginModal}
 				onClose={() => setShowLoginModal(false)}
 			/>
-		</div>
+		</SidebarProvider>
 	);
 };
 

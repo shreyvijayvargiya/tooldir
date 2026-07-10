@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect } from "react";
 import {
 	FileText,
 	Users,
@@ -10,6 +9,7 @@ import {
 	FileEdit,
 	GripVertical,
 	DollarSign,
+	LayoutDashboard,
 } from "lucide-react";
 import {
 	DndContext,
@@ -28,13 +28,28 @@ import {
 	useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { toast } from "@/lib/toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ThemeCustomizerButton } from "@/components/theme/ThemeCustomizer";
+import {
+	Sidebar as ShadcnSidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarSeparator,
+	useSidebar,
+} from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const ICON_MAP = {
+	LayoutDashboard,
 	FileText,
 	Users,
 	Eye,
@@ -48,7 +63,10 @@ const DEFAULT_NAV_STRUCTURE = [
 	{
 		id: "overview",
 		title: "Overview",
-		items: [{ id: "analytics", label: "Analytics", icon: "Eye" }],
+		items: [
+			{ id: "home", label: "Home", icon: "LayoutDashboard" },
+			{ id: "analytics", label: "Analytics", icon: "Eye" },
+		],
 	},
 	{
 		id: "audience",
@@ -93,40 +111,36 @@ const SortableNavItem = ({ item, activeTab, onSelect }) => {
 	const Icon = ICON_MAP[item.icon] || FileText;
 
 	return (
-		<div
+		<SidebarMenuItem
 			ref={setNodeRef}
 			style={style}
-			className={`group relative flex items-center rounded-xl transition-all ${
-				isDragging ? "bg-muted ring-2 ring-border shadow-sm z-50" : ""
-			}`}
+			className={cn(
+				"group relative flex items-center rounded-xl transition-all",
+				isDragging && "bg-muted ring-2 ring-border shadow-sm z-50"
+			)}
 		>
 			<button
+				type="button"
 				{...attributes}
 				{...listeners}
 				className="py-1 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-opacity"
 			>
 				<GripVertical className="w-3 h-3" />
 			</button>
-			<button
+			<SidebarMenuButton
+				isActive={activeTab === item.id}
 				onClick={() => onSelect(item.id)}
-				className={`flex-1 px-2 py-1.5 text-xs font-medium transition-colors rounded-xl flex items-center gap-2 ${
-					activeTab === item.id
-						? "bg-muted text-foreground"
-						: "text-muted-foreground hover:bg-muted hover:text-foreground"
-				}`}
+				size="sm"
+				className="flex-1 rounded-xl text-xs font-medium h-auto py-1.5"
 			>
 				<Icon className="w-3.5 h-3.5" />
-				{item.label}
-			</button>
-		</div>
+				<span>{item.label}</span>
+			</SidebarMenuButton>
+		</SidebarMenuItem>
 	);
 };
 
-const SortableCategory = ({
-	category,
-	activeTab,
-	onSelect,
-}) => {
+const SortableCategory = ({ category, activeTab, onSelect }) => {
 	const {
 		attributes,
 		listeners,
@@ -143,20 +157,20 @@ const SortableCategory = ({
 	};
 
 	return (
-		<div
+		<SidebarGroup
 			ref={setNodeRef}
 			style={style}
-			className={`pt-2 group/category rounded-xl transition-all ${
-				isDragging
-					? "bg-card ring-2 ring-border shadow-lg z-50 px-1 pb-2"
-					: ""
-			}`}
+			className={cn(
+				"pt-2 group/category rounded-xl transition-all p-0",
+				isDragging && "bg-card ring-2 ring-border shadow-lg z-50 px-1 pb-2"
+			)}
 		>
 			<div className="flex items-center justify-between mb-1">
-				<p className="px-2.5 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+				<SidebarGroupLabel className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider h-auto">
 					{category.title}
-				</p>
+				</SidebarGroupLabel>
 				<button
+					type="button"
 					{...attributes}
 					{...listeners}
 					className="p-1 opacity-0 group-hover/category:opacity-100 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-opacity"
@@ -164,38 +178,59 @@ const SortableCategory = ({
 					<GripVertical className="w-3 h-3" />
 				</button>
 			</div>
-			<div className="space-y-1">
-				<SortableContext
-					items={category.items.map((i) => i.id)}
-					strategy={verticalListSortingStrategy}
-				>
-					{category.items.map((item) => (
-						<SortableNavItem
-							key={item.id}
-							item={item}
-							activeTab={activeTab}
-							onSelect={onSelect}
-						/>
-					))}
-				</SortableContext>
-			</div>
-		</div>
+			<SidebarGroupContent>
+				<SidebarMenu className="space-y-1 gap-0">
+					<SortableContext
+						items={category.items.map((i) => i.id)}
+						strategy={verticalListSortingStrategy}
+					>
+						{category.items.map((item) => (
+							<SortableNavItem
+								key={item.id}
+								item={item}
+								activeTab={activeTab}
+								onSelect={onSelect}
+							/>
+						))}
+					</SortableContext>
+				</SidebarMenu>
+			</SidebarGroupContent>
+		</SidebarGroup>
 	);
 };
+
+const GoogleIcon = () => (
+	<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+		<path
+			d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+			fill="#4285F4"
+		/>
+		<path
+			d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+			fill="#34A853"
+		/>
+		<path
+			d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+			fill="#FBBC05"
+		/>
+		<path
+			d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+			fill="#EA4335"
+		/>
+	</svg>
+);
 
 const Sidebar = ({
 	activeTab,
 	onTabSelect,
-	isSidebarOpen,
-	setIsSidebarOpen,
 	setShowSearchModal,
 	setShowLoginModal,
 	user,
 }) => {
+	const { isMobile, setOpenMobile } = useSidebar();
 	const queryClient = useQueryClient();
 	const queryKey = ["admin_nav_structure"];
 
-	// Sync saved sidebar structure with current default (add new items, remove stale ones)
 	const mergeNavStructure = (savedStructure, defaultStructure) => {
 		if (!savedStructure) return defaultStructure;
 
@@ -204,7 +239,6 @@ const Sidebar = ({
 		);
 		const validCategoryIds = new Set(defaultStructure.map((cat) => cat.id));
 
-		// Remap legacy tab ids from older boilerplate builds
 		const normalized = savedStructure.map((cat) => ({
 			...cat,
 			items: (cat.items || []).map((item) =>
@@ -240,18 +274,16 @@ const Sidebar = ({
 		return sanitized;
 	};
 
-	// Use React Query to manage the sidebar structure
-	const { data: navStructure = DEFAULT_NAV_STRUCTURE } = useQuery({
+	const [navMounted, setNavMounted] = useState(false);
+	useEffect(() => setNavMounted(true), []);
+
+	const { data: storedNav } = useQuery({
 		queryKey,
 		queryFn: () => {
-			if (typeof window === "undefined") return DEFAULT_NAV_STRUCTURE;
 			const saved = localStorage.getItem("admin_nav_structure");
 			const savedStructure = saved ? JSON.parse(saved) : null;
-
-			// Merge saved structure with default to include any new items
 			const merged = mergeNavStructure(savedStructure, DEFAULT_NAV_STRUCTURE);
 
-			// If structure was merged (new items added), save it back
 			if (
 				savedStructure &&
 				JSON.stringify(merged) !== JSON.stringify(savedStructure)
@@ -261,8 +293,12 @@ const Sidebar = ({
 
 			return merged;
 		},
-		staleTime: Infinity, // Keep the data fresh as it's purely local
+		enabled: navMounted,
+		staleTime: Infinity,
 	});
+
+	const navStructure =
+		navMounted && storedNav ? storedNav : DEFAULT_NAV_STRUCTURE;
 
 	const { mutate: updateNavStructure } = useMutation({
 		mutationFn: async (newStructure) => {
@@ -302,17 +338,14 @@ const Sidebar = ({
 		if (!over) return;
 
 		if (active.id !== over.id) {
-			// Check if we are dragging a category or an item
 			const isActiveCategory = navStructure.some((cat) => cat.id === active.id);
 			const isOverCategory = navStructure.some((cat) => cat.id === over.id);
 
 			if (isActiveCategory && isOverCategory) {
-				// Reordering categories
 				const oldIndex = navStructure.findIndex((cat) => cat.id === active.id);
 				const newIndex = navStructure.findIndex((cat) => cat.id === over.id);
 				updateNavStructure(arrayMove(navStructure, oldIndex, newIndex));
 			} else {
-				// Reordering items within or across categories
 				const activeCatIndex = navStructure.findIndex((cat) =>
 					cat.items.some((i) => i.id === active.id)
 				);
@@ -325,14 +358,12 @@ const Sidebar = ({
 				const newStructure = [...navStructure];
 
 				if (activeCatIndex === overCatIndex) {
-					// Reordering within the same category
 					const category = { ...newStructure[activeCatIndex] };
 					const oldIndex = category.items.findIndex((i) => i.id === active.id);
 					const newIndex = category.items.findIndex((i) => i.id === over.id);
 					category.items = arrayMove(category.items, oldIndex, newIndex);
 					newStructure[activeCatIndex] = category;
 				} else if (overCatIndex !== -1) {
-					// Moving from one category to another
 					const activeCategory = { ...newStructure[activeCatIndex] };
 					const overCategory = { ...newStructure[overCatIndex] };
 
@@ -341,10 +372,8 @@ const Sidebar = ({
 					);
 					const item = activeCategory.items[activeItemIndex];
 
-					// Remove from active category
 					activeCategory.items.splice(activeItemIndex, 1);
 
-					// Add to over category at the correct index
 					const overItemIndex = overCategory.items.findIndex(
 						(i) => i.id === over.id
 					);
@@ -373,52 +402,33 @@ const Sidebar = ({
 
 	const handleSelect = (id) => {
 		onTabSelect?.(id);
+		if (isMobile) setOpenMobile(false);
 	};
 
-	const GoogleIcon = () => (
-		<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-			<path
-				d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-				fill="#4285F4"
-			/>
-			<path
-				d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-				fill="#34A853"
-			/>
-			<path
-				d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-				fill="#FBBC05"
-			/>
-			<path
-				d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-				fill="#EA4335"
-			/>
-		</svg>
-	);
-
-	const sidebarContent = (isMobile = false) => (
-		<div className={`flex flex-col h-full ${isMobile ? "p-3" : "py-6 px-1"}`}>
-			<div className="flex-1 space-y-2 hidescrollbar overflow-y-auto">
-				{/* Search Button */}
+	return (
+		<ShadcnSidebar
+			collapsible="offcanvas"
+			className="border-r-0 [&_[data-sidebar=sidebar]]:bg-transparent"
+		>
+			<SidebarHeader className="px-1 pt-6 pb-0 gap-0">
 				<Button
 					variant="outline"
-					onClick={() => {
-						setShowSearchModal(true);
-						if (isMobile) setIsSidebarOpen(false);
-					}}
+					onClick={() => setShowSearchModal(true)}
 					className="w-full justify-start gap-2 rounded-xl mb-2 h-auto py-1.5 px-2 text-sm font-medium"
 				>
 					<Search className="w-3.5 h-3.5" />
 					<div className="flex items-center gap-2 flex-1 justify-between">
 						<p>Search</p>
 						{!isMobile && (
-							<i className="text-[9px] mt-0.5 text-muted-foreground whitespace-nowrap">
+							<i className="text-[9px] mt-0.5 text-muted-foreground whitespace-nowrap not-italic">
 								CMD + K
 							</i>
 						)}
 					</div>
 				</Button>
+			</SidebarHeader>
 
+			<SidebarContent className="px-1 hidescrollbar gap-0">
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCenter}
@@ -435,10 +445,7 @@ const Sidebar = ({
 								key={category.id}
 								category={category}
 								activeTab={activeTab}
-								onSelect={(id) => {
-									handleSelect(id);
-									if (isMobile) setIsSidebarOpen(false);
-								}}
+								onSelect={handleSelect}
 							/>
 						))}
 					</SortableContext>
@@ -472,10 +479,10 @@ const Sidebar = ({
 						) : null}
 					</DragOverlay>
 				</DndContext>
-			</div>
+			</SidebarContent>
 
-			{/* Footer */}
-			<div className="mt-auto pt-4 space-y-2 border-t">
+			<SidebarFooter className="px-1 pb-4 gap-2">
+				<SidebarSeparator className="mx-0" />
 				<div className="flex items-center justify-center gap-1 px-1">
 					<ThemeToggle />
 					<ThemeCustomizerButton />
@@ -491,32 +498,8 @@ const Sidebar = ({
 						{user ? user.displayName || user.email : "Continue with Google"}
 					</span>
 				</Button>
-			</div>
-		</div>
-	);
-
-	return (
-		<>
-			{/* Desktop Sidebar */}
-			<aside className="hidden md:flex h-full w-48 bg-transparent flex-col overflow-hidden">
-				{sidebarContent(false)}
-			</aside>
-
-			{/* Mobile Sidebar */}
-			<AnimatePresence>
-				{isSidebarOpen && (
-					<motion.aside
-						initial={{ x: -280 }}
-						animate={{ x: 0 }}
-						exit={{ x: -280 }}
-						transition={{ type: "spring", damping: 25, stiffness: 200 }}
-						className="fixed md:hidden inset-y-0 left-0 top-0 w-64 bg-background border-r z-50 overflow-hidden"
-					>
-						{sidebarContent(true)}
-					</motion.aside>
-				)}
-			</AnimatePresence>
-		</>
+			</SidebarFooter>
+		</ShadcnSidebar>
 	);
 };
 

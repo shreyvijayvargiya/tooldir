@@ -18,8 +18,9 @@ waitlist, kanban, products catalog, forms builder, cron, codegen) were removed.
 - TanStack React Query for server state
 - Redux Toolkit only for subscription/customer client state
 - TipTap for blog CMS
-- Stripe for paid checkout (subscription-mode APIs still present for billing tabs)
-- Resend for optional transactional email
+- Stripe **one-time** Checkout for launch slots (server builds `price_data`; no Price ID catalog required)
+- Set `STRIPE_TEST_ZERO=true` (+ `NEXT_PUBLIC_STRIPE_TEST_ZERO`) to force $0 checkout while wiring webhooks/admin
+- Resend for optional slot-payment receipt (`sendSlotPaymentEmail`)
 - Framer Motion for marketing motion
 
 ## Critical architecture note
@@ -65,9 +66,10 @@ Tab id `forms` was renamed to `submissions` (legacy `forms` still opens Submissi
 - `/api/pricing-slots/upsert` — admin slot CRUD
 - `/api/storage/upload-image` — Supabase Storage uploads
 - `/api/messages/create` — contact form
-- `/api/stripe/checkout` — Stripe Checkout session
-- `/api/stripe/webhook` — Stripe events + optional Resend email
-- `/api/stripe/cancel-subscription` — cancel Stripe sub
+- `/api/stripe/checkout` — one-time Checkout for launch slot (`price_data`, optional `$0` via `STRIPE_TEST_ZERO`)
+- `/api/stripe/webhook` — marks submission paid, upserts `payments` / `customers` / `users`, sends Resend receipt
+
+Removed: `/api/stripe/cancel-subscription` (no SaaS subscriptions).
 
 ## Core modules (do not delete)
 
@@ -98,9 +100,16 @@ Primary tables: `directory_tools`, `tool_submissions`, `pricing_slots`, `blogs`
 Billing/admin: `users`, `customers`, `payments`, `checkouts`, `invoices`, `messages`, `app_analytics`
 Storage bucket: `saas-starter-storage` (name kept for compatibility)
 
-See `supabase-migrations.sql`.
+See `supabase-migrations.sql` (single file: tables + payment columns + Storage bucket).
 
 When Supabase is empty / unset, directory listing can fall back to mock data in `lib/data/tools.js`.
+
+## Supabase Storage
+
+Bucket name: **`saas-starter-storage`** (constant `STORAGE_BUCKET` in `lib/api/storage.js`).
+TipTap editors call `uploadBlogEditorImage` → direct Storage upload, fallback `POST /api/storage/upload-image`.
+Paths: `blogs/content/`, `blogs/{id}/content/`, `blogs/banners/`, `blogs/{id}/banner-*`.
+SQL: run `supabase-migrations.sql` once (includes Storage bucket `saas-starter-storage`).
 
 ## Environment variables
 
@@ -113,6 +122,8 @@ Payments:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (optional if you only start checkout server-side)
+- `STRIPE_TEST_ZERO=true` — charge $0 in Checkout for local testing
+- `NEXT_PUBLIC_STRIPE_TEST_ZERO=true` — show $0 copy on submit UI
 
 Optional:
 - `RESEND_API_KEY`, `RESEND_FROM_EMAIL`

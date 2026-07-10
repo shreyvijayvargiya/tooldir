@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
@@ -26,6 +26,11 @@ const queryClient = new QueryClient({
 const MyApp = ({ Component, pageProps }) => {
 	const router = useRouter();
 	const isAdminRoute = router.pathname.startsWith("/admin");
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	const AppComponent = isAdminRoute ? (
 		<Component {...pageProps} />
@@ -45,8 +50,13 @@ const MyApp = ({ Component, pageProps }) => {
 					<AnalyticsTracker />
 					<SEO />
 					{AppComponent}
-					<Toaster position="top-right" richColors closeButton />
-					<ThemeCustomizer />
+					{/* Portal-based UI can mismatch SSR — mount after hydration */}
+					{mounted && (
+						<>
+							<Toaster position="top-right" richColors closeButton />
+							<ThemeCustomizer />
+						</>
+					)}
 				</PostHogProvider>
 			</QueryClientProvider>
 		</ThemeProvider>
