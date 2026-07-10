@@ -11,6 +11,7 @@ import PostHogProvider from "../lib/ui/PostHogProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
+import CookieConsent from "../app/frontend/marketing/CookieConsent";
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -32,6 +33,7 @@ const MyApp = ({ Component, pageProps }) => {
 		<Provider store={store}>
 			<PersistGate loading={null} persistor={persistor}>
 				<Component {...pageProps} />
+				<CookieConsent />
 			</PersistGate>
 		</Provider>
 	);

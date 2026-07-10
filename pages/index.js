@@ -1,566 +1,307 @@
-import React, { useState } from "react";
+import React from "react";
 import Head from "next/head";
-import Navbar from "../app/components/Navbar";
-import Footer from "../app/components/Footer";
-import { motion } from "framer-motion";
-import {
-	ArrowRight,
-	Check,
-	Zap,
-	Shield,
-	Rocket,
-	Sparkles,
-	Database,
-	CreditCard,
-	Users,
-	BarChart3,
-	Send,
-	Mail,
-	MessageSquare,
-} from "lucide-react";
 import Link from "next/link";
-import { toast } from "@/lib/toast";
+import dynamic from "next/dynamic";
+import { motion } from "framer-motion";
+import { Sparkles, ArrowRight, Calendar } from "lucide-react";
+import Navbar from "../app/frontend/Navbar";
+import Footer from "../app/frontend/Footer";
+import ToolsDirectoryTable from "../app/frontend/marketing/ToolsDirectoryTable";
+import CategoryChips from "../app/frontend/marketing/CategoryChips";
+import SubmitToolCard from "../app/frontend/marketing/SubmitToolCard";
+import StatsCards from "../app/frontend/marketing/StatsCards";
+import TestimonialsMarquee from "../app/frontend/marketing/TestimonialsMarquee";
+import PricingCalendar from "../app/frontend/marketing/PricingCalendar";
+import { usePricingSlots } from "@/lib/hooks/usePricingSlots";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Card, CardContent } from "@/components/ui/card";
+
+const AnimatedGradient = dynamic(
+	() =>
+		import("@/components/ui/animated-gradient").then((m) => m.AnimatedGradient),
+	{ ssr: false }
+);
+
+const ease = [0.22, 1, 0.36, 1];
+
+const sectionVariants = {
+	hidden: { opacity: 0, y: 48 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.7, ease, when: "beforeChildren", staggerChildren: 0.08 },
+	},
+	exit: {
+		opacity: 0,
+		y: -28,
+		transition: { duration: 0.45, ease },
+	},
+};
+
+const itemVariants = {
+	hidden: { opacity: 0, y: 24 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.55, ease },
+	},
+	exit: {
+		opacity: 0,
+		y: -12,
+		transition: { duration: 0.3, ease },
+	},
+};
+
+const heroItemVariants = {
+	hidden: { opacity: 0, y: 28, filter: "blur(6px)" },
+	visible: {
+		opacity: 1,
+		y: 0,
+		filter: "blur(0px)",
+		transition: { duration: 0.65, ease },
+	},
+	exit: {
+		opacity: 0,
+		y: -16,
+		filter: "blur(4px)",
+		transition: { duration: 0.35, ease },
+	},
+};
+
+const viewport = { once: false, amount: 0.2, margin: "-40px 0px" };
+
+const MotionSection = ({ children, className, id, delay = 0 }) => (
+	<motion.section
+		id={id}
+		className={className}
+		variants={sectionVariants}
+		initial="hidden"
+		whileInView="visible"
+		exit="exit"
+		viewport={viewport}
+		transition={{ delay }}
+	>
+		{children}
+	</motion.section>
+);
+
+const HERO_GRADIENT_LIGHT = {
+	preset: "custom",
+	color1: "#ffffff",
+	color2: "#eef6ff",
+	color3: "#7eb8ff",
+	rotation: -40,
+	proportion: 55,
+	scale: 0.55,
+	speed: 12,
+	distortion: 24,
+	swirl: 50,
+	swirlIterations: 8,
+	softness: 100,
+	offset: 80,
+	shape: "Edge",
+	shapeSize: 45,
+};
+
+const HERO_GRADIENT_DARK = {
+	preset: "custom",
+	color1: "#050810",
+	color2: "#0b1a33",
+	color3: "#1d6fd8",
+	rotation: -40,
+	proportion: 55,
+	scale: 0.55,
+	speed: 12,
+	distortion: 24,
+	swirl: 50,
+	swirlIterations: 8,
+	softness: 100,
+	offset: 80,
+	shape: "Edge",
+	shapeSize: 45,
+};
 
 const HomePage = () => {
-	const [contactForm, setContactForm] = useState({
-		name: "",
-		email: "",
-		subject: "",
-		message: "",
-	});
-	const [isSubmittingContact, setIsSubmittingContact] = useState(false);
-
-	const features = [
-		{
-			icon: Zap,
-			title: "Lightning Fast Performance",
-			description:
-				"Built with Next.js 15 and React 18 for optimal performance and SEO.",
-		},
-		{
-			icon: Shield,
-			title: "Secure Authentication",
-			description:
-				"Complete authentication system with email/password and Google OAuth.",
-		},
-		{
-			icon: CreditCard,
-			title: "Payment Integration",
-			description:
-				"Seamless payment processing with Stripe. Subscription management built-in.",
-		},
-		{
-			icon: Database,
-			title: "Database Ready",
-			description:
-				"Supabase database integration with PostgreSQL included.",
-		},
-		{
-			icon: Users,
-			title: "User Management",
-			description:
-				"Complete user management system with teams, roles, and permissions.",
-		},
-		{
-			icon: BarChart3,
-			title: "Analytics Dashboard",
-			description:
-				"Beautiful analytics dashboard with charts and metrics included.",
-		},
-		{
-			icon: Rocket,
-			title: "Scalable Architecture",
-			description:
-				"Built to scale from startup to enterprise with clean architecture.",
-		},
-		{
-			icon: Sparkles,
-			title: "Modern UI/UX",
-			description:
-				"Beautiful, responsive design with Tailwind CSS and Framer Motion.",
-		},
-	];
-
-	const plans = [
-		{
-			id: "pro-monthly",
-			name: "Pro",
-			price: "$29",
-			period: "month",
-			description: "Perfect for individuals and small teams",
-			features: [
-				"All core features",
-				"Priority support",
-				"Advanced analytics",
-				"Custom integrations",
-				"API access",
-			],
-			popular: true,
-		},
-		{
-			id: "pro-yearly",
-			name: "Pro",
-			price: "$290",
-			period: "year",
-			description: "Best value for long-term users",
-			features: [
-				"All Pro features",
-				"2 months free",
-				"Priority support",
-				"Advanced analytics",
-				"Custom integrations",
-				"API access",
-			],
-			popular: false,
-		},
-	];
-
-	const faqs = [
-		{
-			question: "What's included in the template?",
-			answer:
-				"The template includes a complete admin panel, customer-facing app, authentication, payment integration, blog system, email management, and analytics dashboard. Everything you need to launch your SaaS product.",
-		},
-		{
-			question: "Do I need coding experience?",
-			answer:
-				"Basic knowledge of JavaScript and React is helpful, but the template is well-documented with clear instructions. You can customize it to match your brand with minimal coding.",
-		},
-		{
-			question: "Can I use my own backend?",
-			answer:
-				"Yes! The template works with Supabase, or any backend API. You can easily swap out the database and API integrations to match your preferences.",
-		},
-		{
-			question: "Is there support included?",
-			answer:
-				"The template includes comprehensive documentation and code comments. For additional support, check the template documentation or reach out through our contact form.",
-		},
-		{
-			question: "How do I customize the design?",
-			answer:
-				"The entire design is built with Tailwind CSS, making it easy to customize colors, fonts, spacing, and layouts. All components are modular and well-organized.",
-		},
-		{
-			question: "What payment methods are supported?",
-			answer:
-				"The template integrates with Stripe for payment processing, supporting credit cards and other payment methods through their platform.",
-		},
-	];
-
-	const handleContactSubmit = async (e) => {
-		e.preventDefault();
-		setIsSubmittingContact(true);
-
-		try {
-			const response = await fetch("/api/messages/create", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(contactForm),
-			});
-
-			const data = await response.json();
-
-			if (response.ok) {
-				toast.success("Message sent successfully! We'll get back to you soon.");
-				setContactForm({ name: "", email: "", subject: "", message: "" });
-			} else {
-				throw new Error(data.error || "Failed to send message");
-			}
-		} catch (error) {
-			console.error("Error sending message:", error);
-			toast.error(error.message || "Failed to send message. Please try again.");
-		} finally {
-			setIsSubmittingContact(false);
-		}
-	};
-
+	const { data: slotsMap = {} } = usePricingSlots();
 	return (
 		<>
 			<Head>
-				<title>YourApp - Build Amazing SaaS Products Faster</title>
+				<title>ToolDir — AI Tool Directory</title>
 				<meta
 					name="description"
-					content="SaaS starter template to build amazing products faster. Includes authentication, payments, and more."
+					content="Discover trending AI tools. Browse, compare, and submit the best AI products in one curated directory."
 				/>
 			</Head>
+
 			<div className="min-h-screen flex flex-col">
 				<Navbar />
 
-				{/* Hero Section */}
-				<section className="flex-1 py-20 px-4 sm:px-6 lg:px-8">
-					<div className="max-w-4xl mx-auto text-center">
+				{/* Hero */}
+				<MotionSection className="relative py-20 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-[60vh] flex items-center">
+					<div className="absolute inset-0 pointer-events-none" aria-hidden>
+						<AnimatedGradient
+							config={HERO_GRADIENT_LIGHT}
+							darkConfig={HERO_GRADIENT_DARK}
+							noise={{ opacity: 0.12, scale: 1 }}
+						/>
+						<div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background" />
+					</div>
+					<div className="max-w-5xl mx-auto text-center relative z-10">
+						<motion.div variants={heroItemVariants}>
+							<Badge variant="secondary" className="mb-4 gap-1">
+								<Sparkles className="w-3 h-3" />
+								AI Tool Directory
+							</Badge>
+						</motion.div>
 						<motion.h1
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.5 }}
-							className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6"
+							variants={heroItemVariants}
+							className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight"
 						>
-							Build Amazing SaaS Products{" "}
-							<span className="text-muted-foreground">Faster</span>
+							Discover the Best{" "}
+							<span className="text-primary">AI Tools</span>
 						</motion.h1>
 						<motion.p
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.5, delay: 0.1 }}
-							className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
+							variants={heroItemVariants}
+							className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8"
 						>
-							Start building your SaaS product today with our complete starter
-							template. Includes authentication, payments, admin panel, and
-							more.
+							The curated directory for AI builders and users. Browse trending
+							tools, compare features, and launch your product to 1M+ monthly
+							visitors.
 						</motion.p>
 						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.5, delay: 0.2 }}
-							className="flex flex-col sm:flex-row items-center justify-center gap-4"
+							variants={heroItemVariants}
+							className="flex flex-col sm:flex-row gap-3 justify-center"
 						>
 							<Button asChild size="lg">
-								<Link href="/pricing">
-									Get Started
+								<Link href="/submit">
+									Submit Your Tool
 									<ArrowRight className="w-4 h-4" />
 								</Link>
 							</Button>
 							<Button asChild variant="outline" size="lg">
-								<Link href="/docs">Learn More</Link>
+								<Link href="#trending">Browse Tools</Link>
 							</Button>
 						</motion.div>
 					</div>
-				</section>
+				</MotionSection>
 
-				{/* Features Section */}
-				<section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted">
-					<div className="max-w-6xl mx-auto">
-						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-foreground mb-4">
-								Everything You Need
+				{/* Trending Tools Table */}
+				<MotionSection id="trending" className="py-12 px-4 sm:px-6 lg:px-8">
+					<div className="max-w-7xl mx-auto space-y-5">
+						<motion.div variants={itemVariants}>
+							<h2 className="text-2xl font-bold text-foreground mb-2">
+								Trending AI Tools
 							</h2>
-							<p className="text-muted-foreground max-w-2xl mx-auto">
-								All the essential features to launch your SaaS product quickly
-								and efficiently.
+							<p className="text-muted-foreground text-sm">
+								Latest tools ranked by community upvotes and GitHub stars
 							</p>
-						</div>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-							{features.map((feature, index) => {
-								const Icon = feature.icon;
-								return (
-									<motion.div
-										key={index}
-										initial={{ opacity: 0, y: 20 }}
-										whileInView={{ opacity: 1, y: 0 }}
-										viewport={{ once: true }}
-										transition={{ delay: index * 0.1 }}
-									>
-										<Card className="h-full hover:shadow-md transition-shadow">
-											<CardContent className="p-6">
-												<div className="p-3 bg-primary text-primary-foreground rounded-xl w-fit mb-4">
-													<Icon className="w-5 h-5" />
-												</div>
-												<h3 className="text-lg font-semibold text-foreground mb-2">
-													{feature.title}
-												</h3>
-												<p className="text-sm text-muted-foreground">
-													{feature.description}
-												</p>
-											</CardContent>
-										</Card>
-									</motion.div>
-								);
-							})}
-						</div>
-					</div>
-				</section>
-
-				{/* Pricing Section */}
-				<section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
-					<div className="max-w-6xl mx-auto">
-						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-foreground mb-4">
-								Simple, Transparent Pricing
-							</h2>
-							<p className="text-muted-foreground max-w-2xl mx-auto">
-								Choose the plan that works best for you. All plans include a
-								14-day free trial.
-							</p>
-						</div>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-							{plans.map((plan, index) => (
-								<motion.div
-									key={plan.id}
-									initial={{ opacity: 0, y: 20 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ delay: index * 0.1 }}
-									className="relative"
-								>
-									<Card
-										className={`h-full ${
-											plan.popular
-												? "border-primary border-2 shadow-lg"
-												: ""
-										}`}
-									>
-										{plan.popular && (
-											<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-												<Badge>Most Popular</Badge>
-											</div>
-										)}
-										<CardContent className="p-8">
-											<div className="text-center mb-6">
-												<h3 className="text-2xl font-bold text-foreground mb-2">
-													{plan.name}
-												</h3>
-												<div className="mb-2">
-													<span className="text-4xl font-bold text-foreground">
-														{plan.price}
-													</span>
-													<span className="text-muted-foreground">/{plan.period}</span>
-												</div>
-												<p className="text-sm text-muted-foreground">{plan.description}</p>
-											</div>
-											<ul className="space-y-3 mb-6">
-												{plan.features.map((feature, idx) => (
-													<li key={idx} className="flex items-start gap-2">
-														<Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-														<span className="text-sm text-foreground">{feature}</span>
-													</li>
-												))}
-											</ul>
-											<Button
-												asChild
-												variant={plan.popular ? "default" : "secondary"}
-												className="w-full"
-											>
-												<Link href="/pricing">
-													Get Started
-													<ArrowRight className="w-4 h-4" />
-												</Link>
-											</Button>
-										</CardContent>
-									</Card>
-								</motion.div>
-							))}
-						</div>
-					</div>
-				</section>
-
-				{/* FAQ Section */}
-				<section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted">
-					<div className="max-w-3xl mx-auto">
-						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-foreground mb-4">
-								Frequently Asked Questions
-							</h2>
-							<p className="text-muted-foreground">
-								Everything you need to know about our SaaS starter template.
-							</p>
-						</div>
+						</motion.div>
 
 						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							whileInView={{ opacity: 1, y: 0 }}
-							viewport={{ once: true }}
+							id="categories"
+							className="w-full"
+							variants={itemVariants}
 						>
-							<Card>
-								<CardContent className="p-6">
-									<Accordion type="single" collapsible className="w-full">
-										{faqs.map((faq, index) => (
-											<AccordionItem key={index} value={`item-${index}`}>
-												<AccordionTrigger className="text-left">
-													{faq.question}
-												</AccordionTrigger>
-												<AccordionContent className="text-muted-foreground">
-													{faq.answer}
-												</AccordionContent>
-											</AccordionItem>
-										))}
-									</Accordion>
-								</CardContent>
-							</Card>
+							<CategoryChips />
+						</motion.div>
+
+						<motion.div variants={itemVariants}>
+							<ToolsDirectoryTable />
 						</motion.div>
 					</div>
-				</section>
+				</MotionSection>
 
-				{/* Contact Section */}
-				<section id="contact" className="py-20 px-4 sm:px-6 lg:px-8">
-					<div className="max-w-4xl mx-auto">
-						<div className="text-center mb-12">
-							<h2 className="text-3xl font-bold text-foreground mb-4">
-								Get in Touch
-							</h2>
-							<p className="text-muted-foreground">
-								Have a question? We'd love to hear from you.
-							</p>
+				{/* Submit CTA */}
+				<MotionSection className="py-8 px-4 sm:px-6 lg:px-8">
+					<motion.div className="max-w-7xl mx-auto" variants={itemVariants}>
+						<SubmitToolCard />
+					</motion.div>
+				</MotionSection>
+
+				{/* Stats + Testimonials */}
+				<MotionSection className="py-16 px-4 sm:px-6 lg:px-8">
+					<div className="max-w-7xl mx-auto space-y-14">
+						<div className="max-w-4xl mx-auto">
+							<motion.div variants={itemVariants} className="text-center mb-10">
+								<h2 className="text-2xl font-bold text-foreground mb-2">
+									Trusted by Builders Worldwide
+								</h2>
+								<p className="text-muted-foreground text-sm">
+									Real numbers from our growing AI tool community
+								</p>
+							</motion.div>
+							<motion.div variants={itemVariants}>
+								<StatsCards />
+							</motion.div>
 						</div>
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-							{/* Contact Info */}
-							<div className="space-y-6">
-								<Card>
-									<CardContent className="p-6">
-										<div className="flex items-start gap-4">
-											<div className="p-3 bg-primary text-primary-foreground rounded-xl">
-												<Mail className="w-5 h-5" />
-											</div>
-											<div>
-												<h3 className="font-semibold text-foreground mb-1">
-													Email
-												</h3>
-												<p className="text-sm text-muted-foreground">
-													support@yourapp.com
-												</p>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-								<Card>
-									<CardContent className="p-6">
-										<div className="flex items-start gap-4">
-											<div className="p-3 bg-primary text-primary-foreground rounded-xl">
-												<MessageSquare className="w-5 h-5" />
-											</div>
-											<div>
-												<h3 className="font-semibold text-foreground mb-1">
-													Response Time
-												</h3>
-												<p className="text-sm text-muted-foreground">
-													We typically respond within 24 hours
-												</p>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
+						<motion.div variants={itemVariants} className="overflow-hidden">
+							<div className="text-center mb-8">
+								<h3 className="text-2xl font-bold text-foreground mb-2">
+									What Founders Say
+								</h3>
+								<p className="text-muted-foreground text-sm">
+									Builders who launched on ToolDir
+								</p>
 							</div>
-
-							{/* Contact Form */}
-							<Card>
-								<CardContent className="p-6">
-									<form onSubmit={handleContactSubmit} className="space-y-4">
-										<div className="space-y-2">
-											<Label htmlFor="name">Name</Label>
-											<Input
-												id="name"
-												type="text"
-												name="name"
-												value={contactForm.name}
-												onChange={(e) =>
-													setContactForm({
-														...contactForm,
-														[e.target.name]: e.target.value,
-													})
-												}
-												required
-											/>
-										</div>
-										<div className="space-y-2">
-											<Label htmlFor="email">Email</Label>
-											<Input
-												id="email"
-												type="email"
-												name="email"
-												value={contactForm.email}
-												onChange={(e) =>
-													setContactForm({
-														...contactForm,
-														[e.target.name]: e.target.value,
-													})
-												}
-												required
-											/>
-										</div>
-										<div className="space-y-2">
-											<Label htmlFor="subject">Subject</Label>
-											<Input
-												id="subject"
-												type="text"
-												name="subject"
-												value={contactForm.subject}
-												onChange={(e) =>
-													setContactForm({
-														...contactForm,
-														[e.target.name]: e.target.value,
-													})
-												}
-												required
-											/>
-										</div>
-										<div className="space-y-2">
-											<Label htmlFor="message">Message</Label>
-											<Textarea
-												id="message"
-												name="message"
-												value={contactForm.message}
-												onChange={(e) =>
-													setContactForm({
-														...contactForm,
-														[e.target.name]: e.target.value,
-													})
-												}
-												required
-												rows={4}
-											/>
-										</div>
-										<Button
-											type="submit"
-											disabled={isSubmittingContact}
-											className="w-full"
-										>
-											<Send className="w-4 h-4" />
-											{isSubmittingContact ? "Sending..." : "Send Message"}
-										</Button>
-									</form>
-								</CardContent>
-							</Card>
-						</div>
+							<TestimonialsMarquee />
+						</motion.div>
 					</div>
-				</section>
+				</MotionSection>
 
-				{/* CTA Section */}
-				<section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted">
-					<div className="max-w-4xl mx-auto text-center">
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							whileInView={{ opacity: 1, y: 0 }}
-							viewport={{ once: true }}
-						>
-							<Card className="bg-primary text-primary-foreground border-primary">
-								<CardContent className="p-8">
-									<h2 className="text-3xl font-bold mb-4">
-										Ready to Get Started?
+				{/* Pricing Preview */}
+				<MotionSection className="py-16 px-4 sm:px-6 lg:px-8">
+					<motion.div className="" variants={itemVariants}>
+						<Card className="relative overflow-hidden border shadow-xl shadow-primary/5">
+							<div className="pointer-events-none absolute inset-0" aria-hidden>
+								<AnimatedGradient
+									config={HERO_GRADIENT_LIGHT}
+									darkConfig={HERO_GRADIENT_DARK}
+									noise={{ opacity: 0.1, scale: 1 }}
+								/>
+								<div className="absolute inset-0 bg-background/40" />
+							</div>
+							<CardContent className="relative z-10 p-6 sm:p-8 max-w-3xl mx-auto">
+								<div className="text-center mb-8">
+									<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border bg-background/90 shadow-sm backdrop-blur-sm">
+										<motion.div
+											animate={{ rotate: [0, -8, 8, 0], y: [0, -3, 0] }}
+											transition={{
+												duration: 2.6,
+												repeat: Infinity,
+												ease: "easeInOut",
+											}}
+										>
+											<Calendar className="h-5 w-5 text-primary" />
+										</motion.div>
+									</div>
+									<Badge variant="outline" className="mb-3 gap-1 bg-background/70 backdrop-blur-sm">
+										Launch Slots
+									</Badge>
+									<h2 className="text-2xl font-bold text-foreground mb-2">
+										Book Your Launch Slot
 									</h2>
-									<p className="text-primary-foreground/80 mb-6">
-										Join thousands of developers building amazing SaaS products.
+									<p className="text-muted-foreground text-sm max-w-lg mx-auto">
+										Choose a date to launch your tool with featured placement.
+										Free slots available early each month.
 									</p>
-									<Button
-										asChild
-										variant="secondary"
-										size="lg"
-									>
+								</div>
+
+								<PricingCalendar mini slotsMap={slotsMap} />
+
+								<div className="text-center mt-6">
+									<Button asChild size="lg">
 										<Link href="/pricing">
-											View Pricing
+											View Full Pricing
 											<ArrowRight className="w-4 h-4" />
 										</Link>
 									</Button>
-								</CardContent>
-							</Card>
-						</motion.div>
-					</div>
-				</section>
+								</div>
+							</CardContent>
+						</Card>
+					</motion.div>
+				</MotionSection>
 
 				<Footer />
 			</div>

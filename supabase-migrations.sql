@@ -1,14 +1,15 @@
 -- ============================================
--- Supabase Database Migration Script
--- SAAS starter CMS - Simple table structures
+-- ToolDir — Supabase migrations
+-- AI tool directory boilerplate
+-- Run in the Supabase SQL editor
 -- ============================================
 
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
--- BLOGS TABLE
+-- Core directory tables
 -- ============================================
+
 CREATE TABLE IF NOT EXISTS blogs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
@@ -22,37 +23,74 @@ CREATE TABLE IF NOT EXISTS blogs (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================
--- EMAILS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS emails (
+CREATE INDEX IF NOT EXISTS idx_blogs_slug ON blogs(slug);
+CREATE INDEX IF NOT EXISTS idx_blogs_status ON blogs(status);
+CREATE INDEX IF NOT EXISTS idx_blogs_published_at ON blogs(published_at);
+
+CREATE TABLE IF NOT EXISTS directory_tools (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    subject TEXT NOT NULL,
-    content TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'draft',
-    recipients INTEGER DEFAULT 0,
-    published_at TIMESTAMPTZ,
+    slug TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    website TEXT NOT NULL,
+    description TEXT,
+    stars INTEGER DEFAULT 0,
+    upvotes INTEGER DEFAULT 0,
+    listed_date DATE,
+    country TEXT DEFAULT 'US',
+    pricing TEXT,
+    category TEXT,
+    tags TEXT[] DEFAULT ARRAY[]::TEXT[],
+    logo_url TEXT,
+    screenshot_url TEXT,
+    is_listed BOOLEAN NOT NULL DEFAULT FALSE,
+    featured BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_directory_tools_slug ON directory_tools(slug);
+CREATE INDEX IF NOT EXISTS idx_directory_tools_is_listed ON directory_tools(is_listed);
+CREATE INDEX IF NOT EXISTS idx_directory_tools_listed_date ON directory_tools(listed_date);
+
+CREATE TABLE IF NOT EXISTS tool_submissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    website TEXT NOT NULL,
+    description TEXT,
+    tags TEXT[] DEFAULT ARRAY[]::TEXT[],
+    logo_url TEXT,
+    screenshot_url TEXT,
+    badge_verified BOOLEAN DEFAULT FALSE,
+    launch_date DATE,
+    slot_label TEXT,
+    slot_price INTEGER DEFAULT 0,
+    slot_is_paid BOOLEAN DEFAULT FALSE,
+    status TEXT NOT NULL DEFAULT 'pending',
+    directory_tool_id UUID REFERENCES directory_tools(id) ON DELETE SET NULL,
+    submitter_email TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_tool_submissions_status ON tool_submissions(status);
+CREATE INDEX IF NOT EXISTS idx_tool_submissions_created_at ON tool_submissions(created_at);
+
+CREATE TABLE IF NOT EXISTS pricing_slots (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slot_date DATE UNIQUE NOT NULL,
+    price INTEGER NOT NULL DEFAULT 0,
+    label TEXT NOT NULL,
+    description TEXT,
+    is_paid BOOLEAN NOT NULL DEFAULT TRUE,
+    perks TEXT[] DEFAULT ARRAY[]::TEXT[],
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================
--- SUBSCRIBERS TABLE
+-- Auth / admin / billing tables
 -- ============================================
-CREATE TABLE IF NOT EXISTS subscribers (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email TEXT UNIQUE NOT NULL,
-    name TEXT,
-    status TEXT NOT NULL DEFAULT 'active',
-    subscribed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    unsubscribed_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
 
--- ============================================
--- USERS TABLE
--- ============================================
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     uid TEXT UNIQUE,
@@ -67,9 +105,6 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================
--- CUSTOMERS TABLE
--- ============================================
 CREATE TABLE IF NOT EXISTS customers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_id TEXT UNIQUE,
@@ -83,9 +118,6 @@ CREATE TABLE IF NOT EXISTS customers (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================
--- PAYMENTS TABLE
--- ============================================
 CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     payment_id TEXT UNIQUE,
@@ -101,70 +133,16 @@ CREATE TABLE IF NOT EXISTS payments (
     expires_at TIMESTAMPTZ
 );
 
--- ============================================
--- MESSAGES TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS messages (
+CREATE TABLE IF NOT EXISTS checkouts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    subject TEXT NOT NULL,
-    message TEXT NOT NULL,
-    read BOOLEAN DEFAULT FALSE,
-    replied BOOLEAN DEFAULT FALSE,
-    read_at TIMESTAMPTZ,
-    replied_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================
--- PRODUCTS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS products (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    stripe_product_id TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
-    banner_images JSONB DEFAULT '[]'::jsonb,
-    media_file_ids TEXT[] DEFAULT ARRAY[]::TEXT[],
-    prices JSONB DEFAULT '[]'::jsonb,
-    checkout_link TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Create index on stripe_product_id for faster lookups
-CREATE INDEX IF NOT EXISTS idx_products_stripe_product_id ON products(stripe_product_id);
-
--- ============================================
--- REPORT ISSUES TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS report_issues (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    username TEXT,
-    issue TEXT NOT NULL,
+    checkout_id TEXT UNIQUE NOT NULL,
+    plan_id TEXT,
+    customer_id TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================
--- WAITLIST TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS waitlist (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================
--- INVOICES TABLE
--- ============================================
 CREATE TABLE IF NOT EXISTS invoices (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     invoice_number TEXT UNIQUE NOT NULL,
@@ -183,86 +161,22 @@ CREATE TABLE IF NOT EXISTS invoices (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create index on invoice_number for faster lookups
 CREATE INDEX IF NOT EXISTS idx_invoices_invoice_number ON invoices(invoice_number);
 
--- ============================================
--- TASKS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS tasks (
+CREATE TABLE IF NOT EXISTS messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title TEXT NOT NULL,
-    description TEXT,
-    type TEXT NOT NULL DEFAULT 'task',
-    status TEXT NOT NULL DEFAULT 'backlog',
-    priority TEXT NOT NULL DEFAULT 'Medium',
-    progress INTEGER DEFAULT 0,
-    assignees TEXT[] DEFAULT ARRAY[]::TEXT[],
-    attachments INTEGER DEFAULT 0,
-    comments INTEGER DEFAULT 0,
-    category TEXT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    message TEXT NOT NULL,
+    read BOOLEAN DEFAULT FALSE,
+    replied BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMPTZ,
+    replied_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create indexes for faster lookups
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-CREATE INDEX IF NOT EXISTS idx_tasks_type ON tasks(type);
-CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
-
--- ============================================
--- IDEA DATABASE TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS idea_database (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title TEXT NOT NULL,
-    content TEXT,
-    mark_as_task BOOLEAN NOT NULL DEFAULT FALSE,
-    task_id UUID,
-    task_status TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Create indexes for faster lookups
-CREATE INDEX IF NOT EXISTS idx_idea_database_created_at ON idea_database(created_at);
-CREATE INDEX IF NOT EXISTS idx_idea_database_mark_as_task ON idea_database(mark_as_task);
-CREATE INDEX IF NOT EXISTS idx_idea_database_task_id ON idea_database(task_id);
-
--- ============================================
--- FORMS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS forms (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title TEXT NOT NULL,
-    description TEXT,
-    fields JSONB NOT NULL DEFAULT '[]'::jsonb,
-    is_published BOOLEAN NOT NULL DEFAULT FALSE,
-    form_slug TEXT UNIQUE NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_forms_created_at ON forms(created_at);
-CREATE INDEX IF NOT EXISTS idx_forms_form_slug ON forms(form_slug);
-CREATE INDEX IF NOT EXISTS idx_forms_is_published ON forms(is_published);
-
--- ============================================
--- FORM SUBMISSIONS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS form_submissions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    form_id UUID NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
-    data JSONB NOT NULL DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_form_submissions_form_id ON form_submissions(form_id);
-CREATE INDEX IF NOT EXISTS idx_form_submissions_created_at ON form_submissions(created_at);
-
--- ============================================
--- APP ANALYTICS TABLE
--- ============================================
 CREATE TABLE IF NOT EXISTS app_analytics (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     fingerprint TEXT UNIQUE NOT NULL,
@@ -288,62 +202,35 @@ CREATE INDEX IF NOT EXISTS idx_app_analytics_first_visit ON app_analytics(first_
 CREATE INDEX IF NOT EXISTS idx_app_analytics_last_visit ON app_analytics(last_visit);
 
 -- ============================================
--- CHANGELOG TABLE
+-- Storage bucket for blog / listing images
 -- ============================================
-CREATE TABLE IF NOT EXISTS changelog (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title TEXT NOT NULL,
-    description TEXT,
-    content TEXT,
-    date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    categories TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
 
-CREATE INDEX IF NOT EXISTS idx_changelog_date ON changelog(date);
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'saas-starter-storage',
+    'saas-starter-storage',
+    true,
+    5242880,
+    ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+)
+ON CONFLICT (id) DO NOTHING;
 
--- ============================================
--- CRON JOBS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS cron_jobs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    type TEXT NOT NULL, -- 'blog' | 'email'
-    item_id UUID NOT NULL,
-    scheduled_date TIMESTAMPTZ NOT NULL,
-    status TEXT NOT NULL DEFAULT 'scheduled', -- 'scheduled' | 'completed' | 'failed' | 'cancelled'
-    item_data JSONB NOT NULL DEFAULT '{}'::jsonb,
-    error TEXT,
-    last_run_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+DROP POLICY IF EXISTS "Public read blog storage" ON storage.objects;
+CREATE POLICY "Public read blog storage"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'saas-starter-storage');
 
--- Prevent duplicate CRON jobs per item
-CREATE UNIQUE INDEX IF NOT EXISTS uniq_cron_jobs_type_item_id ON cron_jobs(type, item_id);
+DROP POLICY IF EXISTS "Authenticated upload blog storage" ON storage.objects;
+CREATE POLICY "Authenticated upload blog storage"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'saas-starter-storage');
 
--- Indexes for common queries
-CREATE INDEX IF NOT EXISTS idx_cron_jobs_scheduled_date ON cron_jobs(scheduled_date);
-CREATE INDEX IF NOT EXISTS idx_cron_jobs_type_scheduled_date ON cron_jobs(type, scheduled_date);
-CREATE INDEX IF NOT EXISTS idx_cron_jobs_status ON cron_jobs(status);
+DROP POLICY IF EXISTS "Authenticated update blog storage" ON storage.objects;
+CREATE POLICY "Authenticated update blog storage"
+ON storage.objects FOR UPDATE
+USING (bucket_id = 'saas-starter-storage');
 
--- ============================================
--- ASSETS TABLE (Supabase Storage metadata)
--- ============================================
-CREATE TABLE IF NOT EXISTS assets (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    file_name TEXT NOT NULL,
-    file_id UUID UNIQUE NOT NULL,
-    type TEXT,
-    size BIGINT,
-    original_size BIGINT,
-    url TEXT,
-    bucket TEXT NOT NULL DEFAULT 'saas-starter-storage',
-    storage_path TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_assets_created_at ON assets(created_at);
-CREATE INDEX IF NOT EXISTS idx_assets_file_id ON assets(file_id);
+DROP POLICY IF EXISTS "Authenticated delete blog storage" ON storage.objects;
+CREATE POLICY "Authenticated delete blog storage"
+ON storage.objects FOR DELETE
+USING (bucket_id = 'saas-starter-storage');

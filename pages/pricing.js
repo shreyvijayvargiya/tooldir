@@ -1,424 +1,189 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import Head from "next/head";
-import Navbar from "../app/components/Navbar";
-import Footer from "../app/components/Footer";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Check, ArrowRight, CheckCircle2, Mail, X } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAppSelector } from "../lib/store/hooks";
-import { useSubscription } from "../lib/hooks/useSubscription";
-import LoginModal from "../lib/ui/LoginModal";
-import ConfirmationModal from "../lib/ui/ConfirmationModal";
-import {
-	getUserCookie,
-	removeUserCookie,
-	setUserCookie,
-} from "../lib/utils/cookies";
-import { signInWithGoogle, onAuthStateChange } from "../lib/api/auth";
-import { toast } from "@/lib/toast";
+import { ArrowRight, Check, Rocket } from "lucide-react";
+import Navbar from "../app/frontend/Navbar";
+import Footer from "../app/frontend/Footer";
+import StatsCards from "../app/frontend/marketing/StatsCards";
+import TestimonialsMarquee from "../app/frontend/marketing/TestimonialsMarquee";
+import { PRICING_PLANS } from "@/lib/data/pricing-slots";
+import { FollowerPointerCard } from "@/components/ui/following-pointer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const PricingPage = () => {
-	const queryClient = useQueryClient();
-	const authUnsubscribeRef = useRef(null);
-	const [showLoginModal, setShowLoginModal] = useState(false);
-	const [showCancelModal, setShowCancelModal] = useState(false);
-	const [isCancelling, setIsCancelling] = useState(false);
-
-	// Fetch subscription data
-	useSubscription();
-	const subscription = useAppSelector((state) => state.subscription);
-
-	// Fetch user with React Query - checks cookie and sets up auth listener
-	// Uses same queryKey as Navbar to share cache
-	const { data: user } = useQuery({
-		queryKey: ["currentUser"],
-		queryFn: async () => {
-			// Check for existing user in cookie first
-			const cookieUser = getUserCookie();
-
-			// Set up auth state listener to update query cache only once
-			// This runs once when the query is first executed
-			if (!authUnsubscribeRef.current) {
-				const unsubscribe = onAuthStateChange(async (supabaseUser) => {
-					if (supabaseUser) {
-						const userData = {
-							uid: supabaseUser.uid,
-							email: supabaseUser.email,
-							displayName: supabaseUser.displayName || null,
-							photoURL: supabaseUser.photoURL || null,
-							provider: supabaseUser.providerData[0]?.providerId || "email",
-						};
-						setUserCookie(userData);
-						// Update query cache with new user data
-						queryClient.setQueryData(["currentUser"], userData);
-					} else {
-						removeUserCookie();
-						// Update query cache to null
-						queryClient.setQueryData(["currentUser"], null);
-					}
-				});
-
-				// Store unsubscribe in a ref for cleanup
-				authUnsubscribeRef.current = unsubscribe;
-			}
-
-			// Return initial user from cookie
-			return cookieUser;
-		},
-		enabled: true,
-		staleTime: Infinity, // Auth state is managed by Supabase listener
-		gcTime: Infinity, // Keep in cache indefinitely
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-	});
-
-	// Cleanup auth listener on unmount
-	useEffect(() => {
-		return () => {
-			if (authUnsubscribeRef.current) {
-				authUnsubscribeRef.current();
-				authUnsubscribeRef.current = null;
-			}
-		};
-	}, []);
-
-	const handleGoogleLogin = async () => {
-		try {
-			await signInWithGoogle();
-			// Invalidate user query to refetch after login
-			queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-			toast.success("Logged in successfully!");
-		} catch (error) {
-			console.error("Google login error:", error);
-			toast.error("Failed to login with Google. Please try again.");
-		}
-	};
-
-	// Replace these with your actual stripe plan IDs
-	const plans = [
-		{
-			id: "bf5d934b-da7c-4861-a427-6dcf2b211cff", // stripe plan ID
-			name: "Pro",
-			price: "$29",
-			period: "month",
-			description: "Perfect for individuals and small teams",
-			features: [
-				"All core features",
-				"Priority support",
-				"Advanced analytics",
-				"Custom integrations",
-				"API access",
-			],
-			popular: true,
-			type: "subscription",
-		},
-		{
-			id: "pro-yearly", // stripe plan ID
-			name: "Pro",
-			price: "$290",
-			period: "year",
-			description: "Best value for long-term users",
-			features: [
-				"All Pro features",
-				"2 months free",
-				"Priority support",
-				"Advanced analytics",
-				"Custom integrations",
-				"API access",
-			],
-			popular: false,
-			type: "subscription",
-		},
-		{
-			id: "enterprise",
-			name: "Enterprise",
-			price: "Custom",
-			period: "",
-			description: "For large organizations with custom needs",
-			features: [
-				"Everything in Pro",
-				"Dedicated account manager",
-				"Custom SLA",
-				"On-premise deployment",
-				"Advanced security",
-				"24/7 priority support",
-				"Custom integrations",
-			],
-			popular: false,
-			type: "enterprise",
-		},
-	];
-
-	const handleCheckout = async (planId) => {
-		// Check if user is logged in
-		const user = getUserCookie();
-		if (!user) {
-			setShowLoginModal(true);
-			return;
-		}
-
-		// User is authenticated, proceed with checkout
-		try {
-			const response = await fetch("/api/stripe/checkout", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					planId: planId,
-					customerId: subscription.customerId,
-				}),
-			});
-
-			const data = await response.json();
-
-			if (response.ok && data.checkoutUrl) {
-				window.location.href = data.checkoutUrl;
-			} else {
-				throw new Error(data.error || "Failed to create checkout");
-			}
-		} catch (error) {
-			console.error("Error creating checkout:", error);
-			alert("Failed to start checkout. Please try again.");
-		}
-	};
-
-	const handleCancelSubscription = async () => {
-		if (!subscription.customerId) {
-			toast.error("Unable to cancel subscription. Customer ID not found.");
-			return;
-		}
-
-		setIsCancelling(true);
-		try {
-			const response = await fetch("/api/stripe/cancel-subscription", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					customerId: subscription.customerId,
-				}),
-			});
-
-			const data = await response.json();
-
-			if (response.ok) {
-				toast.success(
-					"Subscription cancelled successfully. You'll have access until the end of your billing period."
-				);
-				setShowCancelModal(false);
-				// Invalidate subscription query to refetch updated data
-				queryClient.invalidateQueries({ queryKey: ["subscription"] });
-			} else {
-				throw new Error(data.error || "Failed to cancel subscription");
-			}
-		} catch (error) {
-			console.error("Error cancelling subscription:", error);
-			toast.error(
-				error.message || "Failed to cancel subscription. Please try again."
-			);
-		} finally {
-			setIsCancelling(false);
-		}
-	};
-
-	// Formats date (e.g. "January 1, 2024") - used for next billing date (works for both monthly/yearly)
-	const formatDate = (dateString) => {
-		if (!dateString) return "N/A";
-		try {
-			const date = new Date(dateString);
-			return date.toLocaleDateString("en-US", {
-				year: "numeric",
-				month: "long",
-				day: "numeric",
-			});
-		} catch (error) {
-			return "Invalid date";
-		}
-	};
-
 	return (
 		<>
 			<Head>
-				<title>Pricing - YourApp</title>
+				<title>Pricing — ToolDir Launch Slots</title>
 				<meta
 					name="description"
-					content="Choose the perfect plan for your needs. Flexible pricing with no hidden fees."
+					content="Choose a launch plan for your AI tool. Standard, Premium, or Weekend Featured on ToolDir."
 				/>
 			</Head>
+
 			<div className="min-h-screen flex flex-col">
 				<Navbar />
 
-				<section className="flex-1 py-20 px-4 sm:px-6 lg:px-8">
-					<div className="max-w-6xl mx-auto">
-						<div className="text-center mb-12">
-							<h1 className="text-4xl font-bold text-foreground mb-4">
-								Simple, Transparent Pricing
+				<section className="py-16 px-4 sm:px-6 lg:px-8">
+					<div className="max-w-7xl mx-auto">
+						<motion.div
+							initial={false}
+							animate={{ opacity: 1, y: 0 }}
+							className="text-center mb-12"
+						>
+							<h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">
+								Launch Pricing
 							</h1>
-							<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-								Choose the plan that works best for you. All plans include a
-								14-day free trial.
+							<p className="text-muted-foreground max-w-xl mx-auto">
+								Pick a plan that matches your launch goals. Hover any card for
+								quick details — then continue to submit and book your slot.
 							</p>
-						</div>
+						</motion.div>
 
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-							{plans.map((plan, index) => (
-								<motion.div
+						<div className="flex flex-col lg:flex-row gap-6 items-stretch">
+							{PRICING_PLANS.map((plan) => (
+								<FollowerPointerCard
 									key={plan.id}
-									initial={{ opacity: 0, y: 20 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ delay: index * 0.1 }}
-									className="relative"
+									className="flex-1 min-w-0"
+									title={
+										<span className="font-medium">{plan.pointerTitle}</span>
+									}
 								>
 									<Card
-										className={`h-full ${
-											plan.popular
-												? "border-primary border-2 shadow-lg"
-												: ""
-										}`}
-									>
-										{plan.popular && (
-											<div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-												<Badge>Most Popular</Badge>
-											</div>
+										className={cn(
+											"h-full flex flex-col transition-shadow duration-200 hover:shadow-lg",
+											plan.featured && "border-primary shadow-md ring-1 ring-primary/20"
 										)}
-										<CardContent className="p-8">
-											<div className="text-center mb-6">
-												<h3 className="text-2xl font-bold text-foreground mb-2">
-													{plan.name}
-												</h3>
-												<div className="mb-2">
-													<span className="text-4xl font-bold text-foreground">
-														{plan.price}
-													</span>
-													{plan.period && (
-														<span className="text-muted-foreground">/{plan.period}</span>
-													)}
-												</div>
-												<p className="text-sm text-muted-foreground">{plan.description}</p>
+									>
+										<CardHeader className="space-y-3">
+											<div className="flex items-center justify-between gap-2">
+												<CardTitle className="text-xl">{plan.name}</CardTitle>
+												{plan.featured && (
+													<Badge>Popular</Badge>
+												)}
 											</div>
-											<ul className="space-y-3 mb-6">
-												{plan.features.map((feature, idx) => (
-													<li key={idx} className="flex items-start gap-2">
-														<Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-														<span className="text-sm text-foreground">{feature}</span>
+											<div className="flex items-baseline gap-1">
+												<span className="text-4xl font-bold tracking-tight">
+													${plan.price}
+												</span>
+												<span className="text-sm text-muted-foreground">
+													/{plan.period}
+												</span>
+											</div>
+											<CardDescription>{plan.description}</CardDescription>
+										</CardHeader>
+
+										<CardContent className="flex-1 space-y-4">
+											<p className="text-sm text-muted-foreground leading-relaxed">
+												{plan.details}
+											</p>
+											<ul className="space-y-2.5">
+												{plan.perks.map((perk) => (
+													<li
+														key={perk}
+														className="flex items-start gap-2 text-sm"
+													>
+														<Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+														<span>{perk}</span>
 													</li>
 												))}
 											</ul>
-											{/* Button Logic */}
-											{plan.type === "enterprise" ? (
-												<Button
-													asChild
-													variant={plan.popular ? "default" : "secondary"}
-													className="w-full"
-												>
-													<a href="/contact">
-														<Mail className="w-4 h-4" />
-														Contact Sales
-													</a>
-												</Button>
-											) : subscription.isSubscribed &&
-												subscription.status === "active" &&
-												subscription.planId === plan.id ? (
-												<div className="space-y-2">
-													<Button
-														disabled
-														variant="outline"
-														className="w-full border-green-200 bg-green-50 text-green-700 hover:bg-green-50"
-													>
-														<CheckCircle2 className="w-5 h-5" />
-														Active Plan
-													</Button>
-
-													{subscription.expiresAt && (
-														<p className="text-xs text-center text-muted-foreground font-medium">
-															{subscription.status === "active"
-																? `Next payment: ${formatDate(subscription.expiresAt)}`
-																: `Ends on: ${formatDate(subscription.expiresAt)}`}
-														</p>
-													)}
-
-													<Button
-														onClick={() => setShowCancelModal(true)}
-														variant="outline"
-														className="w-full border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20"
-													>
-														<X className="w-4 h-4" />
-														Cancel Subscription
-													</Button>
-												</div>
-											) : user ? (
-												<Button
-													onClick={() => handleCheckout(plan.id)}
-													variant={plan.popular ? "default" : "secondary"}
-													className="w-full"
-												>
-													<ArrowRight className="w-4 h-4" />
-													Subscribe to {plan.name}
-												</Button>
-											) : (
-												<Button
-													onClick={handleGoogleLogin}
-													variant={plan.popular ? "default" : "secondary"}
-													className="w-full"
-												>
-													<svg
-														className="w-5 h-5"
-														viewBox="0 0 24 24"
-														fill="currentColor"
-													>
-														<path
-															d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-															fill="#4285F4"
-														/>
-														<path
-															d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-															fill="#34A853"
-														/>
-														<path
-															d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-															fill="#FBBC05"
-														/>
-														<path
-															d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-															fill="#EA4335"
-														/>
-													</svg>
-													Sign in with Google
-												</Button>
-											)}
 										</CardContent>
+
+										<CardFooter>
+											<Button
+												asChild
+												className="w-full"
+												variant={plan.featured ? "default" : "outline"}
+											>
+												<Link href={`/submit?plan=${plan.id}`}>
+													{plan.cta}
+													<ArrowRight className="w-4 h-4" />
+												</Link>
+											</Button>
+										</CardFooter>
 									</Card>
-								</motion.div>
+								</FollowerPointerCard>
 							))}
 						</div>
 					</div>
 				</section>
 
+				<section className="py-16 px-4 sm:px-6 lg:px-8">
+					<div className="max-w-7xl mx-auto">
+						<div className="text-center mb-10">
+							<h2 className="text-2xl font-bold text-foreground mb-2">
+								Why Launch on ToolDir?
+							</h2>
+						</div>
+						<StatsCards />
+					</div>
+				</section>
+
+				<section className="py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+					<div className="max-w-7xl mx-auto">
+						<div className="text-center mb-8">
+							<h2 className="text-2xl font-bold text-foreground mb-2">
+								What Founders Say
+							</h2>
+							<p className="text-muted-foreground text-sm">
+								Builders who launched on ToolDir
+							</p>
+						</div>
+						<TestimonialsMarquee />
+					</div>
+				</section>
+
+				<section className="py-12 px-4 sm:px-6 lg:px-8">
+					<div className="max-w-3xl mx-auto">
+						<Card className="relative overflow-hidden border-dashed">
+							<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.08),_transparent_55%)]" />
+							<CardContent className="relative p-8 sm:p-10 text-center">
+								<div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border bg-background shadow-sm">
+									<motion.div
+										animate={{
+											y: [0, -6, 0],
+											rotate: [0, -8, 8, 0],
+										}}
+										transition={{
+											duration: 2.4,
+											repeat: Infinity,
+											ease: "easeInOut",
+										}}
+									>
+										<Rocket className="h-6 w-6 text-primary" />
+									</motion.div>
+								</div>
+								<h3 className="text-xl font-semibold text-foreground mb-2">
+									Ready to launch?
+								</h3>
+								<p className="text-muted-foreground text-sm mb-6 max-w-md mx-auto leading-relaxed">
+									List your AI tool, pick a plan, and go live in one flow —
+									badge, slot, and directory listing included.
+								</p>
+								<Button asChild size="lg">
+									<Link href="/submit">
+										Submit Your Tool
+										<ArrowRight className="w-4 h-4" />
+									</Link>
+								</Button>
+							</CardContent>
+						</Card>
+					</div>
+				</section>
+
 				<Footer />
-
-				<LoginModal
-					isOpen={showLoginModal}
-					onClose={() => setShowLoginModal(false)}
-				/>
-
-				<ConfirmationModal
-					isOpen={showCancelModal}
-					onClose={() => setShowCancelModal(false)}
-					onConfirm={handleCancelSubscription}
-					title="Cancel Subscription"
-					message="Are you sure you want to cancel your subscription? You'll continue to have access until the end of your current billing period, but you won't be charged again."
-					confirmText={
-						isCancelling ? "Cancelling..." : "Yes, Cancel Subscription"
-					}
-					cancelText="Keep Subscription"
-					variant="danger"
-				/>
 			</div>
 		</>
 	);

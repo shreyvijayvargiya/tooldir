@@ -2,32 +2,14 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	FileText,
-	Mail,
 	Users,
-	Shield,
 	Eye,
-	ShoppingBag,
 	Search,
-	LogIn,
-	ChevronDown,
-	Plus,
-	Home,
 	CreditCard,
-	MessageSquare,
-	User,
-	RocketIcon,
-	ExternalLink,
 	Receipt,
-	Building2,
-	AlertCircle,
-	UsersRound,
-	LayoutGrid,
 	FileEdit,
-	GitBranch,
-	FolderOpen,
-	Clock,
 	GripVertical,
-	Lightbulb,
+	DollarSign,
 } from "lucide-react";
 import {
 	DndContext,
@@ -53,55 +35,27 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ThemeCustomizerButton } from "@/components/theme/ThemeCustomizer";
 
 const ICON_MAP = {
-	Home,
 	FileText,
-	Mail,
-	LayoutGrid,
-	FolderOpen,
-	Clock,
-	User,
 	Users,
-	Building2,
-	UsersRound,
 	Eye,
 	CreditCard,
 	Receipt,
-	ShoppingBag,
-	MessageSquare,
 	FileEdit,
-	AlertCircle,
-	GitBranch,
-	Shield,
-	Lightbulb,
+	DollarSign,
 };
 
 const DEFAULT_NAV_STRUCTURE = [
 	{
 		id: "overview",
 		title: "Overview",
-		items: [{ id: "home", label: "Home", icon: "Home" }],
-	},
-	{
-		id: "content",
-		title: "Content",
-		items: [
-			{ id: "blogs", label: "Blogs", icon: "FileText" },
-			{ id: "emails", label: "Emails", icon: "Mail" },
-			{ id: "kanban-board", label: "Kanban Board", icon: "LayoutGrid" },
-			{ id: "idea-database", label: "Idea Database", icon: "Lightbulb" },
-			{ id: "assets", label: "Assets", icon: "FolderOpen" },
-			{ id: "cron-jobs", label: "CRON Jobs", icon: "Clock" },
-		],
+		items: [{ id: "analytics", label: "Analytics", icon: "Eye" }],
 	},
 	{
 		id: "audience",
 		title: "Audience",
 		items: [
-			{ id: "subscribers", label: "Email Subscribers", icon: "User" },
 			{ id: "users", label: "Users", icon: "Users" },
-			{ id: "customers", label: "Customers", icon: "Building2" },
-			{ id: "waitlist", label: "Waitlist", icon: "UsersRound" },
-			{ id: "analytics", label: "Analytics", icon: "Eye" },
+			{ id: "submissions", label: "Submissions", icon: "FileEdit" },
 		],
 	},
 	{
@@ -110,33 +64,13 @@ const DEFAULT_NAV_STRUCTURE = [
 		items: [
 			{ id: "payments", label: "Payments", icon: "CreditCard" },
 			{ id: "invoices", label: "Invoices", icon: "Receipt" },
-			{ id: "products", label: "Products", icon: "ShoppingBag" },
+			{ id: "pricing-slots", label: "Launch Pricing", icon: "DollarSign" },
 		],
 	},
 	{
-		id: "communication",
-		title: "Communication",
-		items: [
-			{ id: "messages", label: "Messages", icon: "MessageSquare" },
-			{ id: "forms", label: "Forms", icon: "FileEdit" },
-		],
-	},
-	{
-		id: "support",
-		title: "Support",
-		items: [
-			{ id: "reportIssues", label: "Report Issues", icon: "AlertCircle" },
-		],
-	},
-	{
-		id: "frontend",
-		title: "Frontend",
-		items: [{ id: "changelog", label: "Changelog", icon: "GitBranch" }],
-	},
-	{
-		id: "settings",
-		title: "Settings",
-		items: [{ id: "teams", label: "Teams", icon: "Shield" }],
+		id: "content",
+		title: "Content",
+		items: [{ id: "blogs", label: "Blogs", icon: "FileText" }],
 	},
 ];
 
@@ -156,7 +90,7 @@ const SortableNavItem = ({ item, activeTab, onSelect }) => {
 		opacity: isDragging ? 0.5 : 1,
 	};
 
-	const Icon = ICON_MAP[item.icon] || Home;
+	const Icon = ICON_MAP[item.icon] || FileText;
 
 	return (
 		<div
@@ -251,7 +185,7 @@ const SortableCategory = ({
 
 const Sidebar = ({
 	activeTab,
-	setActiveTab,
+	onTabSelect,
 	isSidebarOpen,
 	setIsSidebarOpen,
 	setShowSearchModal,
@@ -261,48 +195,49 @@ const Sidebar = ({
 	const queryClient = useQueryClient();
 	const queryKey = ["admin_nav_structure"];
 
-	// Helper function to merge new items from default structure into saved structure
+	// Sync saved sidebar structure with current default (add new items, remove stale ones)
 	const mergeNavStructure = (savedStructure, defaultStructure) => {
 		if (!savedStructure) return defaultStructure;
 
-		// Create a map of existing items by id for quick lookup
-		const existingItems = new Set();
-		savedStructure.forEach((category) => {
-			category.items?.forEach((item) => existingItems.add(item.id));
-		});
+		const validItemIds = new Set(
+			defaultStructure.flatMap((cat) => cat.items.map((item) => item.id))
+		);
+		const validCategoryIds = new Set(defaultStructure.map((cat) => cat.id));
 
-		// Merge new items from default structure
-		const merged = savedStructure.map((savedCategory) => {
-			const defaultCategory = defaultStructure.find(
-				(cat) => cat.id === savedCategory.id
-			);
-			if (!defaultCategory) return savedCategory;
+		// Remap legacy tab ids from older boilerplate builds
+		const normalized = savedStructure.map((cat) => ({
+			...cat,
+			items: (cat.items || []).map((item) =>
+				item.id === "forms"
+					? { ...item, id: "submissions", label: "Submissions" }
+					: item
+			),
+		}));
 
-			// Find items in default that don't exist in saved
-			const newItems = defaultCategory.items.filter(
-				(defaultItem) => !existingItems.has(defaultItem.id)
-			);
+		const sanitized = normalized
+			.filter((cat) => validCategoryIds.has(cat.id))
+			.map((cat) => ({
+				...cat,
+				items: (cat.items || []).filter((item) => validItemIds.has(item.id)),
+			}));
 
-			// If there are new items, add them to the saved category
-			if (newItems.length > 0) {
-				return {
-					...savedCategory,
-					items: [...savedCategory.items, ...newItems],
-				};
-			}
-
-			return savedCategory;
-		});
-
-		// Add any new categories that don't exist in saved structure
 		defaultStructure.forEach((defaultCategory) => {
-			const exists = merged.some((cat) => cat.id === defaultCategory.id);
-			if (!exists) {
-				merged.push(defaultCategory);
+			const existing = sanitized.find((cat) => cat.id === defaultCategory.id);
+			if (!existing) {
+				sanitized.push(defaultCategory);
+				return;
+			}
+
+			const existingIds = new Set(existing.items.map((item) => item.id));
+			const newItems = defaultCategory.items.filter(
+				(item) => !existingIds.has(item.id)
+			);
+			if (newItems.length > 0) {
+				existing.items = [...existing.items, ...newItems];
 			}
 		});
 
-		return merged;
+		return sanitized;
 	};
 
 	// Use React Query to manage the sidebar structure
@@ -344,7 +279,6 @@ const Sidebar = ({
 		},
 	});
 
-	const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
 	const [activeId, setActiveId] = useState(null);
 
 	const sensors = useSensors(
@@ -437,28 +371,34 @@ const Sidebar = ({
 
 	const isCategory = (id) => navStructure.some((cat) => cat.id === id);
 
+	const handleSelect = (id) => {
+		onTabSelect?.(id);
+	};
+
+	const GoogleIcon = () => (
+		<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<path
+				d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+				fill="#4285F4"
+			/>
+			<path
+				d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+				fill="#34A853"
+			/>
+			<path
+				d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+				fill="#FBBC05"
+			/>
+			<path
+				d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+				fill="#EA4335"
+			/>
+		</svg>
+	);
+
 	const sidebarContent = (isMobile = false) => (
 		<div className={`flex flex-col h-full ${isMobile ? "p-3" : "py-6 px-1"}`}>
 			<div className="flex-1 space-y-2 hidescrollbar overflow-y-auto">
-				{/* Project Dropdown / Logo */}
-				<div className="relative project-dropdown mb-2">
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						className="w-full flex items-center gap-2 px-3 py-2 bg-card border rounded-xl hover:bg-muted transition-colors"
-					>
-						<RocketIcon className="w-3.5 h-3.5" />
-						<span className="text-xs font-medium">SAAS Starter Admin</span>
-						{isMobile && (
-							<ChevronDown
-								className={`w-4 h-4 ml-auto text-muted-foreground transition-transform ${
-									isProjectDropdownOpen ? "rotate-180" : ""
-								}`}
-							/>
-						)}
-					</motion.button>
-				</div>
-
 				{/* Search Button */}
 				<Button
 					variant="outline"
@@ -479,11 +419,6 @@ const Sidebar = ({
 					</div>
 				</Button>
 
-				<div className="flex items-center gap-1 my-1">
-					<ThemeToggle />
-					<ThemeCustomizerButton />
-				</div>
-
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCenter}
@@ -501,7 +436,7 @@ const Sidebar = ({
 								category={category}
 								activeTab={activeTab}
 								onSelect={(id) => {
-									setActiveTab(id);
+									handleSelect(id);
 									if (isMobile) setIsSidebarOpen(false);
 								}}
 							/>
@@ -539,42 +474,23 @@ const Sidebar = ({
 				</DndContext>
 			</div>
 
-			{/* Footer Section */}
+			{/* Footer */}
 			<div className="mt-auto pt-4 space-y-2 border-t">
-				<a
-					className="flex gap-2 items-center px-2 py-1.5 cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-					href="/docs"
-					target="_blank"
-				>
-					<ExternalLink className="w-3 h-3" /> Read Docs
-				</a>
+				<div className="flex items-center justify-center gap-1 px-1">
+					<ThemeToggle />
+					<ThemeCustomizerButton />
+				</div>
+
 				<Button
-					variant="secondary"
+					variant="outline"
 					onClick={() => setShowLoginModal(true)}
-					className="w-full justify-start gap-2 rounded-xl h-auto py-1.5 px-2.5 text-xs font-medium"
+					className="w-full justify-start gap-2 rounded-xl h-auto py-2 px-2.5 text-xs font-medium"
 				>
-					<LogIn className="w-3.5 h-3.5" />
+					<GoogleIcon />
 					<span className="truncate flex-1 text-left">
-						{user ? user.displayName || "Logged In" : "Login"}
+						{user ? user.displayName || user.email : "Continue with Google"}
 					</span>
 				</Button>
-
-				<div className="p-3 bg-card border rounded-xl shadow-sm">
-					<p className="font-bold text-foreground text-sm">Buildsaas PRO</p>
-					<p className="text-[10px] text-muted-foreground mt-1 mb-2 leading-relaxed">
-						Build SAAS applications 10x Faster. The complete boilerplate for
-						developers.
-					</p>
-					<Button asChild size="sm" className="w-full rounded-xl text-[10px] h-auto py-1.5">
-						<a
-							target="_blank"
-							rel="noopener noreferrer"
-							href="https://buy.polar.sh/polar_cl_4DKKA9Ohkz60mo6VtK0VetQLUkkS5lWnjpeRv4Y9rPK"
-						>
-							Get PRO Access
-						</a>
-					</Button>
-				</div>
 			</div>
 		</div>
 	);

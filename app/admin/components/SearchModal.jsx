@@ -8,40 +8,23 @@ import {
 	Search,
 	X,
 	FileText,
-	Mail,
 	Users,
-	Shield,
 	ArrowRight,
 	Sparkles,
 	Receipt,
-	LayoutGrid,
-	UsersRound,
-	AlertCircle,
 	CreditCard,
-	ShoppingBag,
-	Building2,
-	User,
-	MessageSquare,
 	FileEdit,
 } from "lucide-react";
 import { getAllBlogs } from "../../../lib/api/blog";
-import { getAllEmails } from "../../../lib/api/emails";
-import { getAllSubscribers } from "../../../lib/api/subscribers";
-import { getAllProducts } from "../../../lib/api/products";
 import { getAllPayments } from "../../../lib/api/payments";
 import { getAllInvoices } from "../../../lib/api/invoice";
-import { getAllCustomers } from "../../../lib/api/customers";
 import { getAllUsers } from "../../../lib/api/users";
-import { getAllTeamMembers } from "../../../lib/api/teams";
-import { getAllWaitlist } from "../../../lib/api/waitlist";
-import { getAllMessages } from "../../../lib/api/messages";
-import { getAllForms } from "../../../lib/api/forms";
+import { getAllToolSubmissions } from "../../../lib/api/toolSubmissions";
 
 const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedCategory, setSelectedCategory] = useState("all"); // all, blogs, emails, subscribers, users, customers, products, payments, invoices, messages, forms, teams, waitlist
+	const [selectedCategory, setSelectedCategory] = useState("all");
 
-	// Normalize values for safe React rendering and search indexing
 	const formatValue = (value) => {
 		if (value === null || value === undefined) return "";
 		if (typeof value === "string") return value;
@@ -50,7 +33,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			if (isNaN(value.getTime())) return "";
 			return value.toLocaleString();
 		}
-		// Firestore Timestamp-like object
 		if (
 			typeof value === "object" &&
 			typeof value.seconds === "number" &&
@@ -60,44 +42,18 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			const d = new Date(ms);
 			return isNaN(d.getTime()) ? "" : d.toLocaleString();
 		}
-		// Avoid rendering arbitrary objects as React children
 		return "";
 	};
 
-	// Fetch all data
 	const { data: blogs = [] } = useQuery({
 		queryKey: ["blogs"],
 		queryFn: () => getAllBlogs(),
 		enabled: isOpen,
 	});
 
-	const { data: emails = [] } = useQuery({
-		queryKey: ["emails"],
-		queryFn: () => getAllEmails(),
-		enabled: isOpen,
-	});
-
-	const { data: subscribers = [] } = useQuery({
-		queryKey: ["subscribers"],
-		queryFn: () => getAllSubscribers(),
-		enabled: isOpen,
-	});
-
 	const { data: users = [] } = useQuery({
 		queryKey: ["users"],
 		queryFn: () => getAllUsers(),
-		enabled: isOpen,
-	});
-
-	const { data: customers = [] } = useQuery({
-		queryKey: ["customers"],
-		queryFn: () => getAllCustomers(),
-		enabled: isOpen,
-	});
-
-	const { data: products = [] } = useQuery({
-		queryKey: ["products"],
-		queryFn: () => getAllProducts(),
 		enabled: isOpen,
 	});
 
@@ -113,31 +69,12 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 		enabled: isOpen,
 	});
 
-	const { data: messages = [] } = useQuery({
-		queryKey: ["messages"],
-		queryFn: () => getAllMessages(),
+	const { data: submissions = [] } = useQuery({
+		queryKey: ["toolSubmissions"],
+		queryFn: () => getAllToolSubmissions(),
 		enabled: isOpen,
 	});
 
-	const { data: forms = [] } = useQuery({
-		queryKey: ["forms"],
-		queryFn: () => getAllForms(),
-		enabled: isOpen,
-	});
-
-	const { data: teams = [] } = useQuery({
-		queryKey: ["teams"],
-		queryFn: () => getAllTeamMembers(),
-		enabled: isOpen,
-	});
-
-	const { data: waitlist = [] } = useQuery({
-		queryKey: ["waitlist"],
-		queryFn: () => getAllWaitlist(),
-		enabled: isOpen,
-	});
-
-	// Prepare search data
 	const searchData = useMemo(() => {
 		const data = [];
 
@@ -154,32 +91,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			});
 		}
 
-		if (selectedCategory === "all" || selectedCategory === "emails") {
-			emails.forEach((email) => {
-				data.push({
-					type: "email",
-					id: email.id,
-					title: email.subject,
-					subtitle: email.status || "draft",
-					searchText: `${email.subject} ${email.status || ""}`,
-					data: email,
-				});
-			});
-		}
-
-		if (selectedCategory === "all" || selectedCategory === "subscribers") {
-			subscribers.forEach((subscriber) => {
-				data.push({
-					type: "subscriber",
-					id: subscriber.id,
-					title: subscriber.email,
-					subtitle: subscriber.name || "",
-					searchText: `${subscriber.email} ${subscriber.name || ""}`,
-					data: subscriber,
-				});
-			});
-		}
-
 		if (selectedCategory === "all" || selectedCategory === "users") {
 			users.forEach((u) => {
 				const id = u.id || u.uid || u.email || `${u.email || "user"}-${Math.random()}`;
@@ -192,38 +103,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 					subtitle,
 					searchText: `${title} ${subtitle} ${formatValue(u.email || "")}`,
 					data: u,
-				});
-			});
-		}
-
-		if (selectedCategory === "all" || selectedCategory === "customers") {
-			customers.forEach((c) => {
-				const id = c.id || c.customerId || c.email || `${c.email || "customer"}-${Math.random()}`;
-				const title = formatValue(c.email || c.name || c.customer_email || "Customer");
-				const subtitle = formatValue(c.plan || c.status || c.company || "");
-				data.push({
-					type: "customer",
-					id,
-					title,
-					subtitle,
-					searchText: `${title} ${subtitle}`,
-					data: c,
-				});
-			});
-		}
-
-		if (selectedCategory === "all" || selectedCategory === "products") {
-			products.forEach((p) => {
-				const id = p.id || p.productId || p.slug || `${p.name || "product"}-${Math.random()}`;
-				const title = formatValue(p.name || p.title || "Product");
-				const subtitle = formatValue(p.status || p.type || p.slug || "");
-				data.push({
-					type: "product",
-					id,
-					title,
-					subtitle,
-					searchText: `${title} ${subtitle}`,
-					data: p,
 				});
 			});
 		}
@@ -262,88 +141,25 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			});
 		}
 
-		if (selectedCategory === "all" || selectedCategory === "messages") {
-			messages.forEach((m) => {
-				const id = m.id || m.messageId || `${m.email || "message"}-${Math.random()}`;
-				const title = formatValue(m.subject || m.title || m.email || "Message");
-				const subtitle = formatValue(m.status || m.createdAt || "");
+		if (selectedCategory === "all" || selectedCategory === "submissions") {
+			submissions.forEach((s) => {
+				const id = s.id || `${s.name || "submission"}-${Math.random()}`;
+				const title = formatValue(s.name || "Submission");
+				const subtitle = formatValue(s.status || s.website || "");
 				data.push({
-					type: "message",
+					type: "submission",
 					id,
 					title,
 					subtitle,
-					searchText: `${title} ${subtitle} ${formatValue(m.email || "")}`,
-					data: m,
-				});
-			});
-		}
-
-		if (selectedCategory === "all" || selectedCategory === "forms") {
-			forms.forEach((f) => {
-				const id = f.id || f.slug || f.formId || `${f.name || "form"}-${Math.random()}`;
-				const title = formatValue(f.name || f.title || f.slug || "Form");
-				const subtitle = formatValue(f.status || "");
-				data.push({
-					type: "form",
-					id,
-					title,
-					subtitle,
-					searchText: `${title} ${subtitle}`,
-					data: f,
-				});
-			});
-		}
-
-		if (selectedCategory === "all" || selectedCategory === "teams") {
-			teams.forEach((t) => {
-				const id = t.id || t.email || `${t.email || "team"}-${Math.random()}`;
-				const title = formatValue(t.email || t.name || "Team Member");
-				const subtitle = formatValue(t.role || "");
-				data.push({
-					type: "team",
-					id,
-					title,
-					subtitle,
-					searchText: `${title} ${subtitle}`,
-					data: t,
-				});
-			});
-		}
-
-		if (selectedCategory === "all" || selectedCategory === "waitlist") {
-			waitlist.forEach((w) => {
-				const id = w.id || w.email || `${w.email || "waitlist"}-${Math.random()}`;
-				const title = formatValue(w.email || w.name || "Waitlist");
-				const subtitle = formatValue(w.status || "");
-				data.push({
-					type: "waitlist",
-					id,
-					title,
-					subtitle,
-					searchText: `${title} ${subtitle}`,
-					data: w,
+					searchText: `${title} ${subtitle} ${formatValue(s.submitterEmail || "")}`,
+					data: s,
 				});
 			});
 		}
 
 		return data;
-	}, [
-		blogs,
-		emails,
-		subscribers,
-		users,
-		customers,
-		products,
-		payments,
-		invoices,
-		messages,
-		forms,
-		teams,
-		waitlist,
-		selectedCategory,
-	]);
+	}, [blogs, users, payments, invoices, submissions, selectedCategory]);
 
-	// Configure Fuse.js
 	const fuse = useMemo(() => {
 		return new Fuse(searchData, {
 			keys: ["title", "subtitle", "searchText"],
@@ -352,7 +168,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 		});
 	}, [searchData]);
 
-	// Perform search
 	const searchResults = useMemo(() => {
 		if (!searchQuery.trim()) {
 			return [];
@@ -360,7 +175,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 		return fuse.search(searchQuery).map((result) => result.item);
 	}, [searchQuery, fuse]);
 
-	// Reset search when modal closes
 	useEffect(() => {
 		if (!isOpen) {
 			setSearchQuery("");
@@ -368,7 +182,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 		}
 	}, [isOpen]);
 
-	// Prevent Cmd/Ctrl+K from triggering browser shortcuts while open
 	useEffect(() => {
 		if (!isOpen) return;
 
@@ -385,92 +198,35 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 	const categories = [
 		{ id: "all", label: "All" },
 		{ id: "blogs", label: "Blogs" },
-		{ id: "emails", label: "Emails" },
-		{ id: "subscribers", label: "Subscribers" },
 		{ id: "users", label: "Users" },
-		{ id: "customers", label: "Customers" },
-		{ id: "products", label: "Products" },
+		{ id: "submissions", label: "Submissions" },
 		{ id: "payments", label: "Payments" },
 		{ id: "invoices", label: "Invoices" },
-		{ id: "messages", label: "Messages" },
-		{ id: "forms", label: "Forms" },
-		{ id: "teams", label: "Teams" },
-		{ id: "waitlist", label: "Waitlist" },
 	];
 
-	// Handle result click
 	const handleResultClick = (result) => {
 		if (result.type === "blog") {
 			onNavigate("blogs");
-			window.location.href = `/admin/editor/blog?id=${result.id}`;
-		} else if (result.type === "email") {
-			onNavigate("emails");
-			window.location.href = `/admin/editor/email?id=${result.id}`;
-		} else if (result.type === "subscriber") {
-			onNavigate("subscribers");
+			window.location.href = `/admin/blogs/${result.id}`;
 		} else if (result.type === "user") {
 			onNavigate("users");
-		} else if (result.type === "customer") {
-			onNavigate("customers");
-		} else if (result.type === "product") {
-			onNavigate("products");
 		} else if (result.type === "payment") {
 			onNavigate("payments");
 		} else if (result.type === "invoice") {
 			onNavigate("invoices");
-		} else if (result.type === "message") {
-			onNavigate("messages");
-		} else if (result.type === "form") {
-			onNavigate("forms");
-		} else if (result.type === "team") {
-			onNavigate("teams");
-		} else if (result.type === "waitlist") {
-			onNavigate("waitlist");
+		} else if (result.type === "submission") {
+			onNavigate("submissions");
 		}
 		onClose();
 	};
 
-	// Guidance actions
 	const guidanceActions = [
 		{
 			icon: FileText,
 			label: "Create New Blog",
 			action: () => {
 				onNavigate("blogs");
-				window.location.href = "/admin/editor/blog";
-				onClose();
-			},
-		},
-		{
-			icon: Mail,
-			label: "Create New Email",
-			action: () => {
-				onNavigate("emails");
-				window.location.href = "/admin/editor/email";
-				onClose();
-			},
-		},
-		{
-			icon: Shield,
-			label: "Add Team Member",
-			action: () => {
-				onNavigate("teams");
-				onClose();
-			},
-		},
-		{
-			icon: Users,
-			label: "Check Subscribers",
-			action: () => {
-				onNavigate("subscribers");
-				onClose();
-			},
-		},
-		{
-			icon: Mail,
-			label: "Send Email to Subscriber",
-			action: () => {
-				onNavigate("subscribers");
+				window.location.href = "/admin/blogs/new";
 				onClose();
 			},
 		},
@@ -483,34 +239,18 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 			},
 		},
 		{
-			icon: LayoutGrid,
-			label: "Open Kanban Board",
+			icon: FileEdit,
+			label: "View Submissions",
 			action: () => {
-				onNavigate("kanban-board");
+				onNavigate("submissions");
 				onClose();
 			},
 		},
 		{
-			icon: Receipt,
-			label: "View Invoices",
+			icon: Users,
+			label: "Manage Users",
 			action: () => {
-				onNavigate("invoices");
-				onClose();
-			},
-		},
-		{
-			icon: UsersRound,
-			label: "Manage Waitlist",
-			action: () => {
-				onNavigate("waitlist");
-				onClose();
-			},
-		},
-		{
-			icon: AlertCircle,
-			label: "Report Issues",
-			action: () => {
-				onNavigate("reportIssues");
+				onNavigate("users");
 				onClose();
 			},
 		},
@@ -520,28 +260,14 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 		switch (type) {
 			case "blog":
 				return FileText;
-			case "email":
-				return Mail;
-			case "subscriber":
-				return Users;
 			case "user":
 				return Users;
-			case "customer":
-				return Building2;
-			case "product":
-				return ShoppingBag;
 			case "payment":
 				return CreditCard;
 			case "invoice":
 				return Receipt;
-			case "message":
-				return MessageSquare;
-			case "form":
+			case "submission":
 				return FileEdit;
-			case "team":
-				return Shield;
-			case "waitlist":
-				return UsersRound;
 			default:
 				return FileText;
 		}
@@ -551,28 +277,14 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 		switch (type) {
 			case "blog":
 				return "bg-muted text-foreground";
-			case "email":
-				return "bg-purple-100 text-purple-800";
-			case "subscriber":
-				return "bg-green-100 text-green-800";
 			case "user":
 				return "bg-blue-100 text-blue-800";
-			case "customer":
-				return "bg-amber-100 text-amber-800";
-			case "product":
-				return "bg-indigo-100 text-indigo-800";
 			case "payment":
 				return "bg-emerald-100 text-emerald-800";
 			case "invoice":
 				return "bg-muted text-foreground";
-			case "message":
-				return "bg-pink-100 text-pink-800";
-			case "form":
+			case "submission":
 				return "bg-violet-100 text-violet-800";
-			case "team":
-				return "bg-muted text-foreground";
-			case "waitlist":
-				return "bg-teal-100 text-teal-800";
 			default:
 				return "bg-muted text-foreground";
 		}
@@ -581,7 +293,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 	return (
 		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
 			<DialogContent className="flex max-h-[80vh] w-full max-w-2xl flex-col gap-0 overflow-hidden p-0 sm:rounded-2xl [&>button]:hidden">
-				{/* Header */}
 				<div className="p-4">
 					<div className="mb-3 flex items-center gap-3">
 						<div className="relative flex-1">
@@ -590,7 +301,7 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 								type="text"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								placeholder="Search blogs, emails, subscribers, users, customers, products, payments, invoices..."
+								placeholder="Search blogs, users, submissions, payments, invoices..."
 								className="rounded-xl pl-10"
 								autoFocus
 							/>
@@ -619,9 +330,7 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 					</div>
 				</div>
 
-				{/* Content */}
 				<div className="flex-1 overflow-y-auto p-4">
-					{/* Search Results */}
 					{searchQuery.trim() && (
 						<div className="mb-6">
 							{searchResults.length === 0 ? (
@@ -672,7 +381,6 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 						</div>
 					)}
 
-					{/* Guidance Section */}
 					<div>
 						<div className="mb-3 flex items-center gap-2">
 							<Sparkles className="h-4 w-4 text-muted-foreground" />
@@ -704,12 +412,9 @@ const SearchModal = ({ isOpen, onClose, onNavigate }) => {
 					</div>
 				</div>
 
-				{/* Footer */}
 				<div className="border-t border bg-muted p-4">
 					<div className="flex items-center justify-between text-xs text-muted-foreground">
-						<div className="flex items-center gap-4">
-							<span>Press Esc to close</span>
-						</div>
+						<span>Press Esc to close</span>
 						<span>
 							{searchQuery.trim()
 								? `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""}`

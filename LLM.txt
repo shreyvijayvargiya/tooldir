@@ -1,0 +1,156 @@
+# ToolDir — LLM context file
+# Purpose: help coding agents understand this repo quickly without exploratory scanning.
+# Last cleaned for launch template readiness.
+
+## Product
+
+ToolDir is a Next.js 15 (Pages Router) AI tool directory boilerplate.
+Buyers launch a public directory site, accept tool submissions, sell launch slots,
+publish a blog, and manage everything from `/admin`.
+
+This is NOT a generic multi-tenant SaaS CMS. Older SaaS modules (email campaigns,
+waitlist, kanban, products catalog, forms builder, cron, codegen) were removed.
+
+## Tech stack
+
+- Next.js 15 Pages Router (`pages/`), React 18, Tailwind, shadcn/ui
+- Supabase (Auth + Postgres + Storage)
+- TanStack React Query for server state
+- Redux Toolkit only for subscription/customer client state
+- TipTap for blog CMS
+- Stripe for paid checkout (subscription-mode APIs still present for billing tabs)
+- Resend for optional transactional email
+- Framer Motion for marketing motion
+
+## Critical architecture note
+
+`app/` is NOT the App Router.
+- `pages/` = real Next.js routes and API handlers
+- `app/admin/` = admin UI components
+- `app/frontend/` = marketing site components (Navbar, Footer, directory UI)
+- `components/ui/` = shadcn primitives
+- `lib/` = APIs, hooks, config, data seeds, store, utils
+
+## Public routes (keep)
+
+| Route | File | Role |
+|-------|------|------|
+| `/` | `pages/index.js` | Directory home |
+| `/tool/[slug]` | `pages/tool/[slug].js` | Tool detail |
+| `/categories/[slug]` | `pages/categories/[slug].js` | Category filter |
+| `/submit` | `pages/submit.js` | Multi-step submission |
+| `/pricing` | `pages/pricing.js` | Launch slot calendar |
+| `/dashboard` | `pages/dashboard.js` | User submissions |
+| `/blog`, `/blog/[slug]` | `pages/blog*.js` | Public blog |
+| `/contact`, `/privacy`, `/terms-and-conditions` | legal |
+| `/auth/callback` | Supabase OAuth |
+| `/robots.txt`, `/sitemap.xml` | SEO |
+
+## Admin routes (keep)
+
+| Route | Role |
+|-------|------|
+| `/admin` | Shell + tabs |
+| `/admin/blogs/new`, `/admin/blogs/[id]` | Nested blog editor |
+| `/admin/editor/blog` | Legacy redirect into nested editor |
+
+Admin tabs (sidebar): analytics, users, submissions, payments, invoices, pricing-slots, blogs.
+Tab id `forms` was renamed to `submissions` (legacy `forms` still opens SubmissionsTab).
+
+## API routes (keep)
+
+- `/api/directory-tools/publish` — approve submission → listing
+- `/api/directory-tools/seed` — seed from `lib/data/tools.js`
+- `/api/tool-submissions/create` — public submit
+- `/api/pricing-slots/upsert` — admin slot CRUD
+- `/api/storage/upload-image` — Supabase Storage uploads
+- `/api/messages/create` — contact form
+- `/api/stripe/checkout` — Stripe Checkout session
+- `/api/stripe/webhook` — Stripe events + optional Resend email
+- `/api/stripe/cancel-subscription` — cancel Stripe sub
+
+## Core modules (do not delete)
+
+```
+lib/api/directoryTools.js
+lib/api/toolSubmissions.js
+lib/api/pricingSlots.js
+lib/api/blog.js
+lib/api/storage.js
+lib/api/auth.js
+lib/hooks/useDirectoryTools.js
+lib/hooks/useBlogs.js
+lib/hooks/usePricingSlots.js
+lib/data/tools.js
+lib/data/pricing-slots.js
+lib/data/testimonials.js
+app/frontend/marketing/*
+app/admin/components/SubmissionsTab.jsx
+app/admin/components/PricingSlotsTab.jsx
+app/admin/components/BlogTab.jsx
+app/admin/components/BlogTiptapEditor.jsx
+app/admin/views/BlogEditorView.jsx
+```
+
+## Data model (Supabase)
+
+Primary tables: `directory_tools`, `tool_submissions`, `pricing_slots`, `blogs`
+Billing/admin: `users`, `customers`, `payments`, `checkouts`, `invoices`, `messages`, `app_analytics`
+Storage bucket: `saas-starter-storage` (name kept for compatibility)
+
+See `supabase-migrations.sql`.
+
+When Supabase is empty / unset, directory listing can fall back to mock data in `lib/data/tools.js`.
+
+## Environment variables
+
+Required for core:
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_KEY`
+
+Payments:
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (optional if you only start checkout server-side)
+
+Optional:
+- `RESEND_API_KEY`, `RESEND_FROM_EMAIL`
+- `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`
+- `NEXT_PUBLIC_APP_URL` (legacy Stripe fallback; prefer SITE_URL)
+
+Use `.env.local` locally. `.env*` is gitignored.
+
+## Intentional dual editors
+
+- `BlogTiptapEditor.jsx` — canonical nested route editor (`/admin/blogs/*`)
+- `TiptapEditor.jsx` — still used by BlogTab modal list workflow
+
+Do not delete either without consolidating BlogTab first.
+
+## What was removed for launch
+
+Do not reintroduce these without a product need:
+- Forms builder (`FormsTab`, `/api/forms/*`, `forms` / `form_submissions` tables)
+- Email campaigns, subscribers, waitlist, kanban/tasks, idea DB, changelog, cron, assets CMS
+- Builder zip/AST APIs, roles-config codegen (`modules-config`, generate-*)
+- Unused deps: octokit, archiver, simple-git, nginx, react-toastify, @vercel/analytics, @stripe/stripe-js, unused Radix accordion/checkbox/avatar/tabs/tooltip/switch/scroll-area
+
+## Conventions for agents
+
+1. Prefer Pages Router for new pages under `pages/`.
+2. Put reusable marketing UI in `app/frontend/marketing/`.
+3. Put Supabase access in `lib/api/*`; use React Query hooks in `lib/hooks/*`.
+4. Do not change visual theme / CSS / layout unless the task is design work.
+5. Do not commit `.env` files.
+6. Keep packaging lean — delete orphan modules instead of leaving stubs.
+7. Brand copy is ToolDir, not "SAAS Starter".
+
+## Local commands
+
+```bash
+npm install
+npm run dev     # http://localhost:3002
+npm run build
+npm run lint
+```

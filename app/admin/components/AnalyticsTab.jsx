@@ -143,20 +143,20 @@ const formatDate = (dateString, showTime = false) => {
 // Mock data generator for missing metrics (Pages, Referrers)
 const generateMockPages = () => [
 	{ path: "/", visitors: 47 },
-	{ path: "/premium-templates", visitors: 8 },
-	{ path: "/templates", visitors: 8 },
-	{ path: "/forms", visitors: 4 },
-	{ path: "/widgets", visitors: 4 },
+	{ path: "/pricing", visitors: 12 },
+	{ path: "/submit", visitors: 8 },
+	{ path: "/blog", visitors: 6 },
+	{ path: "/tool/chatgpt", visitors: 4 },
 	{ path: "/admin", visitors: 3 },
 ];
 
 const generateMockReferrers = () => [
-	{ source: "ihatereading.in", visitors: 2 },
-	{ source: "shreyvijayvargiya26.medium.com", visitors: 2 },
-	{ source: "t.co", visitors: 2 },
-	{ source: "blog.startupstash.com", visitors: 1 },
-	{ source: "chatgpt.com", visitors: 1 },
-	{ source: "com.google.android.gm", visitors: 1 },
+	{ source: "google.com", visitors: 18 },
+	{ source: "twitter.com", visitors: 6 },
+	{ source: "producthunt.com", visitors: 4 },
+	{ source: "linkedin.com", visitors: 3 },
+	{ source: "newsletter", visitors: 2 },
+	{ source: "direct", visitors: 1 },
 ];
 
 const StatCard = ({ title, value, change, trend }) => (
@@ -387,7 +387,7 @@ const AnalyticsTab = () => {
 					<div className="flex items-center gap-2 mt-1">
 						<div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium text-muted-foreground">
 							<Globe className="w-3 h-3" />
-							www.buildsaas.dev
+							www.tooldir.buildsaas.dev
 						</div>
 						<div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 rounded-md text-xs font-medium text-green-700">
 							<div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />

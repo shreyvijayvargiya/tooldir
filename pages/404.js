@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Custom404() {
 	const customSEO = {
-		title: "404 - Page Not Found - SAAS Starter",
+		title: "404 — Page Not Found — ToolDir",
 		description: "The page you are looking for does not exist.",
 		keywords: "404, page not found, error",
 		ogImage: "/og-default.png",

@@ -40,10 +40,17 @@ import {
 	Youtube as YoutubeIcon,
 	ChevronRight,
 	Table as TableIcon,
-	CheckSquare2,
+	AlignLeft,
+	AlignCenter,
+	AlignRight,
+	Highlighter,
+	Minus,
+	Loader2,
 } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { htmlToMarkdown } from "../../../lib/utils/htmlToMarkdown";
+import { uploadBlogContentImage } from "../../../lib/api/storage";
+import { isSupabaseConfigured } from "../../../lib/config/supabase";
 import { CodeBlock, CodeGroup } from "../../../lib/ui/TiptapCodeExtensions";
 import { AnimatePresence } from "framer-motion";
 import {
@@ -126,8 +133,10 @@ const TiptapEditor = ({
 	onImageUpload,
 	showPreview,
 	onPreview,
+	blogId = null,
 }) => {
 	const fileInputRef = useRef(null);
+	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [linkDropdownOpen, setLinkDropdownOpen] = useState(false);
 	const [colorDropdownOpen, setColorDropdownOpen] = useState(false);
 	const [menuDropdownOpen, setMenuDropdownOpen] = useState(false);
@@ -373,26 +382,41 @@ const TiptapEditor = ({
 	}, []);
 
 	const handleImageUpload = useCallback(
-		(event) => {
+		async (event) => {
 			const file = event.target.files[0];
-			if (file) {
-				if (!file.type.startsWith("image/")) {
-					toast.warning("Please select an image file");
-					return;
-				}
-				const reader = new FileReader();
-				reader.onload = (e) => {
-					const imageUrl = e.target.result;
-					editor?.chain().focus().setImage({ src: imageUrl }).run();
-					if (onImageUpload) {
-						onImageUpload(imageUrl);
-					}
-				};
-				reader.readAsDataURL(file);
+			if (!file) return;
+
+			if (!file.type.startsWith("image/")) {
+				toast.warning("Please select an image file");
+				return;
 			}
-			event.target.value = "";
+
+			setIsUploadingImage(true);
+			try {
+				let imageUrl;
+
+				if (isSupabaseConfigured()) {
+					imageUrl = await uploadBlogContentImage(file, blogId);
+				} else {
+					imageUrl = await new Promise((resolve, reject) => {
+						const reader = new FileReader();
+						reader.onload = (e) => resolve(e.target.result);
+						reader.onerror = reject;
+						reader.readAsDataURL(file);
+					});
+				}
+
+				editor?.chain().focus().setImage({ src: imageUrl }).run();
+				onImageUpload?.(imageUrl);
+			} catch (error) {
+				console.error("Image upload failed:", error);
+				toast.error("Failed to upload image. Please try again.");
+			} finally {
+				setIsUploadingImage(false);
+				event.target.value = "";
+			}
 		},
-		[editor, onImageUpload]
+		[editor, onImageUpload, blogId]
 	);
 
 	const handleYoutubeInsert = useCallback(() => {
@@ -498,7 +522,7 @@ const TiptapEditor = ({
 	return (
 		<div className="border border-zinc-300 rounded-xl overflow-hidden flex flex-col h-full">
 			{/* Editor Toolbar */}
-			<div className="border-b border-zinc-200 bg-zinc-50 px-3 py-1.5 flex items-center gap-1 sticky top-0 z-10 flex-shrink-0">
+			<div className="border-b border-zinc-200 bg-zinc-50 px-3 py-1.5 flex items-center gap-1 sticky top-0 z-10 flex-shrink-0 overflow-x-auto flex-wrap">
 				<motion.button
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
@@ -710,15 +734,83 @@ const TiptapEditor = ({
 						</motion.button>
 					</>
 				)}
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().toggleHighlight().run()}
+					className={`p-1.5 rounded-xl ${
+						editor.isActive("highlight")
+							? "bg-zinc-200 text-zinc-900"
+							: "text-zinc-600 hover:bg-zinc-100"
+					}`}
+					title="Highlight"
+				>
+					<Highlighter className="w-3.5 h-3.5" />
+				</motion.button>
+				<div className="w-px h-5 bg-zinc-200 mx-1" />
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().setTextAlign("left").run()}
+					className={`p-1.5 rounded-xl ${
+						editor.isActive({ textAlign: "left" })
+							? "bg-zinc-200 text-zinc-900"
+							: "text-zinc-600 hover:bg-zinc-100"
+					}`}
+					title="Align Left"
+				>
+					<AlignLeft className="w-3.5 h-3.5" />
+				</motion.button>
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().setTextAlign("center").run()}
+					className={`p-1.5 rounded-xl ${
+						editor.isActive({ textAlign: "center" })
+							? "bg-zinc-200 text-zinc-900"
+							: "text-zinc-600 hover:bg-zinc-100"
+					}`}
+					title="Align Center"
+				>
+					<AlignCenter className="w-3.5 h-3.5" />
+				</motion.button>
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().setTextAlign("right").run()}
+					className={`p-1.5 rounded-xl ${
+						editor.isActive({ textAlign: "right" })
+							? "bg-zinc-200 text-zinc-900"
+							: "text-zinc-600 hover:bg-zinc-100"
+					}`}
+					title="Align Right"
+				>
+					<AlignRight className="w-3.5 h-3.5" />
+				</motion.button>
+				<div className="w-px h-5 bg-zinc-200 mx-1" />
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					onClick={() => editor.chain().focus().setHorizontalRule().run()}
+					className="p-1.5 rounded-xl text-zinc-600 hover:bg-zinc-100"
+					title="Horizontal Rule"
+				>
+					<Minus className="w-3.5 h-3.5" />
+				</motion.button>
 				<div className="w-px h-5 bg-zinc-200 mx-1" />
 				<motion.button
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
 					onClick={() => fileInputRef.current?.click()}
-					className="p-1.5 rounded-xl text-zinc-600 hover:bg-zinc-100"
+					disabled={isUploadingImage}
+					className="p-1.5 rounded-xl text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
 					title="Upload Image"
 				>
-					<Upload className="w-3.5 h-3.5" />
+					{isUploadingImage ? (
+						<Loader2 className="w-3.5 h-3.5 animate-spin" />
+					) : (
+						<Upload className="w-3.5 h-3.5" />
+					)}
 				</motion.button>
 				<div className="w-px h-5 bg-zinc-200 mx-1" />
 				<motion.button

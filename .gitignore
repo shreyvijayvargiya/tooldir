@@ -6,9 +6,14 @@ yarn-error.lock
 .cursor
 .swc
 
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
 .DS_Store
 app/.DS_Store
-app/components/.DS_Store
+app/frontend/.DS_Store
 pages/.DS_Store
 public/.DS_Store
 styles/.DS_Store

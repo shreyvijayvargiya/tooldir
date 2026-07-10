@@ -3,8 +3,6 @@ import { Plus, Trash2, Save } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AnimatedDropdown from "./AnimatedDropdown";
 import { getAllUsers } from "../api/users";
-import { getAllCustomers } from "../api/customers";
-import { getAllSubscribers } from "../api/subscribers";
 import { createInvoice, updateInvoice } from "../api/invoice";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
@@ -58,46 +56,19 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 	const [status, setStatus] = useState("unpaid");
 	const [isSaving, setIsSaving] = useState(false);
 
-	// Fetch users, customers, and subscribers
+	// Fetch users
 	const { data: users = [] } = useQuery({
 		queryKey: ["users"],
 		queryFn: getAllUsers,
 	});
 
-	const { data: customers = [] } = useQuery({
-		queryKey: ["customers"],
-		queryFn: getAllCustomers,
-	});
-
-	const { data: subscribers = [] } = useQuery({
-		queryKey: ["subscribers"],
-		queryFn: getAllSubscribers,
-	});
-
 	// Prepare client options based on selected type
 	const getClientOptions = () => {
-		switch (selectedClientType) {
-			case "users":
-				return users.map((user) => ({
-					value: user.id,
-					label: `${user.name || user.displayName || user.email} (${user.email || "N/A"})`,
-					data: user,
-				}));
-			case "customers":
-				return customers.map((customer) => ({
-					value: customer.id,
-					label: `${customer.name || customer.email} (${customer.email || "N/A"})`,
-					data: customer,
-				}));
-			case "subscribers":
-				return subscribers.map((subscriber) => ({
-					value: subscriber.id,
-					label: `${subscriber.name || subscriber.email} (${subscriber.email || "N/A"})`,
-					data: subscriber,
-				}));
-			default:
-				return [];
-		}
+		return users.map((user) => ({
+			value: user.id,
+			label: `${user.name || user.displayName || user.email} (${user.email || "N/A"})`,
+			data: user,
+		}));
 	};
 
 	// Handle client selection
@@ -335,11 +306,7 @@ const CreateInvoiceModal = ({ isOpen, onClose, invoiceToEdit = null }) => {
 		}
 	};
 
-	const clientTypeOptions = [
-		{ value: "users", label: "Users" },
-		{ value: "customers", label: "Customers" },
-		{ value: "subscribers", label: "Subscribers" },
-	];
+	const clientTypeOptions = [{ value: "users", label: "Users" }];
 
 	const selectClassName =
 		"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";

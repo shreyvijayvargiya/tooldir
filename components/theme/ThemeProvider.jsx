@@ -6,7 +6,12 @@ import { ThemeConfigProvider } from "@/lib/theme/ThemeConfigContext";
 
 export function ThemeProvider({ children }) {
 	return (
-		<NextThemesProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+		<NextThemesProvider
+			attribute="class"
+			defaultTheme="light"
+			enableSystem={false}
+			disableTransitionOnChange
+		>
 			<ThemeConfigProvider>{children}</ThemeConfigProvider>
 		</NextThemesProvider>
 	);

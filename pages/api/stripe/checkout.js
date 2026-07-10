@@ -22,8 +22,13 @@ export default async function handler(req, res) {
 		// Get user email from request (you may need to pass this from the frontend)
 		// For now, we'll create a checkout session without customer email
 		// The customer will enter their email during checkout
-		const successUrl = `${req.headers.origin || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pricing?success=true`;
-		const cancelUrl = `${req.headers.origin || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pricing?cancelled=true`;
+		const appOrigin =
+			req.headers.origin ||
+			process.env.NEXT_PUBLIC_SITE_URL ||
+			process.env.NEXT_PUBLIC_APP_URL ||
+			"http://localhost:3002";
+		const successUrl = `${appOrigin}/pricing?success=true`;
+		const cancelUrl = `${appOrigin}/pricing?cancelled=true`;
 
 		// Create Stripe Checkout Session
 		const sessionParams = {
@@ -38,13 +43,11 @@ export default async function handler(req, res) {
 			success_url: successUrl,
 			cancel_url: cancelUrl,
 			metadata: {
-				source: "saas-app",
-				// customerId: customerId || null,
+				source: "tooldir",
 			},
 			subscription_data: {
 				metadata: {
-					source: "saas-app",
-					// customerId: customerId || null,
+					source: "tooldir",
 				},
 			},
 		};

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
-import Navbar from "../app/components/Navbar";
-import Footer from "../app/components/Footer";
+import Navbar from "../app/frontend/Navbar";
+import Footer from "../app/frontend/Footer";
 import { Mail, MessageSquare, Send } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";

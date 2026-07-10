@@ -1,17 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { getSEOConfig, getCanonicalUrl } from "../config/seo";
 
-/**
- * SEO Component
- * Automatically applies SEO tags based on the current route
- * Uses the centralized SEO_CONFIG for easy management
- */
 const SEO = ({ customSEO = null }) => {
 	const router = useRouter();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	const seoConfig = customSEO || getSEOConfig(router.pathname);
-	const canonicalUrl = getCanonicalUrl(router.asPath);
+	const canonicalPath =
+		mounted && router.isReady
+			? router.asPath.split("#")[0].split("?")[0]
+			: router.pathname;
+	const canonicalUrl = getCanonicalUrl(canonicalPath);
 
 	return (
 		<Head>

@@ -35,12 +35,6 @@ import {
 } from "../../../lib/api/blog";
 import { uploadBlogImages } from "../../../lib/api/upload";
 import { htmlToMarkdown } from "../../../lib/utils/htmlToMarkdown";
-import {
-	hasPermission,
-	getAllowedActions,
-} from "../../../lib/config/roles-config";
-import { getCachedUserRole, getUserRole } from "../../../lib/utils/getUserRole";
-import { getCurrentUserEmail } from "../../../lib/utils/getCurrentUserEmail";
 import AnimatedDropdown from "../../../lib/ui/AnimatedDropdown";
 import ConfirmationModal from "../../../lib/ui/ConfirmationModal";
 import { toast } from "@/lib/toast";
@@ -68,41 +62,6 @@ const BlogTab = () => {
 	// Modal states
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
 	const [confirmAction, setConfirmAction] = useState(null);
-
-	// Fetch user role with React Query
-	const fetchUserRole = async () => {
-		try {
-			// Get current user email (from Supabase Auth or localStorage fallback)
-			const userEmail = await getCurrentUserEmail();
-
-			console.log("BlogTab: Current user email:", userEmail);
-
-			if (userEmail) {
-				// Fetch role from Firestore teams collection using email
-				const role = await getUserRole(userEmail, false);
-				console.log("BlogTab: Fetched role from teams collection:", role);
-				return role;
-			} else {
-				console.warn("BlogTab: No user email found, using cached role");
-				// Fallback to cached role
-				return getCachedUserRole();
-			}
-		} catch (error) {
-			console.error("Error fetching user role:", error);
-			// Fallback to cached role
-			return getCachedUserRole();
-		}
-	};
-
-	const { data: userRole = "viewer", isLoading: isLoadingRole } = useQuery({
-		queryKey: ["userRole"],
-		queryFn: fetchUserRole,
-		staleTime: 5 * 60 * 1000, // 5 minutes
-		cacheTime: 10 * 60 * 1000, // 10 minutes
-	});
-
-	// Get allowed actions for blogs
-	const allowedActions = getAllowedActions(userRole, "blogs");
 
 	// Fetch blogs with React Query
 	const {
@@ -318,7 +277,7 @@ const BlogTab = () => {
 	// Edit blog
 	const handleEditBlog = (blog) => {
 		// Navigate to editor page instead of opening modal
-		window.location.href = `/admin/editor/blog?id=${blog.id}`;
+		window.location.href = `/admin/blogs/${blog.id}`;
 	};
 
 	// Copy HTML content
@@ -406,17 +365,15 @@ const BlogTab = () => {
 				</div>
 				<div className="flex items-center gap-2">
 					<ExportDropdown dataType="blogs" data={sortedBlogs} />
-					{hasPermission(userRole, "blogs", "create") && (
-						<motion.a
-							whileHover={{ scale: 1.02 }}
-							whileTap={{ scale: 0.98 }}
-							href="/admin/editor/blog"
-							className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
-						>
-							<Plus className="w-3.5 h-3.5" />
-							Create New Blog
-						</motion.a>
-					)}
+					<motion.a
+						whileHover={{ scale: 1.02 }}
+						whileTap={{ scale: 0.98 }}
+						href="/admin/blogs/new"
+						className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors text-sm"
+					>
+						<Plus className="w-3.5 h-3.5" />
+						Create New Blog
+					</motion.a>
 				</div>
 			</div>
 

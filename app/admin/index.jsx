@@ -1,400 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
-import HomeTab from "./components/HomeTab";
+import { useRouter } from "next/router";
+import AdminShell from "./AdminShell";
 import BlogTab from "./components/BlogTab";
-import EmailTab from "./components/EmailTab";
-import KanbanBoardTab from "./components/KanbanBoardTab";
-import IdeaDatabaseTab from "./components/IdeaDatabaseTab";
-import CronJobsTab from "./components/CronJobsTab";
-import SubscribersTab from "./components/SubscribersTab";
 import UsersTab from "./components/UsersTab";
-import CustomersTab from "./components/CustomersTab";
 import PaymentsTab from "./components/PaymentsTab";
-import MessagesTab from "./components/MessagesTab";
 import InvoiceTab from "./components/InvoiceTab";
-import WaitlistTab from "./components/WaitlistTab";
-import ReportIssuesTab from "./components/ReportIssuesTab";
-import ProductsTab from "./components/ProductsTab";
-import TeamsTab from "./components/TeamsTab";
-import FormsTab from "./components/FormsTab";
-import ChangelogTab from "./components/ChangelogTab";
-import AssetsTab from "./components/AssetsTab";
+import SubmissionsTab from "./components/SubmissionsTab";
+import PricingSlotsTab from "./components/PricingSlotsTab";
 import AnalyticsTab from "./components/AnalyticsTab";
-import SearchModal from "./components/SearchModal";
-import Sidebar from "./components/Sidebar";
-import { markEmailAsSent } from "../../lib/api/emails";
-import { onAuthStateChange } from "../../lib/api/auth";
-import { getCachedUserRole } from "../../lib/utils/getUserRole";
-import { ROLES } from "../../lib/config/roles-config";
-import { getUserRole } from "../../lib/utils/getUserRole";
-import { getCurrentUserEmail } from "../../lib/utils/getCurrentUserEmail";
-import ConfirmationModal from "../../lib/ui/ConfirmationModal";
-import LoginModal from "../../lib/ui/LoginModal";
-import {
-	getUserCookie,
-	removeUserCookie,
-	setUserCookie,
-} from "../../lib/utils/cookies";
-import { toast } from "@/lib/toast";
 import { useAppQueryClient } from "../../lib/hooks/useQueryClient";
-import { Button } from "@/components/ui/button";
 
 const Admin = () => {
 	const queryClient = useAppQueryClient();
-	const [activeTab, setActiveTab] = useState("home");
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-	const [showSearchModal, setShowSearchModal] = useState(false);
-	const [showLoginModal, setShowLoginModal] = useState(false);
-	const [user, setUser] = useState(null);
+	const router = useRouter();
+	const [activeTab, setActiveTab] = useState("analytics");
 
-	// Modal states
-	const [showConfirmModal, setShowConfirmModal] = useState(false);
-	const [confirmAction, setConfirmAction] = useState(null);
-	const [confirmData, setConfirmData] = useState({
-		title: "",
-		message: "",
-		variant: "danger",
-	});
-
-	// Fetch user role with React Query
-	const fetchUserRole = async () => {
-		try {
-			// Get current user email (from Supabase Auth or localStorage fallback)
-			const userEmail = await getCurrentUserEmail();
-
-			console.log("CMS: Current user email:", userEmail);
-
-			if (userEmail) {
-				// Fetch role from Firestore teams collection using email
-				// Supabase Auth users don't have role - we check teams collection
-				const role = await getUserRole(userEmail, false);
-				console.log("CMS: Fetched role from teams collection:", role);
-				return role;
-			} else {
-				console.warn("CMS: No user email found, using cached role");
-				// Fallback to cached role
-				return getCachedUserRole();
-			}
-		} catch (error) {
-			console.error("Error fetching user role:", error);
-			// Fallback to cached role
-			return getCachedUserRole();
-		}
-	};
-
-	const { data: userRole = "viewer" } = useQuery({
-		queryKey: ["userRole"],
-		queryFn: fetchUserRole,
-		staleTime: 5 * 60 * 1000, // 5 minutes
-		cacheTime: 10 * 60 * 1000, // 10 minutes
-	});
-
-	// Check if user is admin
-	const isAdmin = userRole === ROLES.ADMIN;
-
-	// Check for existing user in cookie on mount
 	useEffect(() => {
-		const cookieUser = getUserCookie();
-		if (cookieUser) {
-			setUser(cookieUser);
+		if (router.query.tab && typeof router.query.tab === "string") {
+			setActiveTab(router.query.tab);
 		}
-	}, []);
-
-	// Listen for auth state changes and refetch user role
-	useEffect(() => {
-		const unsubscribe = onAuthStateChange(async (authUser) => {
-			// Invalidate userRole query when auth state changes
-			queryClient.invalidateQueries({ queryKey: ["userRole"] });
-
-			// Update user state and cookie
-			if (authUser) {
-				const userData = {
-					uid: authUser.uid,
-					email: authUser.email,
-					displayName:
-						authUser.displayName ||
-						authUser.email?.split("@")[0] ||
-						"User",
-					photoURL: authUser.photoURL || null,
-					provider:
-						authUser.providerData[0]?.providerId === "google.com"
-							? "google"
-							: "email",
-				};
-				setUserCookie(userData);
-				setUser(userData);
-			} else {
-				removeUserCookie();
-				setUser(null);
-			}
-		});
-
-		return () => unsubscribe();
-	}, [queryClient]);
-
-	// Keyboard shortcut for search (Cmd/Ctrl + K)
-	useEffect(() => {
-		const handleKeyDown = (e) => {
-			if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-				e.preventDefault();
-				setShowSearchModal(true);
-			}
-		};
-
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, []);
-
-	// Send email to subscribers
-	const handleSendEmail = async (email) => {
-		if (!email.subject || !email.content) {
-			toast.warning("Email must have subject and content");
-			return;
-		}
-
-		setConfirmData({
-			title: "Send Email",
-			message: "Send this email to all active subscribers?",
-			variant: "info",
-		});
-		setConfirmAction(() => async () => {
-			try {
-				const response = await fetch("/api/emails/send", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						emailId: email.id,
-						subject: email.subject,
-						content: email.content,
-					}),
-				});
-
-				const data = await response.json();
-
-				if (response.ok) {
-					toast.success(
-						`Email sent successfully to ${data.stats.successCount} subscribers!`
-					);
-					// Update email in Firestore
-					await markEmailAsSent(email.id, data.stats.successCount);
-				} else {
-					toast.error(data.error || "Failed to send email");
-				}
-			} catch (error) {
-				console.error("Error sending email:", error);
-				toast.error("Failed to send email. Please try again.");
-			}
-		});
-		setShowConfirmModal(true);
-	};
-
-	// Send email to authenticated users
-	const handleSendEmailToUsers = async (email) => {
-		if (!email.subject || !email.content) {
-			toast.warning("Email must have subject and content");
-			return;
-		}
-
-		setConfirmData({
-			title: "Send Email",
-			message:
-				"Send this email to all authenticated users with verified emails?",
-			variant: "info",
-		});
-		setConfirmAction(() => async () => {
-			try {
-				const response = await fetch("/api/emails/send-to-users", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						emailId: email.id,
-						subject: email.subject,
-						content: email.content,
-					}),
-				});
-
-				const data = await response.json();
-
-				if (response.ok) {
-					toast.success(
-						`Email sent successfully to ${data.stats.successCount} users!`
-					);
-					// Update email in Firestore
-					await markEmailAsSent(email.id, data.stats.successCount);
-				} else {
-					toast.error(data.error || "Failed to send email");
-				}
-			} catch (error) {
-				console.error("Error sending email to users:", error);
-				toast.error("Failed to send email. Please try again.");
-			}
-		});
-		setShowConfirmModal(true);
-	};
+	}, [router.query.tab]);
 
 	return (
-		<div className="h-screen w-screen bg-muted flex flex-col overflow-hidden">
-			{/* Main Layout */}
-			<div className="flex flex-1 overflow-hidden relative">
-				{/* Mobile Overlay */}
-				<AnimatePresence>
-					{isSidebarOpen && (
-						<>
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								onClick={() => setIsSidebarOpen(false)}
-								className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-							/>
-						</>
-					)}
-				</AnimatePresence>
-
-				{/* Sidebar */}
-				<Sidebar
-					activeTab={activeTab}
-					setActiveTab={setActiveTab}
-					isSidebarOpen={isSidebarOpen}
-					setIsSidebarOpen={setIsSidebarOpen}
-					setShowSearchModal={setShowSearchModal}
-					setShowLoginModal={setShowLoginModal}
-					user={user}
-				/>
-
-				{/* Mobile Menu Toggle */}
-				<Button
-					variant="outline"
-					onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-					className="md:hidden fixed flex items-center gap-1 bottom-4 z-50 right-4 rounded-xl shadow-lg"
-				>
-					{isSidebarOpen ? "Close" : "Open"} Sidebar
-					{isSidebarOpen ? (
-						<X className="w-5 h-5" />
-					) : (
-						<Menu className="w-5 h-5" />
-					)}
-				</Button>
-
-				{/* Content Area */}
-				<main className="flex-1 w-full h-full overflow-y-auto">
-					<div className="h-full w-full md:p-2">
-						<div className="h-full w-full bg-card border rounded-2xl py-2 overflow-y-auto">
-							{activeTab === "home" && <HomeTab onNavigate={setActiveTab} />}
-							{activeTab === "blogs" && <BlogTab queryClient={queryClient} />}
-							{activeTab === "emails" && (
-								<EmailTab
-									queryClient={queryClient}
-									onSendEmail={handleSendEmail}
-								/>
-							)}
-							{activeTab === "kanban-board" && (
-								<KanbanBoardTab queryClient={queryClient} />
-							)}
-							{activeTab === "idea-database" && (
-								<IdeaDatabaseTab
-									queryClient={queryClient}
-									onNavigate={setActiveTab}
-								/>
-							)}
-							{activeTab === "subscribers" && (
-								<SubscribersTab
-									queryClient={queryClient}
-									onSendEmail={handleSendEmail}
-								/>
-							)}
-							{activeTab === "users" && (
-								<UsersTab onSendEmailToUsers={handleSendEmailToUsers} />
-							)}
-							{activeTab === "customers" && <CustomersTab />}
-							{activeTab === "payments" && (
-								<PaymentsTab queryClient={queryClient} />
-							)}
-							{activeTab === "invoices" && (
-								<InvoiceTab queryClient={queryClient} />
-							)}
-							{activeTab === "products" && (
-								<ProductsTab queryClient={queryClient} />
-							)}
-							{activeTab === "messages" && (
-								<MessagesTab queryClient={queryClient} />
-							)}
-							{activeTab === "forms" && <FormsTab queryClient={queryClient} />}
-							{activeTab === "changelog" && (
-								<ChangelogTab queryClient={queryClient} />
-							)}
-							{activeTab === "cron-jobs" && (
-								<CronJobsTab queryClient={queryClient} />
-							)}
-							{activeTab === "assets" && <AssetsTab queryClient={queryClient} />}
-							{activeTab === "waitlist" && (
-								<WaitlistTab queryClient={queryClient} />
-							)}
-							{activeTab === "analytics" && <AnalyticsTab />}
-							{activeTab === "reportIssues" && (
-								<ReportIssuesTab queryClient={queryClient} />
-							)}
-							{activeTab === "teams" && <TeamsTab queryClient={queryClient} />}
-							{[
-								"docs-editor",
-							].includes(activeTab) && (
-									<div className="p-6">
-										<div className="border rounded-2xl bg-muted p-6">
-											<p className="text-sm font-semibold text-foreground">
-												Coming soon
-											</p>
-											<p className="text-sm text-muted-foreground mt-1">
-												This section (<span className="font-mono">{activeTab}</span>)
-												is not implemented yet.
-											</p>
-										</div>
-									</div>
-								)}
-						</div>
-					</div>
-				</main>
+		<AdminShell activeTab={activeTab} onTabSelect={setActiveTab}>
+			<div className="py-2 h-full overflow-y-auto">
+				{activeTab === "analytics" && <AnalyticsTab />}
+				{activeTab === "users" && <UsersTab />}
+				{(activeTab === "submissions" || activeTab === "forms") && (
+					<SubmissionsTab queryClient={queryClient} />
+				)}
+				{activeTab === "pricing-slots" && (
+					<PricingSlotsTab queryClient={queryClient} />
+				)}
+				{activeTab === "payments" && (
+					<PaymentsTab queryClient={queryClient} />
+				)}
+				{activeTab === "invoices" && (
+					<InvoiceTab queryClient={queryClient} />
+				)}
+				{activeTab === "blogs" && <BlogTab queryClient={queryClient} />}
 			</div>
-
-			{/* Confirmation Modal */}
-			<ConfirmationModal
-				isOpen={showConfirmModal}
-				onClose={() => {
-					setShowConfirmModal(false);
-					setConfirmAction(null);
-				}}
-				onConfirm={() => {
-					if (confirmAction) {
-						confirmAction();
-					}
-					setShowConfirmModal(false);
-					setConfirmAction(null);
-				}}
-				title={confirmData.title}
-				message={confirmData.message}
-				confirmText="Confirm"
-				cancelText="Cancel"
-				variant={confirmData.variant}
-			/>
-
-			{/* Search Modal */}
-			<SearchModal
-				isOpen={showSearchModal}
-				onClose={() => setShowSearchModal(false)}
-				onNavigate={setActiveTab}
-			/>
-
-			{/* Login Modal */}
-			<LoginModal
-				isOpen={showLoginModal}
-				onClose={() => setShowLoginModal(false)}
-			/>
-		</div>
+		</AdminShell>
 	);
 };
 

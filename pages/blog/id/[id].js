@@ -2,8 +2,8 @@ import React, { useState, useMemo } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
-import Navbar from "../../../app/components/Navbar";
-import Footer from "../../../app/components/Footer";
+import Navbar from "../../../app/frontend/Navbar";
+import Footer from "../../../app/frontend/Footer";
 import {
 	Calendar,
 	ArrowLeft,

@@ -1,28 +1,21 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import Navbar from "../app/components/Navbar";
-import Footer from "../app/components/Footer";
+import Navbar from "../app/frontend/Navbar";
+import Footer from "../app/frontend/Footer";
 import { motion } from "framer-motion";
 import { Calendar, ArrowRight, Search } from "lucide-react";
-import { getAllBlogs } from "../lib/api/blog";
-import { addSubscriber } from "../lib/api/subscribers";
-import { toast } from "@/lib/toast";
-import { Button } from "@/components/ui/button";
+import { usePublishedBlogs } from "@/lib/hooks/useBlogs";
+import { getBlogPostPath } from "@/lib/utils/blogContent";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { formatDisplayDate } from "@/lib/utils/formatDate";
 
 const BlogPage = () => {
 	const [searchQuery, setSearchQuery] = useState("");
-	const [showSubscribeModal, setShowSubscribeModal] = useState(false);
-	const [subscribeForm, setSubscribeForm] = useState({ email: "", name: "" });
-	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const { data: blogs = [], isLoading } = useQuery({
-		queryKey: ["blogs"],
-		queryFn: () => getAllBlogs("published"),
-	});
+	const { data: blogs = [], isLoading } = usePublishedBlogs();
 
 	const filteredBlogs = blogs.filter((blog) =>
 		blog.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -32,21 +25,17 @@ const BlogPage = () => {
 
 	const formatDate = (date) => {
 		if (!date) return "N/A";
-		const d = date?.toDate ? date.toDate() : new Date(date);
-		return d.toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
+		const value = date?.toDate ? date.toDate().toISOString() : date;
+		return formatDisplayDate(value);
 	};
 
 	return (
 		<>
 			<Head>
-				<title>Blog - YourApp</title>
+				<title>Blog | ToolDir — AI Tool Directory</title>
 				<meta
 					name="description"
-					content="Read our latest blog posts and stay updated with news and insights."
+					content="Read the latest articles on AI tools, product launches, and directory growth from the ToolDir team."
 				/>
 			</Head>
 			<div className="min-h-screen flex flex-col">
@@ -90,7 +79,7 @@ const BlogPage = () => {
 								{filteredBlogs.map((blog, index) => (
 									<motion.div
 										key={blog.id}
-										initial={{ opacity: 0, y: 20 }}
+										initial={false}
 										whileInView={{ opacity: 1, y: 0 }}
 										viewport={{ once: true }}
 										transition={{ delay: index * 0.1 }}
@@ -122,11 +111,7 @@ const BlogPage = () => {
 													asChild
 													className="p-0 h-auto justify-start mt-auto"
 												>
-													<Link
-														href={
-															blog.slug ? `/blog/${blog.slug}` : `/blog/id/${blog.id}`
-														}
-													>
+													<Link href={getBlogPostPath(blog)}>
 														Read More
 														<ArrowRight className="w-4 h-4" />
 													</Link>
