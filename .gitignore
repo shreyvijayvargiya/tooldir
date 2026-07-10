@@ -5,6 +5,7 @@ yarn-error.lock
 .vercel
 .cursor
 .swc
+dist
 
 # Secrets — never commit
 .env

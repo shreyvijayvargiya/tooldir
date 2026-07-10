@@ -12,7 +12,9 @@
 		"build": "next build",
 		"start": "next start",
 		"clean": "yarn cache clean",
-		"lint": "next lint"
+		"lint": "next lint",
+		"pack": "bash scripts/pack-zip.sh",
+		"zip": "bash scripts/pack-zip.sh"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",

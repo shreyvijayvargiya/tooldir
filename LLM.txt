@@ -153,4 +153,5 @@ npm install
 npm run dev     # http://localhost:3002
 npm run build
 npm run lint
+npm run pack    # clean buyer zip → dist/tooldir.zip
 ```

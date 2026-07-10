@@ -1,56 +1,24 @@
-# ToolDir — Full-Stack AI Tool Directory Boilerplate
+# ToolDir — AI Tool Directory Boilerplate
 
-**$89 USD** — A production-ready Next.js boilerplate to launch your own AI tool directory, accept paid listings, publish SEO-friendly blog content, and manage everything from a built-in admin panel.
+**$89 USD** — Production-ready Next.js template to launch an AI tool directory: searchable listings, paid launch slots, SEO blog, submissions, and a full admin panel.
 
 Ship a polished directory site in days, not months.
 
-## What's Included
+---
 
-### Public website
-- **Home** — searchable tool directory with categories, stats, and featured listings
-- **Tool detail pages** — `/tool/[slug]` with rich metadata
-- **Submit flow** — multi-step tool submission form at `/submit`
-- **Pricing** — launch calendar and paid placement slots at `/pricing`
-- **Blog** — published posts from Supabase with React Query, markdown rendering, and per-post SEO (Open Graph, Twitter, canonical URLs)
-- **Legal pages** — privacy, terms, contact
-- **Sitemap & robots** — `/sitemap.xml` includes static routes plus the latest 5 published blog posts
+## Quick start (5 steps)
 
-### Admin panel (`/admin`)
-- Analytics, users, submissions, payments, invoices
-- **Blog CMS** — TipTap editor with slash commands, image upload to Supabase Storage, draft/publish workflow
-- Nested routes: `/admin/blogs/new`, `/admin/blogs/[id]`
-- Launch pricing slot management
+### Requirements
 
-### Backend & integrations
-- **Supabase** — auth, Postgres, storage, RLS policies
-- **Stripe** — checkout and webhooks for paid listings
-- **Resend** — transactional email (optional)
-- **React Query** — server-state for blogs and admin data
-- **Redux** — client UI state
+| Tool | Version |
+|------|---------|
+| **Node.js** | **18.18+** (recommended: **20 LTS**) |
+| npm | 9+ (comes with Node) |
+| Accounts | [Supabase](https://supabase.com) · [Stripe](https://stripe.com) (paid listings) |
 
-## Tech Stack
+> Next.js 15 does **not** support Node 16 or earlier. Node 20 LTS is the safest choice for local and CI.
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Next.js 15 (Pages Router) |
-| UI | Tailwind CSS, shadcn/ui, Framer Motion |
-| Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth (Google OAuth) |
-| Payments | Stripe |
-| Editor | TipTap + markdown export |
-| Data fetching | TanStack React Query |
-
-## Prerequisites
-
-- Node.js 18+
-- npm or yarn
-- [Supabase](https://supabase.com) project
-- [Stripe](https://stripe.com) account (for paid listings)
-- Domain + `NEXT_PUBLIC_SITE_URL` for production SEO
-
-## Quick Start
-
-### 1. Install dependencies
+### 1. Install
 
 ```bash
 git clone <your-repo-url>
@@ -58,115 +26,191 @@ cd buildsaas
 npm install
 ```
 
-### 2. Environment variables
+### 2. Environment
 
-Create `.env.local` in the project root:
+```bash
+cp .env.example .env.local
+```
+
+Fill in `.env.local`:
 
 ```env
-# Site (required for canonical URLs, sitemap, OG tags)
 NEXT_PUBLIC_SITE_URL=http://localhost:3002
 
-# Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_KEY=your_supabase_anon_key
 
-# Stripe (paid listings)
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
-# Email (optional)
+# Optional
 RESEND_API_KEY=re_...
 RESEND_FROM_EMAIL=hello@yourdomain.com
 ```
 
-### 3. Database setup
+### 3. Database
 
-Run the SQL in `supabase-migrations.sql` in your Supabase SQL editor. This creates:
+In the Supabase SQL editor, run **`supabase-migrations.sql`**. This creates:
 
-- `directory_tools` — published tool listings
-- `tool_submissions` — pending submissions from `/submit`
-- `pricing_slots` — launch calendar slots
-- `blogs` — blog posts (title, slug, markdown content, banner, status)
-- Storage bucket `saas-starter-storage` with upload policies
+- `directory_tools` — published listings  
+- `tool_submissions` — pending `/submit` entries  
+- `pricing_slots` — launch calendar  
+- `blogs` — CMS posts  
+- Storage bucket `saas-starter-storage` + upload policies  
+- Billing helpers (`users`, `customers`, `payments`, `invoices`, …)
 
-### 4. Run locally
+### 4. Run
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3002](http://localhost:3002).
+Open **[http://localhost:3002](http://localhost:3002)**.
 
-### 5. Admin access
+Without Supabase data, the home directory can fall back to mock tools in `lib/data/tools.js`.
 
-1. Sign in via Google on the marketing site or admin panel
-2. Go to `/admin` to manage tools, submissions, blogs, and pricing
+### 5. Admin
 
-## Project Structure
+1. Sign in with Google (Supabase Auth)  
+2. Open `/admin` — analytics, users, submissions, payments, pricing slots, blogs  
+
+---
+
+## What’s included
+
+### Public site
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Searchable directory, categories, stats, featured tools |
+| `/tool/[slug]` | Tool detail + metadata |
+| `/categories/[slug]` | Category filter |
+| `/submit` | Multi-step tool submission |
+| `/pricing` | Launch calendar / paid placement slots |
+| `/dashboard` | User’s own submissions |
+| `/blog`, `/blog/[slug]` | Published blog + per-post SEO |
+| `/contact`, `/privacy`, `/terms-and-conditions` | Legal / contact |
+| `/sitemap.xml`, `/robots.txt` | SEO |
+
+### Admin (`/admin`)
+
+- Analytics, users, submissions, payments, invoices  
+- **Blog CMS** — TipTap editor, image upload to Supabase Storage, draft/publish  
+- Nested editors: `/admin/blogs/new`, `/admin/blogs/[id]`  
+- Pricing slot management  
+
+### Integrations
+
+- **Supabase** — Auth (Google OAuth), Postgres, Storage, RLS  
+- **Stripe** — Checkout + webhooks for paid listings / billing  
+- **Resend** — optional transactional email  
+- **React Query** — server state (blogs, tools, slots)  
+- **Redux** — light client UI / subscription state  
+
+---
+
+## Architecture
+
+ToolDir uses the **Next.js Pages Router**. Important: the `app/` folder is **not** the App Router.
 
 ```
+pages/                  ← Real routes + API handlers (add pages here)
+  index.js              Home directory
+  tool/[slug].js
+  submit.js, pricing.js, blog/, …
+  admin/                Admin page entrypoints
+  api/                  Stripe, submissions, uploads, directory tools
+
 app/
-  admin/              # Admin shell, blog editor, dashboard tabs
-  frontend/           # Navbar, Footer, directory UI
-components/ui/        # shadcn components
+  frontend/             Marketing UI (Navbar, Footer, directory components)
+  admin/                Admin shell, tabs, TipTap blog editor
+
+components/ui/          shadcn/ui primitives
 lib/
-  api/                # Supabase API helpers (blog, tools, submissions)
-  hooks/useBlogs.js   # React Query hooks for blog pages
-  utils/blogSeo.js    # Per-post SEO metadata helpers
-pages/
-  blog/               # Blog list + [slug] + id fallback
-  tool/[slug].js      # Tool detail page
-  submit.js           # Tool submission flow
-  pricing.js          # Launch pricing calendar
-  sitemap.xml.js      # Dynamic sitemap
-  api/                # Stripe webhooks, uploads, submissions
+  api/                  Supabase helpers (blog, tools, submissions, auth, …)
+  hooks/                React Query hooks
+  data/                 Mock seeds (tools, pricing-slots, testimonials)
+  config/               SEO, Supabase client
+  store/                Redux
+  utils/                SEO helpers, dates, cookies
+
 supabase-migrations.sql
 ```
 
-## Blog System
+### Data flow
 
-- **Admin**: create/edit posts in `/admin` → Blogs tab or `/admin/blogs/new`
-- **Storage**: banner and inline images upload to Supabase Storage
-- **Public**: `/blog` lists published posts; `/blog/[slug]` renders markdown with syntax highlighting
-- **SEO**: each post gets title, description, canonical URL, `og:*`, `twitter:*`, and `article:*` tags via `lib/utils/blogSeo.js`
-- **Sitemap**: latest 5 published posts are added automatically at `/sitemap.xml`
+1. **Public reads** — React Query hooks (`lib/hooks/*`) call `lib/api/*` → Supabase.  
+2. **Mutations** — browser or admin hits `pages/api/*` (publish submission, upload image, Stripe checkout).  
+3. **Auth** — Supabase Google OAuth; session available site-wide and in `/admin`.  
+4. **Payments** — Stripe Checkout → webhook updates customers/payments; optional Resend email.  
 
-### React Query hooks
+### Core modules (keep these)
 
-```js
-import { usePublishedBlogs, useBlogBySlug } from "@/lib/hooks/useBlogs";
-
-const { data: blogs } = usePublishedBlogs();
-const { data: post } = useBlogBySlug("my-post-slug");
+```
+lib/api/directoryTools.js
+lib/api/toolSubmissions.js
+lib/api/pricingSlots.js
+lib/api/blog.js
+lib/api/storage.js
+lib/hooks/useDirectoryTools.js
+lib/hooks/useBlogs.js
+lib/hooks/usePricingSlots.js
+app/frontend/marketing/*
+app/admin/components/{SubmissionsTab,PricingSlotsTab,BlogTab}.jsx
 ```
 
-## Customization
+---
 
-1. **Branding** — update copy in `pages/index.js`, `app/frontend/Navbar.jsx`, and `lib/config/seo.js`
-2. **Mock data** — seed tools in `lib/data/tools.js` or publish via admin/API
-3. **Pricing** — edit slot tiers in `lib/data/pricing-slots.js` and Supabase `pricing_slots`
-4. **Theme** — shadcn tokens in `tailwind.config.js` and `styles/globals.css`
+## Tech stack
 
-## Scripts
+| Layer | Choice | Notes |
+|-------|--------|--------|
+| Runtime | **Node.js 18.18+** (prefer **20 LTS**) | Required by Next.js 15 |
+| Framework | **Next.js 15** | Pages Router only (`pages/`) |
+| UI | React 18, Tailwind CSS 3, shadcn/ui, Framer Motion | Theme tokens in `styles/globals.css` |
+| Auth + DB + files | Supabase (Auth, Postgres, Storage) | Anon key in env; RLS in migrations |
+| Server state | TanStack React Query v5 | Blogs, directory tools, pricing slots |
+| Client state | Redux Toolkit + persist | Subscription / customer UI |
+| CMS editor | TipTap + markdown | Blog admin |
+| Payments | Stripe | Checkout + webhook APIs |
+| Email | Resend (optional) | Receipts / transactional |
+| Search (UI) | Fuse.js | Client-side command search |
+| Analytics | PostHog (optional) | Env keys in `.env.example` |
+
+### Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Dev server on port 3002 |
+| `npm run dev` | Dev server on **port 3002** |
 | `npm run build` | Production build |
-| `npm start` | Start production server |
-| `npm run lint` | ESLint |
+| `npm start` | Production server |
+| `npm run lint` | Next.js ESLint |
+| `npm run pack` | Buyer zip → `dist/tooldir.zip` (no `.env`, `node_modules`, `.next`, `.git`) |
 
-For agent / codebase orientation, see `LLM.txt`.
+---
 
-## Deployment
+## Customize
 
-Works on Vercel, Netlify, or any Node host.
+1. **Branding** — `pages/index.js`, `app/frontend/Navbar.jsx`, `lib/config/seo.js`  
+2. **Seed tools** — `lib/data/tools.js`, or `/api/directory-tools/seed`, or publish via admin  
+3. **Pricing tiers** — `lib/data/pricing-slots.js` + Supabase `pricing_slots`  
+4. **Theme** — `tailwind.config.js`, `styles/globals.css`  
 
-1. Set all environment variables in your hosting dashboard
-2. Point `NEXT_PUBLIC_SITE_URL` to your production domain
-3. Configure Stripe webhook to `https://yourdomain.com/api/stripe/webhook`
-4. Run Supabase migrations on your production project
+Agent-oriented codebase map: see **`LLM.txt`**.
+
+---
+
+## Deploy
+
+Works on Vercel, Netlify, or any Node host (use Node **20** in the project settings).
+
+1. Set the same env vars in the host dashboard  
+2. Set `NEXT_PUBLIC_SITE_URL` to your production domain  
+3. Stripe webhook → `https://yourdomain.com/api/stripe/webhook`  
+4. Run `supabase-migrations.sql` on the production Supabase project  
+
+---
 
 ## License
 
@@ -174,4 +218,4 @@ MIT — use commercially in unlimited projects after purchase.
 
 ---
 
-Built for founders who want to launch an AI tool directory without building from scratch. Questions? Open an issue or contact support.
+Built for founders who want an AI tool directory without starting from scratch. Questions? Open an issue or contact support.
