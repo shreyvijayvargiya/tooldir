@@ -11,6 +11,7 @@ import PostHogProvider from "../lib/ui/PostHogProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
+import BuyTemplateButton from "@/components/BuyTemplateButton";
 import CookieConsent from "../app/frontend/marketing/CookieConsent";
 
 const queryClient = new QueryClient({
@@ -55,6 +56,7 @@ const MyApp = ({ Component, pageProps }) => {
 						<>
 							<Toaster position="top-right" richColors closeButton />
 							<ThemeCustomizer />
+							<BuyTemplateButton />
 						</>
 					)}
 				</PostHogProvider>

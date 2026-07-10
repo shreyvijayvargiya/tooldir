@@ -25,7 +25,7 @@ const MobileSidebarToggle = () => {
 		<Button
 			variant="outline"
 			onClick={toggleSidebar}
-			className="md:hidden fixed flex items-center gap-1 bottom-4 z-50 right-4 rounded-xl shadow-lg"
+			className="md:hidden fixed flex items-center gap-1 bottom-14 z-50 right-2 rounded-xl shadow-lg"
 		>
 			{openMobile ? "Close" : "Open"} Sidebar
 			{openMobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
