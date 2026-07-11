@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { TOOL_CATEGORIES } from "@/lib/data/tools";
 import { useDirectoryTools } from "@/lib/hooks/useDirectoryTools";
+import { usePreset } from "@/lib/presets/PresetContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,8 @@ const ToolsDirectoryTable = ({
 	isLoading: isLoadingProp,
 }) => {
 	const router = useRouter();
+	const { preset } = usePreset();
+	const categoryOptions = preset.categories || TOOL_CATEGORIES;
 	const { data: fetchedTools = [], isLoading: isFetching } = useDirectoryTools({
 		enabled: !toolsProp,
 	});
@@ -185,7 +188,7 @@ const ToolsDirectoryTable = ({
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-56">
 						<DropdownMenuLabel>Categories</DropdownMenuLabel>
-						{TOOL_CATEGORIES.map((cat) => (
+						{categoryOptions.map((cat) => (
 							<DropdownMenuCheckboxItem
 								key={cat}
 								checked={selectedCategories.includes(cat)}

@@ -147,6 +147,50 @@ Do not reintroduce these without a product need:
 - Builder zip/AST APIs, roles-config codegen (`modules-config`, generate-*)
 - Unused deps: octokit, archiver, simple-git, nginx, react-toastify, @vercel/analytics, @stripe/stripe-js, unused Radix accordion/checkbox/avatar/tabs/tooltip/switch/scroll-area
 
+## Buyer zips (one niche per zip)
+
+```bash
+npm run pack:tooldir      # dist/tooldir.zip
+npm run pack:promptdir    # dist/promptdir.zip
+npm run pack:designdir    # dist/designdir.zip
+npm run pack:inspiredir   # dist/inspiredir.zip
+npm run pack:resourcedir  # dist/resourcedir.zip
+npm run pack:all          # all five
+```
+
+Each zip includes **only that niche’s landing + preset**. Demo niche dock / switcher is stripped.
+`directory.config.js` is locked. Buyers do not get other landings.
+
+## Niche presets (ToolDir / PromptDir / DesignDir / InspireDir / ResourceDir)
+
+One codebase, five niches. Buyers lock a niche — they do **not** get a navbar switcher.
+
+| Preset id | Brand | Landing file |
+|-----------|--------|----------------|
+| `ai-tools` | ToolDir (default) | `app/frontend/landings/LandingAiTools.jsx` |
+| `prompt-library` | PromptDir | `LandingPromptDir.jsx` |
+| `design-resources` | DesignDir | `LandingDesignDir.jsx` |
+| `ui-inspiration` | InspireDir | `LandingInspireDir.jsx` |
+| `resources` | ResourceDir | `LandingResourceDir.jsx` |
+
+`pages/index.js` picks the landing via `getLandingComponent(preset)` / `LANDING_MAP`.
+To add a new home UI: create a file under `app/frontend/landings/`, register it in `landings/index.js`, set `landingTemplate` on the preset.
+
+Lock for production:
+1. Edit `directory.config.js` → `preset: "prompt-library"`, **or**
+2. Set `NEXT_PUBLIC_DIRECTORY_PRESET=prompt-library` in `.env.local`
+
+Demo site only: `NEXT_PUBLIC_PRESET_SWITCHER=true` shows a bottom niche dock.
+Buyer zips / client installs leave that flag **unset** — no dropdown in the navbar.
+Clients lock a niche via `directory.config.js` or `NEXT_PUBLIC_DIRECTORY_PRESET`.
+
+Each preset sets `theme.accent` (blue / green / orange / purple / teal) so primary
+buttons and the navbar submit icon (`text-primary`) match the niche. ThemeCustomizer
+can still override accent after load.
+
+Preset files: `lib/presets/*`. Brand/hero/categories/seed come from the active preset.
+Stripe, admin, and Supabase tables stay the same across niches.
+
 ## Conventions for agents
 
 1. Prefer Pages Router for new pages under `pages/`.

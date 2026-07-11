@@ -97,6 +97,17 @@
 	h1, h2, h3, h4, h5, h6 {
 		font-family: var(--font-heading);
 	}
+
+	/* Theme customizer: border utility width */
+	.border,
+	.border-t,
+	.border-r,
+	.border-b,
+	.border-l,
+	.border-x,
+	.border-y {
+		border-style: var(--border-style);
+	}
 }
 
 @layer utilities {
@@ -107,6 +118,10 @@
 	}
 	.theme-shadow {
 		box-shadow: var(--shadow);
+	}
+	.theme-blur {
+		backdrop-filter: blur(var(--backdrop-blur));
+		-webkit-backdrop-filter: blur(var(--backdrop-blur));
 	}
 }
 

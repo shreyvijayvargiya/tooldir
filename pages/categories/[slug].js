@@ -8,17 +8,31 @@ import Footer from "../../app/frontend/Footer";
 import ToolsDirectoryTable from "../../app/frontend/marketing/ToolsDirectoryTable";
 import CategoryChips from "../../app/frontend/marketing/CategoryChips";
 import SubmitToolCard from "../../app/frontend/marketing/SubmitToolCard";
-import { CATEGORY_META, getCategoryBySlug } from "@/lib/data/tools";
+import { usePreset } from "@/lib/presets/PresetContext";
+import { PRESET_LIST } from "@/lib/presets";
+
+const allCategoryMeta = () => {
+	const map = new Map();
+	for (const p of PRESET_LIST) {
+		for (const c of p.categoryMeta || []) {
+			if (!map.has(c.slug)) map.set(c.slug, c);
+		}
+	}
+	return [...map.values()];
+};
+
+const findCategoryBySlug = (slug) =>
+	allCategoryMeta().find((c) => c.slug === slug) || null;
 
 export async function getStaticPaths() {
 	return {
-		paths: CATEGORY_META.map((c) => ({ params: { slug: c.slug } })),
+		paths: allCategoryMeta().map((c) => ({ params: { slug: c.slug } })),
 		fallback: false,
 	};
 }
 
 export async function getStaticProps({ params }) {
-	const category = getCategoryBySlug(params.slug);
+	const category = findCategoryBySlug(params.slug);
 	if (!category) {
 		return { notFound: true };
 	}
@@ -31,6 +45,7 @@ export async function getStaticProps({ params }) {
 
 const CategoryPage = ({ category }) => {
 	const router = useRouter();
+	const { preset } = usePreset();
 	const activeSlug = category?.slug || router.query.slug;
 
 	if (!category) return null;
@@ -38,10 +53,12 @@ const CategoryPage = ({ category }) => {
 	return (
 		<>
 			<Head>
-				<title>{category.name} AI Tools — ToolDir</title>
+				<title>
+					{category.name} — {preset.brand}
+				</title>
 				<meta
 					name="description"
-					content={`Browse ${category.name} tools in the ToolDir AI directory. Search, filter, and discover the best products.`}
+					content={`Browse ${category.name} ${preset.entityPlural} in ${preset.brand}. Search, filter, and discover the best listings.`}
 				/>
 			</Head>
 
@@ -69,8 +86,8 @@ const CategoryPage = ({ category }) => {
 							{category.name}
 						</h1>
 						<p className="text-muted-foreground text-sm mb-6 max-w-2xl">
-							Explore {category.name.toLowerCase()} tools ranked by community
-							upvotes. Use search and filters to narrow results.
+							Explore {category.name.toLowerCase()} {preset.entityPlural} ranked
+							by community upvotes. Use search and filters to narrow results.
 						</p>
 
 						<CategoryChips activeSlug={activeSlug} />

@@ -22,6 +22,7 @@ import Navbar from "../app/frontend/Navbar";
 import Footer from "../app/frontend/Footer";
 import PricingCalendar from "../app/frontend/marketing/PricingCalendar";
 import { TOOL_CATEGORIES } from "@/lib/data/tools";
+import { usePreset } from "@/lib/presets/PresetContext";
 import { formatDateKey, getSlotPricing } from "@/lib/data/pricing-slots";
 import { usePricingSlots } from "@/lib/hooks/usePricingSlots";
 import { toast } from "@/lib/toast";
@@ -88,6 +89,8 @@ const ImagePreview = ({ src, alt, onRemove, className }) => (
 const SubmitPage = () => {
 	const router = useRouter();
 	const { data: slotsMap = {} } = usePricingSlots();
+	const { preset } = usePreset();
+	const tagSuggestions = (preset.categories || TOOL_CATEGORIES).slice(0, 4);
 	const [step, setStep] = useState(0);
 	const [showReview, setShowReview] = useState(false);
 	const [badgeVerified, setBadgeVerified] = useState(false);
@@ -567,7 +570,7 @@ const SubmitPage = () => {
 												))}
 											</div>
 											<div className="flex flex-wrap gap-1 mt-1">
-												{TOOL_CATEGORIES.slice(0, 4).map((cat) => (
+												{tagSuggestions.map((cat) => (
 													<Button
 														key={cat}
 														type="button"

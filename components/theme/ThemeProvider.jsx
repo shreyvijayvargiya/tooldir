@@ -3,6 +3,7 @@
 import React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeConfigProvider } from "@/lib/theme/ThemeConfigContext";
+import { PresetProvider } from "@/lib/presets/PresetContext";
 
 export function ThemeProvider({ children }) {
 	return (
@@ -13,7 +14,9 @@ export function ThemeProvider({ children }) {
 			disableTransitionOnChange
 			storageKey="tooldir-theme"
 		>
-			<ThemeConfigProvider>{children}</ThemeConfigProvider>
+			<ThemeConfigProvider>
+				<PresetProvider>{children}</PresetProvider>
+			</ThemeConfigProvider>
 		</NextThemesProvider>
 	);
 }

@@ -1,15 +1,21 @@
 import React from "react";
 import Link from "next/link";
 import { Mail, Twitter, Github } from "lucide-react";
+import { usePreset } from "@/lib/presets/PresetContext";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 const Footer = () => {
+	const { preset } = usePreset();
+	const entityLabel =
+		preset.landing.navSubmitLabel ||
+		`Submit ${preset.entitySingular[0].toUpperCase()}${preset.entitySingular.slice(1)}`;
+
 	const footerLinks = {
 		Product: [
 			{ href: "/", label: "Directory" },
 			{ href: "/pricing", label: "Pricing" },
-			{ href: "/submit", label: "Submit Tool" },
+			{ href: "/submit", label: entityLabel },
 			{ href: "/blog", label: "Blog" },
 		],
 		Company: [
@@ -34,12 +40,11 @@ const Footer = () => {
 					<div className="col-span-2">
 						<Link href="/" className="inline-block mb-2">
 							<span className="text-lg font-semibold -rotate-3 text-foreground p-1 border border-dashed">
-								ToolDir
+								{preset.brand}
 							</span>
 						</Link>
 						<p className="text-sm text-muted-foreground mb-4 max-w-xs">
-							The curated directory for AI tools. Discover, compare, and launch
-							the next generation of AI products.
+							{preset.landing.footerBlurb}
 						</p>
 						<div className="flex items-center gap-2">
 							{socialLinks.map(({ href, icon: Icon, label }) => (
@@ -88,7 +93,7 @@ const Footer = () => {
 
 				<div className="flex flex-col md:flex-row items-center justify-between gap-2">
 					<p className="text-sm text-muted-foreground" suppressHydrationWarning>
-						© {new Date().getFullYear()} ToolDir. All rights reserved.
+						© {new Date().getFullYear()} {preset.brand}. All rights reserved.
 					</p>
 					<div className="flex gap-4">
 						<Link
@@ -102,12 +107,6 @@ const Footer = () => {
 							className="text-xs text-muted-foreground hover:text-foreground"
 						>
 							Terms
-						</Link>
-						<Link
-							href="/submit"
-							className="text-xs text-muted-foreground hover:text-foreground"
-						>
-							Submit Tool
 						</Link>
 					</div>
 				</div>

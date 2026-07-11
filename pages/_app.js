@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
@@ -13,6 +14,11 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
 import BuyTemplateButton from "@/components/BuyTemplateButton";
 import CookieConsent from "../app/frontend/marketing/CookieConsent";
+import { isPresetSwitcherEnabled } from "@/lib/presets";
+
+const NicheBookmarkBar = isPresetSwitcherEnabled()
+	? dynamic(() => import("@/components/demo/NicheBookmarkBar"), { ssr: false })
+	: null;
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -56,6 +62,7 @@ const MyApp = ({ Component, pageProps }) => {
 						<>
 							<Toaster position="top-right" richColors closeButton />
 							<ThemeCustomizer />
+							{NicheBookmarkBar ? <NicheBookmarkBar /> : null}
 							<BuyTemplateButton />
 						</>
 					)}

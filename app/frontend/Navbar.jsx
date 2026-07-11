@@ -16,6 +16,8 @@ import { signOutUser, onAuthStateChange } from "../../lib/api/auth";
 import { toast } from "@/lib/toast";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { ThemeCustomizerButton } from "@/components/theme/ThemeCustomizer";
+import { usePreset } from "@/lib/presets/PresetContext";
+import { isPresetSwitcherEnabled } from "@/lib/presets";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -38,6 +40,8 @@ import { cn } from "@/lib/utils";
 const Navbar = () => {
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const { preset } = usePreset();
+	const showNavThemeCustomizer = !isPresetSwitcherEnabled();
 	const [showLoginModal, setShowLoginModal] = React.useState(false);
 	const [showCommandSearch, setShowCommandSearch] = React.useState(false);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -215,8 +219,8 @@ const Navbar = () => {
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild className="cursor-pointer">
 							<Link href="/submit">
-								<PlusCircle className="w-4 h-4" />
-								Submit Tool
+								<PlusCircle className="w-4 h-4 text-primary" />
+								{preset.landing.navSubmitLabel}
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
@@ -312,7 +316,7 @@ const Navbar = () => {
 					<div className="flex items-center justify-between h-16">
 						<Link href="/" className="flex items-center">
 							<span className="text-lg font-semibold -rotate-3 text-foreground p-1 border border-dashed">
-								ToolDir
+								{preset.brand}
 							</span>
 						</Link>
 
@@ -339,8 +343,8 @@ const Navbar = () => {
 										: "text-muted-foreground hover:text-foreground"
 								)}
 							>
-								<PlusCircle className="h-4 w-4 shrink-0 text-sky-500" />
-								Submit Tool
+								<PlusCircle className="h-4 w-4 shrink-0 text-primary" />
+								{preset.landing.navSubmitLabel}
 							</Link>
 						</div>
 
@@ -368,7 +372,7 @@ const Navbar = () => {
 									</svg>
 								</Button>
 							</a>
-							<ThemeCustomizerButton />
+							{showNavThemeCustomizer ? <ThemeCustomizerButton /> : null}
 							<ThemeToggle />
 							<AuthActions />
 						</div>
@@ -382,7 +386,7 @@ const Navbar = () => {
 							>
 								<Search className="w-5 h-5" />
 							</Button>
-							<ThemeCustomizerButton />
+							{showNavThemeCustomizer ? <ThemeCustomizerButton /> : null}
 							<ThemeToggle />
 							<Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
 								<SheetTrigger asChild>
@@ -419,8 +423,8 @@ const Navbar = () => {
 													: "text-muted-foreground"
 											)}
 										>
-											<PlusCircle className="h-4 w-4 shrink-0 text-sky-500" />
-											Submit Tool
+											<PlusCircle className="h-4 w-4 shrink-0 text-primary" />
+											{preset.landing.navSubmitLabel}
 										</Link>
 										<Separator className="my-4" />
 										<Button

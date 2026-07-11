@@ -1,29 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Users, Wrench, Star } from "lucide-react";
+import { usePreset } from "@/lib/presets/PresetContext";
 import { Card, CardContent } from "@/components/ui/card";
-import { SITE_STATS } from "@/lib/data/tools";
-
-const STAT_ITEMS = [
-	{
-		key: "monthlyVisitors",
-		label: "Monthly Visitors",
-		value: SITE_STATS.monthlyVisitors,
-		icon: Users,
-	},
-	{
-		key: "toolsSubmitted",
-		label: "Tools Submitted",
-		value: SITE_STATS.toolsSubmitted,
-		icon: Wrench,
-	},
-	{
-		key: "githubStars",
-		label: "Open Source GitHub Stars",
-		value: SITE_STATS.githubStars,
-		icon: Star,
-	},
-];
 
 const GlowCard = ({ stat, index }) => {
 	const cardRef = useRef(null);
@@ -79,12 +58,39 @@ const GlowCard = ({ stat, index }) => {
 	);
 };
 
-const StatsCards = ({ className = "" }) => (
-	<div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${className}`}>
-		{STAT_ITEMS.map((stat, index) => (
-			<GlowCard key={stat.key} stat={stat} index={index} />
-		))}
-	</div>
-);
+const StatsCards = ({ className = "" }) => {
+	const { preset } = usePreset();
+	const items = useMemo(
+		() => [
+			{
+				key: "monthlyVisitors",
+				label: "Monthly Visitors",
+				value: preset.stats.monthlyVisitors,
+				icon: Users,
+			},
+			{
+				key: "itemsSubmitted",
+				label: preset.stats.itemsSubmittedLabel,
+				value: preset.stats.itemsSubmitted,
+				icon: Wrench,
+			},
+			{
+				key: "thirdStat",
+				label: preset.stats.thirdStatLabel,
+				value: preset.stats.thirdStat,
+				icon: Star,
+			},
+		],
+		[preset]
+	);
+
+	return (
+		<div className={`grid grid-cols-1 md:grid-cols-3 gap-6 ${className}`}>
+			{items.map((stat, index) => (
+				<GlowCard key={stat.key} stat={stat} index={index} />
+			))}
+		</div>
+	);
+};
 
 export default StatsCards;

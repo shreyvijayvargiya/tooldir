@@ -6,6 +6,9 @@ const GUMROAD_URL =
 	"https://shreyvijayvargiya.gumroad.com/l/nextjs-supabase-directory-boilerplate?layout=profile";
 
 export default function BuyTemplateButton() {
+	// Demo dock already includes Buy — hide floating CTA when switcher is on
+	if (process.env.NEXT_PUBLIC_PRESET_SWITCHER === "true") return null;
+
 	return (
 		<Button
 			asChild

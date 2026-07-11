@@ -13,8 +13,20 @@
 		"start": "next start",
 		"clean": "yarn cache clean",
 		"lint": "next lint",
-		"pack": "bash scripts/pack-zip.sh",
-		"zip": "bash scripts/pack-zip.sh"
+		"pack": "bash scripts/pack-zip.sh ai-tools",
+		"zip": "bash scripts/pack-zip.sh ai-tools",
+		"pack:tooldir": "bash scripts/pack-zip.sh ai-tools",
+		"pack:promptdir": "bash scripts/pack-zip.sh prompt-library",
+		"pack:designdir": "bash scripts/pack-zip.sh design-resources",
+		"pack:inspiredir": "bash scripts/pack-zip.sh ui-inspiration",
+		"pack:resourcedir": "bash scripts/pack-zip.sh resources",
+		"pack:all": "bash scripts/pack-zip.sh all",
+		"zip:tooldir": "bash scripts/pack-zip.sh ai-tools",
+		"zip:promptdir": "bash scripts/pack-zip.sh prompt-library",
+		"zip:designdir": "bash scripts/pack-zip.sh design-resources",
+		"zip:inspiredir": "bash scripts/pack-zip.sh ui-inspiration",
+		"zip:resourcedir": "bash scripts/pack-zip.sh resources",
+		"zip:all": "bash scripts/pack-zip.sh all"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",

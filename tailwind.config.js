@@ -59,6 +59,32 @@ module.exports = {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
     			sm: 'calc(var(--radius) - 4px)'
+    		},
+    		borderWidth: {
+    			DEFAULT: 'var(--border-width)'
+    		},
+    		boxShadow: {
+    			sm: 'var(--shadow)',
+    			DEFAULT: 'var(--shadow)',
+    			md: 'var(--shadow)',
+    			lg: 'var(--shadow)',
+    			xl: 'var(--shadow)',
+    			'2xl': 'var(--shadow)'
+    		},
+    		backdropBlur: {
+    			sm: 'var(--backdrop-blur)',
+    			DEFAULT: 'var(--backdrop-blur)',
+    			md: 'var(--backdrop-blur)',
+    			lg: 'var(--backdrop-blur)',
+    			xl: 'var(--backdrop-blur)',
+    			'2xl': 'var(--backdrop-blur)',
+    			'3xl': 'var(--backdrop-blur)'
+    		},
+    		ringWidth: {
+    			DEFAULT: 'var(--focus-ring-width)',
+    			1: 'var(--focus-ring-width)',
+    			2: 'var(--focus-ring-width)',
+    			4: 'calc(var(--focus-ring-width) * 2)'
     		}
     	}
     },
