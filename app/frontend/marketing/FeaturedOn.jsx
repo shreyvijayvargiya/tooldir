@@ -10,6 +10,7 @@ export const FEATURED_LISTINGS = [
 	{
 		id: "launchstag",
 		type: "badge",
+		// Exact Launchstag embed (rel must be "noopener" for their checker)
 		href: "https://launchstag.com",
 		src: "https://launchstag.com/badge-light.svg",
 		alt: "Featured on Launchstag",
@@ -19,8 +20,7 @@ export const FEATURED_LISTINGS = [
 ];
 
 /**
- * Always-on directory listing badges (footer).
- * Keep the Launchstag <img> in the page DOM so their embed checker can find it.
+ * Footer "Featured on" strip — badge stays in SSR HTML for directory checkers.
  */
 export default function FeaturedOn({ className, scrollClassName }) {
 	return (
@@ -40,15 +40,13 @@ export default function FeaturedOn({ className, scrollClassName }) {
 							key={item.id}
 							href={item.href}
 							target="_blank"
-							rel="noopener noreferrer"
-							className="shrink-0 transition-opacity hover:opacity-90"
+							rel="noopener"
 						>
 							<img
 								src={item.src}
 								alt={item.alt}
 								width={item.width}
 								height={item.height}
-								className="h-[42px] w-auto"
 							/>
 						</a>
 					) : (

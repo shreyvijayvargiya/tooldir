@@ -43,9 +43,18 @@ const MyApp = ({ Component, pageProps }) => {
 		<Component {...pageProps} />
 	) : (
 		<Provider store={store}>
-			<PersistGate loading={null} persistor={persistor}>
-				<Component {...pageProps} />
-				<CookieConsent />
+			{/*
+			  Function children always render (SSR + first paint).
+			  Default PersistGate with loading={null} blanks the HTML until
+			  rehydrate — crawlers then miss footer embeds (e.g. Launchstag).
+			*/}
+			<PersistGate persistor={persistor}>
+				{() => (
+					<>
+						<Component {...pageProps} />
+						<CookieConsent />
+					</>
+				)}
 			</PersistGate>
 		</Provider>
 	);

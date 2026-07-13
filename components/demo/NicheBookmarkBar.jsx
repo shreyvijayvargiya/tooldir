@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,7 +12,6 @@ import {
 	Lock,
 	ChevronsLeft,
 	ChevronsRight,
-	Info,
 } from "lucide-react";
 import { usePreset } from "@/lib/presets/PresetContext";
 import { useThemeConfig } from "@/lib/theme/ThemeConfigContext";
@@ -24,7 +23,6 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import FeaturedOn from "@/app/frontend/marketing/FeaturedOn";
 
 const GUMROAD_URL =
 	"https://shreyvijayvargiya.gumroad.com/l/nextjs-supabase-directory-boilerplate?layout=profile";
@@ -115,77 +113,6 @@ const DockIconButton = ({
 	);
 };
 
-const ListingsInfoButton = () => {
-	const [open, setOpen] = useState(false);
-	const rootRef = useRef(null);
-
-	useEffect(() => {
-		if (!open) return undefined;
-		const onPointerDown = (event) => {
-			if (rootRef.current && !rootRef.current.contains(event.target)) {
-				setOpen(false);
-			}
-		};
-		const onKeyDown = (event) => {
-			if (event.key === "Escape") setOpen(false);
-		};
-		document.addEventListener("pointerdown", onPointerDown);
-		document.addEventListener("keydown", onKeyDown);
-		return () => {
-			document.removeEventListener("pointerdown", onPointerDown);
-			document.removeEventListener("keydown", onKeyDown);
-		};
-	}, [open]);
-
-	return (
-		<div ref={rootRef} className="relative shrink-0">
-			<AnimatePresence>
-				{open ? (
-					<motion.div
-						key="listings-panel"
-						initial={{ opacity: 0, y: 8, scale: 0.96 }}
-						animate={{ opacity: 1, y: 0, scale: 1 }}
-						exit={{ opacity: 0, y: 8, scale: 0.96 }}
-						transition={{ type: "spring", stiffness: 420, damping: 28 }}
-						className={cn(
-							"absolute bottom-[calc(100%+10px)] left-1/2 z-[96] -translate-x-1/2",
-							"max-w-[min(280px,70vw)] rounded-2xl border bg-background/95 p-2 shadow-xl",
-							"ring-1 ring-border/60 backdrop-blur-md"
-						)}
-					>
-						<FeaturedOn
-							className="min-w-0"
-							scrollClassName="max-w-[min(260px,66vw)]"
-						/>
-					</motion.div>
-				) : null}
-			</AnimatePresence>
-
-			<button
-				type="button"
-				aria-label="Where we're listed"
-				aria-expanded={open}
-				aria-haspopup="dialog"
-				onClick={() => setOpen((prev) => !prev)}
-				className={cn(
-					"relative flex size-10 items-center justify-center rounded-xl transition-colors",
-					"hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-					open && "bg-muted"
-				)}
-			>
-				<motion.span
-					whileHover={{ y: -3, scale: 1.08 }}
-					whileTap={{ scale: 0.94 }}
-					transition={{ type: "spring", stiffness: 500, damping: 22 }}
-					className="flex items-center justify-center"
-				>
-					<Info className="size-4" />
-				</motion.span>
-			</button>
-		</div>
-	);
-};
-
 /**
  * DEMO ONLY — fixed bottom bookmark dock to switch niche templates.
  * Collapsible: collapsed shows only the expand toggle.
@@ -233,7 +160,7 @@ export default function NicheBookmarkBar() {
 					transition={{ type: "spring", stiffness: 380, damping: 28 }}
 					className={cn(
 						"pointer-events-auto flex items-center gap-1 rounded-2xl border bg-background/95 p-1.5 shadow-xl backdrop-blur-md",
-						"ring-1 ring-border/60 overflow-visible"
+						"ring-1 ring-border/60 overflow-hidden"
 					)}
 				>
 					<AnimatePresence initial={false} mode="popLayout">
@@ -245,14 +172,9 @@ export default function NicheBookmarkBar() {
 								animate={{ opacity: 1, width: "auto" }}
 								exit={{ opacity: 0, width: 0 }}
 								transition={{ type: "spring", stiffness: 420, damping: 32 }}
-								className="flex items-center gap-1 overflow-visible"
+								className="flex items-center gap-1 overflow-hidden"
 							>
-								<div className="hidden sm:flex items-center gap-1.5 px-2 text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
-									<Bookmark className="size-3" />
-									<span>Demo</span>
-								</div>
-
-								<div className="flex items-center gap-0.5 overflow-visible">
+								<div className="flex items-center gap-0.5">
 									{PRESET_LIST.map((p) => {
 										const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
 										const active = presetId === p.id;
@@ -286,10 +208,6 @@ export default function NicheBookmarkBar() {
 									>
 										<Lock className="size-4" />
 									</DockIconButton>
-
-									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
-
-									<ListingsInfoButton />
 
 									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
 								</div>
