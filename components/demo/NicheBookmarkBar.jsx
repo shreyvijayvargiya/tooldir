@@ -24,28 +24,12 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import FeaturedOn from "@/app/frontend/marketing/FeaturedOn";
 
 const GUMROAD_URL =
 	"https://shreyvijayvargiya.gumroad.com/l/nextjs-supabase-directory-boilerplate?layout=profile";
 
 const COLLAPSE_KEY = "tooldir-niche-dock-collapsed";
-
-const LISTINGS = [
-	{
-		id: "product-hunt",
-		label: "Listed on Product Hunt",
-		href: "https://www.producthunt.com",
-	},
-	{
-		id: "launchstag",
-		type: "badge",
-		href: "https://launchstag.com",
-		src: "https://launchstag.com/badge-light.svg",
-		alt: "Featured on Launchstag",
-		width: 198,
-		height: 62,
-	},
-];
 
 const PRESET_ICONS = {
 	"ai-tools": Sparkles,
@@ -169,41 +153,10 @@ const ListingsInfoButton = () => {
 							"ring-1 ring-border/60 backdrop-blur-md"
 						)}
 					>
-						<div className="flex max-w-[min(260px,66vw)] items-center gap-3 overflow-x-auto pb-0.5 [scrollbar-width:thin]">
-							{LISTINGS.map((item) =>
-								item.type === "badge" ? (
-									<a
-										key={item.id}
-										href={item.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="shrink-0 transition-opacity hover:opacity-90"
-									>
-										<img
-											src={item.src}
-											alt={item.alt}
-											width={item.width}
-											height={item.height}
-											className="h-[42px] w-auto"
-										/>
-									</a>
-								) : (
-									<a
-										key={item.id}
-										href={item.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										className={cn(
-											"shrink-0 rounded-xl border bg-muted/60 px-3 py-2",
-											"text-xs font-medium text-foreground whitespace-nowrap",
-											"transition-colors hover:bg-muted"
-										)}
-									>
-										{item.label}
-									</a>
-								)
-							)}
-						</div>
+						<FeaturedOn
+							className="min-w-0"
+							scrollClassName="max-w-[min(260px,66vw)]"
+						/>
 					</motion.div>
 				) : null}
 			</AnimatePresence>

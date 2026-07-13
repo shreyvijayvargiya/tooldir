@@ -4,6 +4,7 @@ import { Mail, Twitter, Github } from "lucide-react";
 import { usePreset } from "@/lib/presets/PresetContext";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import FeaturedOn from "./marketing/FeaturedOn";
 
 const Footer = () => {
 	const { preset } = usePreset();
@@ -46,7 +47,7 @@ const Footer = () => {
 						<p className="text-sm text-muted-foreground mb-4 max-w-xs">
 							{preset.landing.footerBlurb}
 						</p>
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 mb-5">
 							{socialLinks.map(({ href, icon: Icon, label }) => (
 								<a
 									key={label}
@@ -66,6 +67,7 @@ const Footer = () => {
 								</Button>
 							</a>
 						</div>
+						<FeaturedOn />
 					</div>
 
 					{Object.entries(footerLinks).map(([category, links]) => (
