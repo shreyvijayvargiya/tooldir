@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,6 +12,7 @@ import {
 	Lock,
 	ChevronsLeft,
 	ChevronsRight,
+	Info,
 } from "lucide-react";
 import { usePreset } from "@/lib/presets/PresetContext";
 import { useThemeConfig } from "@/lib/theme/ThemeConfigContext";
@@ -28,6 +29,23 @@ const GUMROAD_URL =
 	"https://shreyvijayvargiya.gumroad.com/l/nextjs-supabase-directory-boilerplate?layout=profile";
 
 const COLLAPSE_KEY = "tooldir-niche-dock-collapsed";
+
+const LISTINGS = [
+	{
+		id: "product-hunt",
+		label: "Listed on Product Hunt",
+		href: "https://www.producthunt.com",
+	},
+	{
+		id: "launchstag",
+		type: "badge",
+		href: "https://launchstag.com",
+		src: "https://launchstag.com/badge-light.svg",
+		alt: "Featured on Launchstag",
+		width: 198,
+		height: 62,
+	},
+];
 
 const PRESET_ICONS = {
 	"ai-tools": Sparkles,
@@ -113,6 +131,108 @@ const DockIconButton = ({
 	);
 };
 
+const ListingsInfoButton = () => {
+	const [open, setOpen] = useState(false);
+	const rootRef = useRef(null);
+
+	useEffect(() => {
+		if (!open) return undefined;
+		const onPointerDown = (event) => {
+			if (rootRef.current && !rootRef.current.contains(event.target)) {
+				setOpen(false);
+			}
+		};
+		const onKeyDown = (event) => {
+			if (event.key === "Escape") setOpen(false);
+		};
+		document.addEventListener("pointerdown", onPointerDown);
+		document.addEventListener("keydown", onKeyDown);
+		return () => {
+			document.removeEventListener("pointerdown", onPointerDown);
+			document.removeEventListener("keydown", onKeyDown);
+		};
+	}, [open]);
+
+	return (
+		<div ref={rootRef} className="relative shrink-0">
+			<AnimatePresence>
+				{open ? (
+					<motion.div
+						key="listings-panel"
+						initial={{ opacity: 0, y: 8, scale: 0.96 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0, y: 8, scale: 0.96 }}
+						transition={{ type: "spring", stiffness: 420, damping: 28 }}
+						className={cn(
+							"absolute bottom-[calc(100%+10px)] left-1/2 z-[96] -translate-x-1/2",
+							"max-w-[min(280px,70vw)] rounded-2xl border bg-background/95 p-2 shadow-xl",
+							"ring-1 ring-border/60 backdrop-blur-md"
+						)}
+					>
+						<div className="flex max-w-[min(260px,66vw)] items-center gap-3 overflow-x-auto pb-0.5 [scrollbar-width:thin]">
+							{LISTINGS.map((item) =>
+								item.type === "badge" ? (
+									<a
+										key={item.id}
+										href={item.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="shrink-0 transition-opacity hover:opacity-90"
+									>
+										<img
+											src={item.src}
+											alt={item.alt}
+											width={item.width}
+											height={item.height}
+											className="h-[42px] w-auto"
+										/>
+									</a>
+								) : (
+									<a
+										key={item.id}
+										href={item.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										className={cn(
+											"shrink-0 rounded-xl border bg-muted/60 px-3 py-2",
+											"text-xs font-medium text-foreground whitespace-nowrap",
+											"transition-colors hover:bg-muted"
+										)}
+									>
+										{item.label}
+									</a>
+								)
+							)}
+						</div>
+					</motion.div>
+				) : null}
+			</AnimatePresence>
+
+			<button
+				type="button"
+				aria-label="Where we're listed"
+				aria-expanded={open}
+				aria-haspopup="dialog"
+				onClick={() => setOpen((prev) => !prev)}
+				className={cn(
+					"relative flex size-10 items-center justify-center rounded-xl transition-colors",
+					"hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+					open && "bg-muted"
+				)}
+			>
+				<motion.span
+					whileHover={{ y: -3, scale: 1.08 }}
+					whileTap={{ scale: 0.94 }}
+					transition={{ type: "spring", stiffness: 500, damping: 22 }}
+					className="flex items-center justify-center"
+				>
+					<Info className="size-4" />
+				</motion.span>
+			</button>
+		</div>
+	);
+};
+
 /**
  * DEMO ONLY — fixed bottom bookmark dock to switch niche templates.
  * Collapsible: collapsed shows only the expand toggle.
@@ -160,7 +280,7 @@ export default function NicheBookmarkBar() {
 					transition={{ type: "spring", stiffness: 380, damping: 28 }}
 					className={cn(
 						"pointer-events-auto flex items-center gap-1 rounded-2xl border bg-background/95 p-1.5 shadow-xl backdrop-blur-md",
-						"ring-1 ring-border/60 overflow-hidden"
+						"ring-1 ring-border/60 overflow-visible"
 					)}
 				>
 					<AnimatePresence initial={false} mode="popLayout">
@@ -172,14 +292,14 @@ export default function NicheBookmarkBar() {
 								animate={{ opacity: 1, width: "auto" }}
 								exit={{ opacity: 0, width: 0 }}
 								transition={{ type: "spring", stiffness: 420, damping: 32 }}
-								className="flex items-center gap-1 overflow-hidden"
+								className="flex items-center gap-1 overflow-visible"
 							>
 								<div className="hidden sm:flex items-center gap-1.5 px-2 text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
 									<Bookmark className="size-3" />
 									<span>Demo</span>
 								</div>
 
-								<div className="flex items-center gap-0.5">
+								<div className="flex items-center gap-0.5 overflow-visible">
 									{PRESET_LIST.map((p) => {
 										const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
 										const active = presetId === p.id;
@@ -213,6 +333,10 @@ export default function NicheBookmarkBar() {
 									>
 										<Lock className="size-4" />
 									</DockIconButton>
+
+									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
+
+									<ListingsInfoButton />
 
 									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
 								</div>
