@@ -22,6 +22,15 @@ import {
 	Calendar,
 	FileText,
 	Settings,
+	Ticket,
+	Briefcase,
+	GraduationCap,
+	Mic,
+	Puzzle,
+	Users,
+	BookOpen,
+	Percent,
+	Rocket,
 } from "lucide-react";
 import { PRESET_LIST } from "@/lib/presets";
 import { usePreset } from "@/lib/presets/PresetContext";
@@ -51,13 +60,25 @@ const PRESET_ICONS = {
 	resources: Package,
 	"icons-library": Shapes,
 	"components-library": Blocks,
+	"coupons-deals": Ticket,
+	"notion-templates": FileText,
+	"job-board": Briefcase,
+	"newsletter-directory": Mail,
+	"course-directory": GraduationCap,
+	"podcast-directory": Mic,
+	"chrome-extensions": Puzzle,
+	"no-code-tools": Blocks,
+	communities: Users,
+	"ebook-directory": BookOpen,
+	"affiliate-offers": Percent,
+	"indie-products": Rocket,
 };
 
 const FEATURES = [
 	{
 		icon: LayoutTemplate,
-		title: "7 niche landing templates",
-		body: "AI tools, prompts, design resources, UI inspiration, resources, icons, and a React component library — switch and ship.",
+		title: "19 niche landing templates",
+		body: "AI tools, Notion, deals, jobs, courses, podcasts, extensions, and more — each with a distinct hero. Switch and ship.",
 	},
 	{
 		icon: Search,
@@ -159,7 +180,7 @@ export default function ProductHome() {
 							</a>
 						</Button>
 						<Button asChild variant="outline" size="lg">
-							<Link href="/demo">
+							<Link href="/templates">
 								Browse templates
 								<ArrowRight className="size-4" />
 							</Link>
@@ -193,7 +214,7 @@ export default function ProductHome() {
 							{
 								step: "1",
 								title: "Preview templates",
-								body: "Open /demo or use the bottom bar to try each niche landing — AI tools, icons, components, and more.",
+								body: "Open /templates or use the bottom dock dropdown to try each niche landing — deals, Notion, jobs, courses, and more.",
 							},
 							{
 								step: "2",
@@ -245,7 +266,7 @@ export default function ProductHome() {
 							return (
 								<motion.div key={preset.id} variants={itemVariants}>
 									<Link
-										href="/demo"
+										href="/templates"
 										onClick={() => openTemplate(preset.id)}
 										className="block h-full"
 									>

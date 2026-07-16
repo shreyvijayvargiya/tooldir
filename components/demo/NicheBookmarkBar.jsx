@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,6 +14,19 @@ import {
 	Lock,
 	ChevronsLeft,
 	ChevronsRight,
+	ChevronUp,
+	Ticket,
+	FileText,
+	Briefcase,
+	Mail,
+	GraduationCap,
+	Mic,
+	Puzzle,
+	Users,
+	BookOpen,
+	Percent,
+	Rocket,
+	Grid2X2,
 } from "lucide-react";
 import { usePreset } from "@/lib/presets/PresetContext";
 import { useThemeConfig } from "@/lib/theme/ThemeConfigContext";
@@ -24,6 +37,14 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const GUMROAD_URL =
@@ -39,6 +60,18 @@ const PRESET_ICONS = {
 	resources: Package,
 	"icons-library": Shapes,
 	"components-library": Blocks,
+	"coupons-deals": Ticket,
+	"notion-templates": FileText,
+	"job-board": Briefcase,
+	"newsletter-directory": Mail,
+	"course-directory": GraduationCap,
+	"podcast-directory": Mic,
+	"chrome-extensions": Puzzle,
+	"no-code-tools": Blocks,
+	communities: Users,
+	"ebook-directory": BookOpen,
+	"affiliate-offers": Percent,
+	"indie-products": Rocket,
 };
 
 const DockIconButton = ({
@@ -118,8 +151,8 @@ const DockIconButton = ({
 };
 
 /**
- * DEMO ONLY — fixed bottom bookmark dock to switch niche templates.
- * Collapsible: collapsed shows only the expand toggle.
+ * DEMO ONLY — fixed bottom bookmark dock.
+ * Templates live in an upward-opening dropdown (avoids crowding the bar).
  */
 export default function NicheBookmarkBar() {
 	const router = useRouter();
@@ -136,6 +169,28 @@ export default function NicheBookmarkBar() {
 		}
 		setReady(true);
 	}, []);
+
+	const grouped = useMemo(() => {
+		const map = new Map();
+		for (const p of PRESET_LIST) {
+			const g = p.group || "Directories";
+			if (!map.has(g)) map.set(g, []);
+			map.get(g).push(p);
+		}
+		return [...map.entries()];
+	}, []);
+
+	const activePreset = PRESET_LIST.find((p) => p.id === presetId);
+	const ActiveIcon = PRESET_ICONS[presetId] || LayoutTemplate;
+	const onDemo =
+		router.pathname === "/demo" || router.pathname === "/templates";
+
+	const selectTemplate = (id) => {
+		setPresetId(id);
+		if (router.pathname !== "/demo" && router.pathname !== "/templates") {
+			router.push("/demo");
+		}
+	};
 
 	const toggleCollapsed = () => {
 		setCollapsed((prev) => {
@@ -164,7 +219,7 @@ export default function NicheBookmarkBar() {
 					transition={{ type: "spring", stiffness: 380, damping: 28 }}
 					className={cn(
 						"pointer-events-auto flex items-center gap-1 rounded-2xl border bg-background/95 p-1.5 shadow-xl backdrop-blur-md",
-						"ring-1 ring-border/60 overflow-hidden"
+						"ring-1 ring-border/60 overflow-visible"
 					)}
 				>
 					<AnimatePresence initial={false} mode="popLayout">
@@ -176,7 +231,7 @@ export default function NicheBookmarkBar() {
 								animate={{ opacity: 1, width: "auto" }}
 								exit={{ opacity: 0, width: 0 }}
 								transition={{ type: "spring", stiffness: 420, damping: 32 }}
-								className="flex items-center gap-1 overflow-hidden"
+								className="flex items-center gap-1 overflow-visible"
 							>
 								<div className="flex items-center gap-0.5">
 									<DockIconButton
@@ -190,27 +245,83 @@ export default function NicheBookmarkBar() {
 
 									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
 
-									{PRESET_LIST.map((p) => {
-										const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
-										const active =
-											router.pathname === "/demo" && presetId === p.id;
-										return (
-											<DockIconButton
-												key={p.id}
-												label={p.brand}
-												sublabel={p.tagline}
-												active={active}
-												onClick={() => {
-													setPresetId(p.id);
-													if (router.pathname !== "/demo") {
-														router.push("/demo");
-													}
-												}}
-											>
-												<Icon className="size-4" />
-											</DockIconButton>
-										);
-									})}
+									<DropdownMenu>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<DropdownMenuTrigger asChild>
+													<button
+														type="button"
+														aria-label="Templates"
+														className={cn(
+															"relative flex h-10 items-center gap-1.5 rounded-xl px-2.5 transition-colors",
+															"hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+															onDemo &&
+																"bg-primary text-primary-foreground hover:bg-primary/90"
+														)}
+													>
+														<ActiveIcon className="size-4 shrink-0" />
+														<span className="hidden max-w-[88px] truncate text-xs font-medium sm:inline">
+															{activePreset?.brand || "Templates"}
+														</span>
+														<ChevronUp className="size-3.5 opacity-70" />
+													</button>
+												</DropdownMenuTrigger>
+											</TooltipTrigger>
+											<TooltipContent side="top" sideOffset={10}>
+												<p className="text-sm font-semibold">Templates</p>
+												<p className="text-[11px] text-muted-foreground">
+													{PRESET_LIST.length} niche landings
+												</p>
+											</TooltipContent>
+										</Tooltip>
+										<DropdownMenuContent
+											side="top"
+											align="center"
+											sideOffset={12}
+											className="max-h-[min(70vh,420px)] w-64 overflow-y-auto"
+										>
+											<DropdownMenuLabel>All templates</DropdownMenuLabel>
+											<DropdownMenuSeparator />
+											{grouped.map(([group, items], gi) => (
+												<React.Fragment key={group}>
+													{gi > 0 ? <DropdownMenuSeparator /> : null}
+													<DropdownMenuLabel className="text-[11px] font-medium text-muted-foreground">
+														{group}
+													</DropdownMenuLabel>
+													{items.map((p) => {
+														const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
+														return (
+															<DropdownMenuItem
+																key={p.id}
+																onSelect={() => selectTemplate(p.id)}
+																className={cn(
+																	"gap-2",
+																	presetId === p.id && "bg-accent"
+																)}
+															>
+																<Icon className="size-4 shrink-0" />
+																<span className="truncate font-medium">
+																	{p.brand}
+																</span>
+																<span className="ml-auto truncate text-[10px] text-muted-foreground">
+																	{p.tagline.split(" ")[0]}
+																</span>
+															</DropdownMenuItem>
+														);
+													})}
+												</React.Fragment>
+											))}
+										</DropdownMenuContent>
+									</DropdownMenu>
+
+									<DockIconButton
+										label="Browse templates"
+										sublabel="Search, filter & preview"
+										active={router.pathname === "/templates"}
+										onClick={() => router.push("/templates")}
+									>
+										<Grid2X2 className="size-4" />
+									</DockIconButton>
 
 									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
 
@@ -236,7 +347,6 @@ export default function NicheBookmarkBar() {
 						) : null}
 					</AnimatePresence>
 
-					{/* Always visible — collapse / expand */}
 					<DockIconButton
 						label={collapsed ? "Expand dock" : "Collapse dock"}
 						sublabel={

@@ -5,10 +5,12 @@ import LandingInspireDir from "./LandingInspireDir";
 import LandingResourceDir from "./LandingResourceDir";
 import LandingIconsDir from "./LandingIconsDir";
 import LandingComponentsDir from "./LandingComponentsDir";
+import LandingCatalogDir from "./LandingCatalogDir";
+import { EXTRA_NICHE_PRESETS } from "@/lib/presets/extra-niches";
 
 /**
  * Map preset.landingTemplate (or preset.id) → home landing component.
- * Add a new file under landings/ and register it here.
+ * Extra niches share LandingCatalogDir with unique heroVariant.
  */
 export const LANDING_MAP = {
 	"ai-tools": LandingAiTools,
@@ -18,6 +20,9 @@ export const LANDING_MAP = {
 	resources: LandingResourceDir,
 	"icons-library": LandingIconsDir,
 	"components-library": LandingComponentsDir,
+	...Object.fromEntries(
+		EXTRA_NICHE_PRESETS.map((p) => [p.id, LandingCatalogDir])
+	),
 };
 
 export function getLandingComponent(preset) {
@@ -33,4 +38,5 @@ export {
 	LandingResourceDir,
 	LandingIconsDir,
 	LandingComponentsDir,
+	LandingCatalogDir,
 };

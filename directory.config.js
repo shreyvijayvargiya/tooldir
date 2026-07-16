@@ -2,14 +2,14 @@
  * Buyer-facing directory config.
  * Lock your niche here (or via NEXT_PUBLIC_DIRECTORY_PRESET in .env.local).
  *
- * Options:
- *   "ai-tools"          → ToolDir (default)
- *   "prompt-library"    → PromptDir
- *   "design-resources"  → DesignDir
- *   "ui-inspiration"    → InspireDir
- *   "resources"         → ResourceDir
- *   "icons-library"     → IconDir (Lucide React icons, frontend-only)
- *   "components-library" → CompDir (React component docs, frontend-only)
+ * Core:
+ *   "ai-tools" | "prompt-library" | "design-resources" | "ui-inspiration" | "resources"
+ * Libraries (demo packs often excluded from zip):
+ *   "icons-library" | "components-library"
+ * Catalog niches:
+ *   "coupons-deals" | "notion-templates" | "job-board" | "newsletter-directory"
+ *   "course-directory" | "podcast-directory" | "chrome-extensions" | "no-code-tools"
+ *   "communities" | "ebook-directory" | "affiliate-offers" | "indie-products"
  *
  * The navbar niche dropdown is DEMO-ONLY and only appears when
  * NEXT_PUBLIC_PRESET_SWITCHER=true (not for client zips).

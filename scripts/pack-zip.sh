@@ -4,23 +4,39 @@
 # Usage:
 #   bash scripts/pack-zip.sh                 # default: ai-tools → dist/tooldir.zip
 #   bash scripts/pack-zip.sh ai-tools
-#   bash scripts/pack-zip.sh prompt-library
-#   bash scripts/pack-zip.sh design-resources
-#   bash scripts/pack-zip.sh ui-inspiration
-#   bash scripts/pack-zip.sh resources
-#   bash scripts/pack-zip.sh all             # all five buyer niche zips
-#
-# Aliases: tooldir | promptdir | designdir | inspiredir | resourcedir
+#   bash scripts/pack-zip.sh coupons-deals
+#   bash scripts/pack-zip.sh all             # all packable niche zips
 #
 # Demo-only (NOT packed into buyer zips):
 #   - Product marketing home (ProductHome.jsx)
-#   - /demo template gallery page
+#   - /demo + /templates gallery pages
 #   - IconDir / CompDir niches + their catalog UIs
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST="$ROOT/dist"
 ARG="${1:-ai-tools}"
+
+# Core niches with bespoke landings
+CORE_PRESETS=(ai-tools prompt-library design-resources ui-inspiration resources)
+
+# Catalog niches share LandingCatalogDir + createNichePreset
+CATALOG_PRESETS=(
+	coupons-deals
+	notion-templates
+	job-board
+	newsletter-directory
+	course-directory
+	podcast-directory
+	chrome-extensions
+	no-code-tools
+	communities
+	ebook-directory
+	affiliate-offers
+	indie-products
+)
+
+ALL_PACKABLE=("${CORE_PRESETS[@]}" "${CATALOG_PRESETS[@]}")
 
 resolve_preset() {
 	case "$1" in
@@ -29,57 +45,110 @@ resolve_preset() {
 		design-resources|designdir|DesignDir) echo "design-resources" ;;
 		ui-inspiration|inspiredir|InspireDir) echo "ui-inspiration" ;;
 		resources|resourcedir|ResourceDir) echo "resources" ;;
+		coupons-deals|dealdir|DealDir) echo "coupons-deals" ;;
+		notion-templates|notiondir|NotionDir) echo "notion-templates" ;;
+		job-board|hiredir|HireDir) echo "job-board" ;;
+		newsletter-directory|inboxdir|InboxDir) echo "newsletter-directory" ;;
+		course-directory|learndir|LearnDir) echo "course-directory" ;;
+		podcast-directory|poddir|PodDir) echo "podcast-directory" ;;
+		chrome-extensions|extdir|ExtDir) echo "chrome-extensions" ;;
+		no-code-tools|nocodedir|NoCodeDir) echo "no-code-tools" ;;
+		communities|communitydir|CommunityDir) echo "communities" ;;
+		ebook-directory|bookdir|BookDir) echo "ebook-directory" ;;
+		affiliate-offers|affdir|AffDir) echo "affiliate-offers" ;;
+		indie-products|launchdir|LaunchDir) echo "indie-products" ;;
 		icons-library|icondir|IconDir|components-library|compdir|CompDir)
 			echo "ERROR: $1 is demo-only and is not sold as a buyer zip." >&2
-			echo "Buyer niches: ai-tools | prompt-library | design-resources | ui-inspiration | resources | all" >&2
+			echo "Buyer niches: ${ALL_PACKABLE[*]} | all" >&2
 			exit 1
 			;;
 		all) echo "all" ;;
 		*)
 			echo "Unknown preset: $1" >&2
-			echo "Use: ai-tools | prompt-library | design-resources | ui-inspiration | resources | all" >&2
+			echo "Use: ${ALL_PACKABLE[*]} | all" >&2
 			exit 1
 			;;
 	esac
+}
+
+is_catalog_preset() {
+	local p="$1"
+	for c in "${CATALOG_PRESETS[@]}"; do
+		[[ "$c" == "$p" ]] && return 0
+	done
+	return 1
 }
 
 preset_meta() {
 	# sets: BRAND ZIP_NAME LANDING_FILE PRESET_FILE IMPORT_NAME
 	case "$1" in
 		ai-tools)
-			BRAND="ToolDir"
-			ZIP_NAME="tooldir.zip"
-			LANDING_FILE="LandingAiTools.jsx"
-			PRESET_FILE="ai-tools.js"
-			IMPORT_NAME="aiToolsPreset"
+			BRAND="ToolDir"; ZIP_NAME="tooldir.zip"
+			LANDING_FILE="LandingAiTools.jsx"; PRESET_FILE="ai-tools.js"; IMPORT_NAME="aiToolsPreset"
 			;;
 		prompt-library)
-			BRAND="PromptDir"
-			ZIP_NAME="promptdir.zip"
-			LANDING_FILE="LandingPromptDir.jsx"
-			PRESET_FILE="prompt-library.js"
-			IMPORT_NAME="promptLibraryPreset"
+			BRAND="PromptDir"; ZIP_NAME="promptdir.zip"
+			LANDING_FILE="LandingPromptDir.jsx"; PRESET_FILE="prompt-library.js"; IMPORT_NAME="promptLibraryPreset"
 			;;
 		design-resources)
-			BRAND="DesignDir"
-			ZIP_NAME="designdir.zip"
-			LANDING_FILE="LandingDesignDir.jsx"
-			PRESET_FILE="design-resources.js"
-			IMPORT_NAME="designResourcesPreset"
+			BRAND="DesignDir"; ZIP_NAME="designdir.zip"
+			LANDING_FILE="LandingDesignDir.jsx"; PRESET_FILE="design-resources.js"; IMPORT_NAME="designResourcesPreset"
 			;;
 		ui-inspiration)
-			BRAND="InspireDir"
-			ZIP_NAME="inspiredir.zip"
-			LANDING_FILE="LandingInspireDir.jsx"
-			PRESET_FILE="ui-inspiration.js"
-			IMPORT_NAME="uiInspirationPreset"
+			BRAND="InspireDir"; ZIP_NAME="inspiredir.zip"
+			LANDING_FILE="LandingInspireDir.jsx"; PRESET_FILE="ui-inspiration.js"; IMPORT_NAME="uiInspirationPreset"
 			;;
 		resources)
-			BRAND="ResourceDir"
-			ZIP_NAME="resourcedir.zip"
-			LANDING_FILE="LandingResourceDir.jsx"
-			PRESET_FILE="resources.js"
-			IMPORT_NAME="resourcesPreset"
+			BRAND="ResourceDir"; ZIP_NAME="resourcedir.zip"
+			LANDING_FILE="LandingResourceDir.jsx"; PRESET_FILE="resources.js"; IMPORT_NAME="resourcesPreset"
+			;;
+		coupons-deals)
+			BRAND="DealDir"; ZIP_NAME="dealdir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="coupons-deals.js"; IMPORT_NAME="couponsDealsPreset"
+			;;
+		notion-templates)
+			BRAND="NotionDir"; ZIP_NAME="notiondir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="notion-templates.js"; IMPORT_NAME="notionTemplatesPreset"
+			;;
+		job-board)
+			BRAND="HireDir"; ZIP_NAME="hiredir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="job-board.js"; IMPORT_NAME="jobBoardPreset"
+			;;
+		newsletter-directory)
+			BRAND="InboxDir"; ZIP_NAME="inboxdir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="newsletter-directory.js"; IMPORT_NAME="newsletterDirectoryPreset"
+			;;
+		course-directory)
+			BRAND="LearnDir"; ZIP_NAME="learndir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="course-directory.js"; IMPORT_NAME="courseDirectoryPreset"
+			;;
+		podcast-directory)
+			BRAND="PodDir"; ZIP_NAME="poddir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="podcast-directory.js"; IMPORT_NAME="podcastDirectoryPreset"
+			;;
+		chrome-extensions)
+			BRAND="ExtDir"; ZIP_NAME="extdir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="chrome-extensions.js"; IMPORT_NAME="chromeExtensionsPreset"
+			;;
+		no-code-tools)
+			BRAND="NoCodeDir"; ZIP_NAME="nocodedir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="no-code-tools.js"; IMPORT_NAME="noCodeToolsPreset"
+			;;
+		communities)
+			BRAND="CommunityDir"; ZIP_NAME="communitydir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="communities.js"; IMPORT_NAME="communitiesPreset"
+			;;
+		ebook-directory)
+			BRAND="BookDir"; ZIP_NAME="bookdir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="ebook-directory.js"; IMPORT_NAME="ebookDirectoryPreset"
+			;;
+		affiliate-offers)
+			BRAND="AffDir"; ZIP_NAME="affdir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="affiliate-offers.js"; IMPORT_NAME="affiliateOffersPreset"
+			;;
+		indie-products)
+			BRAND="LaunchDir"; ZIP_NAME="launchdir.zip"
+			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="indie-products.js"; IMPORT_NAME="indieProductsPreset"
 			;;
 	esac
 }
@@ -90,6 +159,10 @@ pack_one() {
 	local OUT="$DIST/$ZIP_NAME"
 	local STAGE
 	STAGE="$(mktemp -d "${TMPDIR:-/tmp}/tooldir-pack.XXXXXX")"
+	local CATALOG=0
+	if is_catalog_preset "$PRESET"; then
+		CATALOG=1
+	fi
 
 	echo ""
 	echo "════════════════════════════════════════"
@@ -151,16 +224,28 @@ export function getLandingComponent(preset) {
 export default Landing;
 EOF
 
-	# Remove other preset data files (keep shared.js, PresetContext, chosen preset)
-	find "$PRESETS_DIR" -maxdepth 1 -type f \( -name '*.js' -o -name '*.jsx' \) \
-		! -name "$PRESET_FILE" \
-		! -name 'shared.js' \
-		! -name 'PresetContext.jsx' \
-		! -name 'index.js' \
-		-delete
+	# Remove other preset data files
+	# Catalog niches also need createNichePreset.js
+	if [[ "$CATALOG" -eq 1 ]]; then
+		find "$PRESETS_DIR" -maxdepth 1 -type f \( -name '*.js' -o -name '*.jsx' \) \
+			! -name "$PRESET_FILE" \
+			! -name 'createNichePreset.js' \
+			! -name 'shared.js' \
+			! -name 'PresetContext.jsx' \
+			! -name 'index.js' \
+			-delete
+	else
+		find "$PRESETS_DIR" -maxdepth 1 -type f \( -name '*.js' -o -name '*.jsx' \) \
+			! -name "$PRESET_FILE" \
+			! -name 'shared.js' \
+			! -name 'PresetContext.jsx' \
+			! -name 'index.js' \
+			-delete
+	fi
 
 	# Slim lib/presets/index.js
-	cat > "$PRESETS_DIR/index.js" <<EOF
+	if [[ "$CATALOG" -eq 1 ]]; then
+		cat > "$PRESETS_DIR/index.js" <<EOF
 import { ${IMPORT_NAME} } from "./${PRESET_FILE%.js}";
 
 /** Single-niche buyer pack — ${BRAND} */
@@ -169,6 +254,8 @@ export const PRESETS = {
 };
 
 export const PRESET_LIST = [${IMPORT_NAME}];
+
+export const PACKABLE_PRESET_IDS = ["${PRESET}"];
 
 export const DEFAULT_PRESET_ID = "${PRESET}";
 
@@ -193,6 +280,43 @@ export const isPresetSwitcherEnabled = () => false;
 
 export { ${IMPORT_NAME} };
 EOF
+	else
+		cat > "$PRESETS_DIR/index.js" <<EOF
+import { ${IMPORT_NAME} } from "./${PRESET_FILE%.js}";
+
+/** Single-niche buyer pack — ${BRAND} */
+export const PRESETS = {
+	"${PRESET}": ${IMPORT_NAME},
+};
+
+export const PRESET_LIST = [${IMPORT_NAME}];
+
+export const PACKABLE_PRESET_IDS = ["${PRESET}"];
+
+export const DEFAULT_PRESET_ID = "${PRESET}";
+
+export const getPreset = (id) => PRESETS[id] || PRESETS[DEFAULT_PRESET_ID];
+
+export const getConfiguredPresetId = () => {
+	const fromEnv = process.env.NEXT_PUBLIC_DIRECTORY_PRESET;
+	if (fromEnv && PRESETS[fromEnv]) return fromEnv;
+	try {
+		const { DIRECTORY_CONFIG } = require("../../directory.config");
+		if (DIRECTORY_CONFIG?.preset && PRESETS[DIRECTORY_CONFIG.preset]) {
+			return DIRECTORY_CONFIG.preset;
+		}
+	} catch {
+		/* ignore */
+	}
+	return DEFAULT_PRESET_ID;
+};
+
+/** Demo switcher is never enabled in buyer zips */
+export const isPresetSwitcherEnabled = () => false;
+
+export { ${IMPORT_NAME} };
+EOF
+	fi
 
 	# Lock directory.config.js
 	cat > "$STAGE/directory.config.js" <<EOF
@@ -208,7 +332,9 @@ EOF
 	# --- Strip demo-only product / IconDir / CompDir surfaces ---
 	rm -rf "$STAGE/components/demo"
 	rm -f "$STAGE/pages/demo.js"
+	rm -f "$STAGE/pages/templates.js"
 	rm -f "$MARKETING/ProductHome.jsx"
+	rm -f "$MARKETING/TemplatesBrowse.jsx"
 	rm -f "$MARKETING/IconsDirectoryGrid.jsx"
 	rm -f "$MARKETING/ComponentsLibraryExplorer.jsx"
 	rm -rf "$MARKETING/component-library"
@@ -267,7 +393,6 @@ EOF
 
 	# Buyer .env.example: lock niche, no demo switcher
 	if [[ -f "$STAGE/.env.example" ]]; then
-		# Drop old preset comments / switcher lines, append locked niche
 		grep -v 'NEXT_PUBLIC_DIRECTORY_PRESET' "$STAGE/.env.example" \
 			| grep -v 'NEXT_PUBLIC_PRESET_SWITCHER' \
 			| grep -v 'Directory niche' \
@@ -310,7 +435,9 @@ EOF
 	# Demo-only product / IconDir / CompDir must not ship
 	local FORBIDDEN=(
 		'pages/demo.js'
+		'pages/templates.js'
 		'ProductHome.jsx'
+		'TemplatesBrowse.jsx'
 		'IconsDirectoryGrid.jsx'
 		'ComponentsLibraryExplorer.jsx'
 		'component-library/'
@@ -349,6 +476,13 @@ EOF
 		echo "ERROR: other landing pages found in zip:"
 		echo "$OTHER_LANDINGS"
 		fail=1
+	fi
+
+	if [[ "$CATALOG" -eq 1 ]]; then
+		if ! unzip -l "$OUT" | awk '{print $4}' | grep -qx "lib/presets/createNichePreset.js"; then
+			echo "ERROR: missing createNichePreset.js for catalog niche"
+			fail=1
+		fi
 	fi
 
 	# Buyer index must not import ProductHome
@@ -397,13 +531,13 @@ EOF
 	echo "Done: $OUT ($SIZE, $COUNT files) — $BRAND only"
 	echo "  Landing: $LANDING_FILE"
 	echo "  Preset:  $PRESET_FILE"
-	echo "  Excluded: ProductHome, /demo, IconDir, CompDir, demo dock"
+	echo "  Excluded: ProductHome, /demo, /templates, IconDir, CompDir, demo dock"
 }
 
 PRESET="$(resolve_preset "$ARG")"
 
 if [[ "$PRESET" == "all" ]]; then
-	for p in ai-tools prompt-library design-resources ui-inspiration resources; do
+	for p in "${ALL_PACKABLE[@]}"; do
 		pack_one "$p"
 	done
 	echo ""
