@@ -8,6 +8,7 @@ import {
 	LayoutTemplate,
 	Package,
 	Shapes,
+	Blocks,
 	Bookmark,
 	Paintbrush,
 	Lock,
@@ -37,6 +38,7 @@ const PRESET_ICONS = {
 	"ui-inspiration": LayoutTemplate,
 	resources: Package,
 	"icons-library": Shapes,
+	"components-library": Blocks,
 };
 
 const DockIconButton = ({

@@ -4,6 +4,7 @@ import LandingDesignDir from "./LandingDesignDir";
 import LandingInspireDir from "./LandingInspireDir";
 import LandingResourceDir from "./LandingResourceDir";
 import LandingIconsDir from "./LandingIconsDir";
+import LandingComponentsDir from "./LandingComponentsDir";
 
 /**
  * Map preset.landingTemplate (or preset.id) → home landing component.
@@ -16,6 +17,7 @@ export const LANDING_MAP = {
 	"ui-inspiration": LandingInspireDir,
 	resources: LandingResourceDir,
 	"icons-library": LandingIconsDir,
+	"components-library": LandingComponentsDir,
 };
 
 export function getLandingComponent(preset) {
@@ -30,4 +32,5 @@ export {
 	LandingInspireDir,
 	LandingResourceDir,
 	LandingIconsDir,
+	LandingComponentsDir,
 };
