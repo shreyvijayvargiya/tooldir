@@ -8,6 +8,7 @@
  *   "design-resources"  → DesignDir
  *   "ui-inspiration"    → InspireDir
  *   "resources"         → ResourceDir
+ *   "icons-library"     → IconDir (Lucide React icons, frontend-only)
  *
  * The navbar niche dropdown is DEMO-ONLY and only appears when
  * NEXT_PUBLIC_PRESET_SWITCHER=true (not for client zips).

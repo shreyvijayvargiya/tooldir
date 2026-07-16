@@ -170,6 +170,27 @@ export const LANDING_HERO_GRADIENTS = {
 			swirl: 35,
 		},
 	},
+	"icons-library": {
+		light: {
+			...baseGradient,
+			color1: "#faf5ff",
+			color2: "#ede9fe",
+			color3: "#8b5cf6",
+			rotation: -20,
+			speed: 13,
+			swirl: 55,
+			proportion: 52,
+		},
+		dark: {
+			...baseGradient,
+			color1: "#0c0618",
+			color2: "#2e1065",
+			color3: "#a78bfa",
+			rotation: -20,
+			speed: 13,
+			swirl: 55,
+		},
+	},
 };
 
 export const getLandingHeroGradients = (presetId) =>

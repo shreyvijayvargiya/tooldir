@@ -7,6 +7,7 @@ import {
 	Palette,
 	LayoutTemplate,
 	Package,
+	Shapes,
 	Bookmark,
 	Paintbrush,
 	Lock,
@@ -35,6 +36,7 @@ const PRESET_ICONS = {
 	"design-resources": Palette,
 	"ui-inspiration": LayoutTemplate,
 	resources: Package,
+	"icons-library": Shapes,
 };
 
 const DockIconButton = ({
