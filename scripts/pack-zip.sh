@@ -205,13 +205,17 @@ export const DIRECTORY_CONFIG = {
 };
 EOF
 
-	# --- Strip demo-only product / IconDir / CompDir surfaces ---
+	# --- Strip demo-only product / IconDir / CompDir / generator surfaces ---
 	rm -rf "$STAGE/components/demo"
 	rm -f "$STAGE/pages/demo.js"
+	rm -f "$STAGE/pages/generate.js"
 	rm -f "$MARKETING/ProductHome.jsx"
 	rm -f "$MARKETING/IconsDirectoryGrid.jsx"
 	rm -f "$MARKETING/ComponentsLibraryExplorer.jsx"
 	rm -rf "$MARKETING/component-library"
+	rm -rf "$MARKETING/generator"
+	rm -rf "$STAGE/lib/generator"
+	rm -rf "$STAGE/pages/api/generator"
 	rm -f "$STAGE/lib/data/icons-catalog.js"
 	rm -f "$STAGE/lib/data/components-catalog.js"
 	rm -f "$PRESETS_DIR/icons-library.js"
@@ -310,10 +314,14 @@ EOF
 	# Demo-only product / IconDir / CompDir must not ship
 	local FORBIDDEN=(
 		'pages/demo.js'
+		'pages/generate.js'
 		'ProductHome.jsx'
 		'IconsDirectoryGrid.jsx'
 		'ComponentsLibraryExplorer.jsx'
 		'component-library/'
+		'marketing/generator/'
+		'lib/generator/'
+		'pages/api/generator/'
 		'icons-catalog.js'
 		'components-catalog.js'
 		'icons-library.js'
@@ -397,7 +405,7 @@ EOF
 	echo "Done: $OUT ($SIZE, $COUNT files) — $BRAND only"
 	echo "  Landing: $LANDING_FILE"
 	echo "  Preset:  $PRESET_FILE"
-	echo "  Excluded: ProductHome, /demo, IconDir, CompDir, demo dock"
+	echo "  Excluded: ProductHome, /demo, /generate, IconDir, CompDir, demo dock"
 }
 
 PRESET="$(resolve_preset "$ARG")"

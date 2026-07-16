@@ -84,6 +84,11 @@ const FEATURES = [
 		title: "Theme customizer",
 		body: "shadcn/ui tokens, accents, light/dark — make it yours without rebuilding UI.",
 	},
+	{
+		icon: Sparkles,
+		title: "AI SiteSpec generator",
+		body: "Describe a niche, preview a live plan, then PRO-download starter config, SEO, and marketing docs.",
+	},
 ];
 
 const TECH_STACK = [
@@ -159,10 +164,13 @@ export default function ProductHome() {
 							</a>
 						</Button>
 						<Button asChild variant="outline" size="lg">
-							<Link href="/demo">
-								Browse templates
+							<Link href="/generate">
+								AI generate
 								<ArrowRight className="size-4" />
 							</Link>
+						</Button>
+						<Button asChild variant="ghost" size="lg">
+							<Link href="/demo">Browse templates</Link>
 						</Button>
 					</motion.div>
 					<motion.p

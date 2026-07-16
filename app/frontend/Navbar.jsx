@@ -135,6 +135,7 @@ const Navbar = () => {
 	const navLinks = isPresetSwitcherEnabled()
 		? [
 				{ href: "/", label: "Home" },
+				{ href: "/generate", label: "Generate" },
 				{ href: "/demo", label: "Templates" },
 				{ href: "/blog", label: "Blog" },
 				{ href: "/#buy", label: "Buy" },
