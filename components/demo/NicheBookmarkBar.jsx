@@ -9,7 +9,7 @@ import {
 	Package,
 	Shapes,
 	Blocks,
-	Bookmark,
+	Home,
 	Paintbrush,
 	Lock,
 	ChevronsLeft,
@@ -179,16 +179,33 @@ export default function NicheBookmarkBar() {
 								className="flex items-center gap-1 overflow-hidden"
 							>
 								<div className="flex items-center gap-0.5">
+									<DockIconButton
+										label="Product home"
+										sublabel="What ToolDir is & pricing"
+										active={router.pathname === "/"}
+										onClick={() => router.push("/")}
+									>
+										<Home className="size-4" />
+									</DockIconButton>
+
+									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
+
 									{PRESET_LIST.map((p) => {
 										const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
-										const active = presetId === p.id;
+										const active =
+											router.pathname === "/demo" && presetId === p.id;
 										return (
 											<DockIconButton
 												key={p.id}
 												label={p.brand}
 												sublabel={p.tagline}
 												active={active}
-												onClick={() => setPresetId(p.id)}
+												onClick={() => {
+													setPresetId(p.id);
+													if (router.pathname !== "/demo") {
+														router.push("/demo");
+													}
+												}}
 											>
 												<Icon className="size-4" />
 											</DockIconButton>

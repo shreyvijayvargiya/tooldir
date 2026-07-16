@@ -4,14 +4,42 @@ import Navbar from "../app/frontend/Navbar";
 import Footer from "../app/frontend/Footer";
 import { usePreset } from "@/lib/presets/PresetContext";
 import { getLandingComponent } from "../app/frontend/landings";
+import { isPresetSwitcherEnabled } from "@/lib/presets";
+import ProductHome from "../app/frontend/marketing/ProductHome";
 
 /**
- * Home route — picks a niche landing from the active preset.
- * Navbar niche dropdown (demo) changes preset → this re-renders a different landing file.
+ * Home:
+ * - Demo site (PRESET_SWITCHER=true) → product marketing page
+ * - Buyer / locked niche → niche landing (unchanged)
+ * Niche previews live at /demo when the switcher is on.
  */
 const HomePage = () => {
 	const { preset } = usePreset();
+	const showProductHome = isPresetSwitcherEnabled();
 	const Landing = getLandingComponent(preset);
+
+	if (showProductHome) {
+		return (
+			<>
+				<Head>
+					<title>
+						ToolDir — Full-stack Directory Website Boilerplate
+					</title>
+					<meta
+						name="description"
+						content="Next.js + Supabase + Stripe boilerplate to launch niche directory and animated component sites. Preview templates, then buy on Gumroad."
+					/>
+				</Head>
+				<div className="min-h-screen flex flex-col">
+					<Navbar />
+					<main className="flex-1">
+						<ProductHome />
+					</main>
+					<Footer />
+				</div>
+			</>
+		);
+	}
 
 	return (
 		<>

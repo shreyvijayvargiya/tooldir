@@ -132,16 +132,27 @@ const Navbar = () => {
 		}
 	};
 
-	const navLinks = [
-		{ href: "/", label: "Home" },
-		{ href: "/blog", label: "Blog" },
-		{ href: "/pricing", label: "Pricing" },
-		{ href: "/contact", label: "Contact" },
-	];
+	const navLinks = isPresetSwitcherEnabled()
+		? [
+				{ href: "/", label: "Home" },
+				{ href: "/demo", label: "Templates" },
+				{ href: "/blog", label: "Blog" },
+				{ href: "/#buy", label: "Buy" },
+				{ href: "/#contact", label: "Contact" },
+			]
+		: [
+				{ href: "/", label: "Home" },
+				{ href: "/blog", label: "Blog" },
+				{ href: "/pricing", label: "Pricing" },
+				{ href: "/contact", label: "Contact" },
+			];
 
 	const isActive = (href) => {
 		if (href === "/") {
 			return router.pathname === "/";
+		}
+		if (href.startsWith("/#")) {
+			return router.pathname === "/" && router.asPath.includes(href.slice(1));
 		}
 		return router.pathname.startsWith(href);
 	};
