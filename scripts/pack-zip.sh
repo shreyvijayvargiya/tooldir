@@ -8,9 +8,14 @@
 #   bash scripts/pack-zip.sh design-resources
 #   bash scripts/pack-zip.sh ui-inspiration
 #   bash scripts/pack-zip.sh resources
-#   bash scripts/pack-zip.sh all             # all five zips
+#   bash scripts/pack-zip.sh all             # all five buyer niche zips
 #
 # Aliases: tooldir | promptdir | designdir | inspiredir | resourcedir
+#
+# Demo-only (NOT packed into buyer zips):
+#   - Product marketing home (ProductHome.jsx)
+#   - /demo template gallery page
+#   - IconDir / CompDir niches + their catalog UIs
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -24,6 +29,11 @@ resolve_preset() {
 		design-resources|designdir|DesignDir) echo "design-resources" ;;
 		ui-inspiration|inspiredir|InspireDir) echo "ui-inspiration" ;;
 		resources|resourcedir|ResourceDir) echo "resources" ;;
+		icons-library|icondir|IconDir|components-library|compdir|CompDir)
+			echo "ERROR: $1 is demo-only and is not sold as a buyer zip." >&2
+			echo "Buyer niches: ai-tools | prompt-library | design-resources | ui-inspiration | resources | all" >&2
+			exit 1
+			;;
 		all) echo "all" ;;
 		*)
 			echo "Unknown preset: $1" >&2
@@ -34,7 +44,7 @@ resolve_preset() {
 }
 
 preset_meta() {
-	# sets: BRAND ZIP_NAME LANDING_FILE PRESET_FILE
+	# sets: BRAND ZIP_NAME LANDING_FILE PRESET_FILE IMPORT_NAME
 	case "$1" in
 		ai-tools)
 			BRAND="ToolDir"
@@ -120,6 +130,7 @@ pack_one() {
 	# --- Niche lock: only one landing + one preset ---
 	local LANDINGS="$STAGE/app/frontend/landings"
 	local PRESETS_DIR="$STAGE/lib/presets"
+	local MARKETING="$STAGE/app/frontend/marketing"
 
 	# Remove other landing components (keep shared.js + chosen landing)
 	find "$LANDINGS" -maxdepth 1 -type f -name 'Landing*.jsx' ! -name "$LANDING_FILE" -delete
@@ -194,8 +205,54 @@ export const DIRECTORY_CONFIG = {
 };
 EOF
 
-	# Strip demo niche UI from the zip
+	# --- Strip demo-only product / IconDir / CompDir surfaces ---
 	rm -rf "$STAGE/components/demo"
+	rm -f "$STAGE/pages/demo.js"
+	rm -f "$MARKETING/ProductHome.jsx"
+	rm -f "$MARKETING/IconsDirectoryGrid.jsx"
+	rm -f "$MARKETING/ComponentsLibraryExplorer.jsx"
+	rm -rf "$MARKETING/component-library"
+	rm -f "$STAGE/lib/data/icons-catalog.js"
+	rm -f "$STAGE/lib/data/components-catalog.js"
+	rm -f "$PRESETS_DIR/icons-library.js"
+	rm -f "$PRESETS_DIR/components-library.js"
+	rm -f "$LANDINGS/LandingIconsDir.jsx"
+	rm -f "$LANDINGS/LandingComponentsDir.jsx"
+
+	# Buyer home is always the locked niche landing (no ProductHome / demo gate)
+	cat > "$STAGE/pages/index.js" <<EOF
+import React from "react";
+import Head from "next/head";
+import Navbar from "../app/frontend/Navbar";
+import Footer from "../app/frontend/Footer";
+import { usePreset } from "@/lib/presets/PresetContext";
+import { getLandingComponent } from "../app/frontend/landings";
+
+/** ${BRAND} home — single niche landing (buyer pack) */
+const HomePage = () => {
+	const { preset } = usePreset();
+	const Landing = getLandingComponent(preset);
+
+	return (
+		<>
+			<Head>
+				<title>{preset.seoTitle}</title>
+				<meta name="description" content={preset.seoDescription} />
+			</Head>
+
+			<div className="min-h-screen flex flex-col">
+				<Navbar />
+				<main className="flex-1">
+					<Landing key={preset.id} />
+				</main>
+				<Footer />
+			</div>
+		</>
+	);
+};
+
+export default HomePage;
+EOF
 
 	# Ensure _app.js does not reference NicheBookmarkBar
 	if [[ -f "$STAGE/pages/_app.js" ]]; then
@@ -228,9 +285,6 @@ NEXT_PUBLIC_DIRECTORY_PRESET=${PRESET}
 EOF
 	fi
 
-	# Trim LANDING_HERO_GRADIENTS in shared.js is optional — keep all for simplicity
-	# (gradients for unused niches are tiny)
-
 	# Zip staging tree
 	(
 		cd "$STAGE"
@@ -253,6 +307,27 @@ EOF
 		fail=1
 	fi
 
+	# Demo-only product / IconDir / CompDir must not ship
+	local FORBIDDEN=(
+		'pages/demo.js'
+		'ProductHome.jsx'
+		'IconsDirectoryGrid.jsx'
+		'ComponentsLibraryExplorer.jsx'
+		'component-library/'
+		'icons-catalog.js'
+		'components-catalog.js'
+		'icons-library.js'
+		'components-library.js'
+		'LandingIconsDir.jsx'
+		'LandingComponentsDir.jsx'
+	)
+	for pattern in "${FORBIDDEN[@]}"; do
+		if unzip -l "$OUT" | grep -q "$pattern"; then
+			echo "ERROR: demo-only file leaked into buyer zip: $pattern"
+			fail=1
+		fi
+	done
+
 	if unzip -l "$OUT" | grep -q 'cancel-subscription'; then
 		echo "ERROR: cancel-subscription should not be in buyer zip"
 		fail=1
@@ -273,6 +348,12 @@ EOF
 	if [[ -n "$OTHER_LANDINGS" ]]; then
 		echo "ERROR: other landing pages found in zip:"
 		echo "$OTHER_LANDINGS"
+		fail=1
+	fi
+
+	# Buyer index must not import ProductHome
+	if unzip -p "$OUT" pages/index.js 2>/dev/null | grep -q 'ProductHome'; then
+		echo "ERROR: pages/index.js still references ProductHome"
 		fail=1
 	fi
 
@@ -316,7 +397,7 @@ EOF
 	echo "Done: $OUT ($SIZE, $COUNT files) — $BRAND only"
 	echo "  Landing: $LANDING_FILE"
 	echo "  Preset:  $PRESET_FILE"
-	echo "  Demo switcher: excluded"
+	echo "  Excluded: ProductHome, /demo, IconDir, CompDir, demo dock"
 }
 
 PRESET="$(resolve_preset "$ARG")"
