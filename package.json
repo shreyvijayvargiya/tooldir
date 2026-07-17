@@ -38,6 +38,18 @@
 		"zip:designdir": "bash scripts/pack-zip.sh design-resources",
 		"zip:inspiredir": "bash scripts/pack-zip.sh ui-inspiration",
 		"zip:resourcedir": "bash scripts/pack-zip.sh resources",
+		"zip:dealdir": "bash scripts/pack-zip.sh coupons-deals",
+		"zip:notiondir": "bash scripts/pack-zip.sh notion-templates",
+		"zip:hiredir": "bash scripts/pack-zip.sh job-board",
+		"zip:inboxdir": "bash scripts/pack-zip.sh newsletter-directory",
+		"zip:learndir": "bash scripts/pack-zip.sh course-directory",
+		"zip:poddir": "bash scripts/pack-zip.sh podcast-directory",
+		"zip:extdir": "bash scripts/pack-zip.sh chrome-extensions",
+		"zip:nocodedir": "bash scripts/pack-zip.sh no-code-tools",
+		"zip:communitydir": "bash scripts/pack-zip.sh communities",
+		"zip:bookdir": "bash scripts/pack-zip.sh ebook-directory",
+		"zip:affdir": "bash scripts/pack-zip.sh affiliate-offers",
+		"zip:launchdir": "bash scripts/pack-zip.sh indie-products",
 		"zip:all": "bash scripts/pack-zip.sh all"
 	},
 	"dependencies": {
