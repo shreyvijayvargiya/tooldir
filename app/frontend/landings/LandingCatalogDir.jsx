@@ -422,9 +422,7 @@ export default function LandingCatalogDir() {
 	const { landing } = preset;
 	const { data: tools = [], isLoading } = useDirectoryTools();
 	const filters = useDirectoryListFilters(tools);
-	const useCards = ["notion-templates", "ebook-directory", "course-directory"].includes(
-		preset.id
-	);
+	const useCards = ["notion-templates", "course-directory"].includes(preset.id);
 
 	return (
 		<>

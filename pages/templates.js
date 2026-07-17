@@ -1,12 +1,13 @@
 import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import Navbar from "../app/frontend/Navbar";
 import Footer from "../app/frontend/Footer";
 import TemplatesBrowse from "../app/frontend/marketing/TemplatesBrowse";
 import { isPresetSwitcherEnabled } from "@/lib/presets";
 
 /**
- * Demo-only template browser: search, filter chips, live preview, Gumroad CTA.
+ * Demo-only template browser: searchable grid → live preview on /demo.
  */
 const TemplatesPage = () => {
 	const router = useRouter();
@@ -26,12 +27,13 @@ const TemplatesPage = () => {
 				<title>Browse directory templates — ToolDir</title>
 				<meta
 					name="description"
-					content="Search and preview every niche landing template included with ToolDir — deals, Notion, jobs, courses, and more."
+					content="Browse every niche landing template included with ToolDir — deals, Notion, jobs, courses, ebooks, and more."
 				/>
 				<meta name="robots" content="noindex, follow" />
 			</Head>
 
-			<div className="min-h-screen flex flex-col">
+			<div className="flex min-h-screen flex-col">
+				<Navbar />
 				<main className="flex-1">
 					<TemplatesBrowse />
 				</main>

@@ -6,11 +6,13 @@ import LandingResourceDir from "./LandingResourceDir";
 import LandingIconsDir from "./LandingIconsDir";
 import LandingComponentsDir from "./LandingComponentsDir";
 import LandingCatalogDir from "./LandingCatalogDir";
+import LandingBookDir from "./LandingBookDir";
 import { EXTRA_NICHE_PRESETS } from "@/lib/presets/extra-niches";
 
 /**
  * Map preset.landingTemplate (or preset.id) → home landing component.
- * Extra niches share LandingCatalogDir with unique heroVariant.
+ * Extra niches share LandingCatalogDir with unique heroVariant
+ * (ebook-directory uses dedicated LandingBookDir).
  */
 export const LANDING_MAP = {
 	"ai-tools": LandingAiTools,
@@ -20,8 +22,12 @@ export const LANDING_MAP = {
 	resources: LandingResourceDir,
 	"icons-library": LandingIconsDir,
 	"components-library": LandingComponentsDir,
+	"ebook-directory": LandingBookDir,
 	...Object.fromEntries(
-		EXTRA_NICHE_PRESETS.map((p) => [p.id, LandingCatalogDir])
+		EXTRA_NICHE_PRESETS.filter((p) => p.id !== "ebook-directory").map((p) => [
+			p.id,
+			LandingCatalogDir,
+		])
 	),
 };
 
@@ -39,4 +45,5 @@ export {
 	LandingIconsDir,
 	LandingComponentsDir,
 	LandingCatalogDir,
+	LandingBookDir,
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -18,12 +18,15 @@ import {
 	FolderOpen,
 	TrendingUp,
 	Share2,
+	BookOpen,
 } from "lucide-react";
 import Navbar from "../../app/frontend/Navbar";
 import Footer from "../../app/frontend/Footer";
 import ToolsDirectoryTable from "../../app/frontend/marketing/ToolsDirectoryTable";
 import SubmitToolCard from "../../app/frontend/marketing/SubmitToolCard";
+import EbookReader from "../../app/frontend/marketing/EbookReader";
 import { getToolBySlug } from "@/lib/api/directoryTools";
+import { usePresetOptional } from "@/lib/presets/PresetContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,6 +101,9 @@ const ToolDetailSkeleton = () => (
 
 const ToolDetailPage = () => {
 	const { slug } = useRouter().query;
+	const presetCtx = usePresetOptional();
+	const isEbook = presetCtx?.presetId === "ebook-directory";
+	const [readerOpen, setReaderOpen] = useState(false);
 
 	const { data: tool, isLoading } = useQuery({
 		queryKey: ["directoryTool", slug],
@@ -262,16 +268,27 @@ const ToolDetailPage = () => {
 
 								{/* Desktop actions */}
 								<div className="flex flex-row lg:flex-col gap-2 w-full lg:w-auto shrink-0">
-									<Button asChild size="lg" className="flex-1 lg:flex-none lg:min-w-[200px]">
-										<a
-											href={tool.website}
-											target="_blank"
-											rel="noopener noreferrer"
+									{isEbook ? (
+										<Button
+											size="lg"
+											className="flex-1 lg:flex-none lg:min-w-[200px]"
+											onClick={() => setReaderOpen(true)}
 										>
-											Visit Website
-											<ExternalLink className="w-4 h-4" />
-										</a>
-									</Button>
+											<BookOpen className="w-4 h-4" />
+											Read online
+										</Button>
+									) : (
+										<Button asChild size="lg" className="flex-1 lg:flex-none lg:min-w-[200px]">
+											<a
+												href={tool.website}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												Visit Website
+												<ExternalLink className="w-4 h-4" />
+											</a>
+										</Button>
+									)}
 									<Button
 										variant="outline"
 										size="lg"
@@ -282,7 +299,9 @@ const ToolDetailPage = () => {
 										Share
 									</Button>
 									<Button asChild variant="ghost" size="sm" className="hidden lg:flex">
-										<Link href="/submit">Submit a similar tool</Link>
+										<Link href="/submit">
+											{isEbook ? "Submit a similar ebook" : "Submit a similar tool"}
+										</Link>
 									</Button>
 								</div>
 							</motion.div>
@@ -526,6 +545,14 @@ const ToolDetailPage = () => {
 
 				<Footer />
 			</div>
+
+			{isEbook ? (
+				<EbookReader
+					book={tool}
+					open={readerOpen}
+					onOpenChange={setReaderOpen}
+				/>
+			) : null}
 		</>
 	);
 };

@@ -47,13 +47,13 @@ const DemoPage = () => {
 					<div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
 						<div className="flex min-w-0 items-center gap-3">
 							<Button asChild variant="ghost" size="sm" className="shrink-0">
-								<Link href="/">
+								<Link href="/templates">
 									<ArrowLeft className="size-4" />
-									Product
+									All templates
 								</Link>
 							</Button>
 							<Badge variant="secondary" className="hidden sm:inline-flex">
-								Template preview
+								Live preview
 							</Badge>
 							<p className="truncate text-sm text-muted-foreground">
 								<span className="font-medium text-foreground">

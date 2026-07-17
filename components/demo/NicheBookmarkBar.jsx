@@ -187,7 +187,7 @@ export default function NicheBookmarkBar() {
 
 	const selectTemplate = (id) => {
 		setPresetId(id);
-		if (router.pathname !== "/demo" && router.pathname !== "/templates") {
+		if (router.pathname !== "/demo") {
 			router.push("/demo");
 		}
 	};
@@ -208,6 +208,9 @@ export default function NicheBookmarkBar() {
 	if (!switcherEnabled) return null;
 	if (router.pathname.startsWith("/admin")) return null;
 	if (!ready) return null;
+
+	const isLanding = router.pathname === "/";
+	const showTemplateDropdown = !isLanding;
 
 	return (
 		<TooltipProvider delayDuration={80}>
@@ -237,7 +240,7 @@ export default function NicheBookmarkBar() {
 									<DockIconButton
 										label="Product home"
 										sublabel="What ToolDir is & pricing"
-										active={router.pathname === "/"}
+										active={isLanding}
 										onClick={() => router.push("/")}
 									>
 										<Home className="size-4" />
@@ -245,74 +248,76 @@ export default function NicheBookmarkBar() {
 
 									<span className="mx-0.5 h-6 w-px bg-border shrink-0" aria-hidden />
 
-									<DropdownMenu>
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<DropdownMenuTrigger asChild>
-													<button
-														type="button"
-														aria-label="Templates"
-														className={cn(
-															"relative flex h-10 items-center gap-1.5 rounded-xl px-2.5 transition-colors",
-															"hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-															onDemo &&
-																"bg-primary text-primary-foreground hover:bg-primary/90"
-														)}
-													>
-														<ActiveIcon className="size-4 shrink-0" />
-														<span className="hidden max-w-[88px] truncate text-xs font-medium sm:inline">
-															{activePreset?.brand || "Templates"}
-														</span>
-														<ChevronUp className="size-3.5 opacity-70" />
-													</button>
-												</DropdownMenuTrigger>
-											</TooltipTrigger>
-											<TooltipContent side="top" sideOffset={10}>
-												<p className="text-sm font-semibold">Templates</p>
-												<p className="text-[11px] text-muted-foreground">
-													{PRESET_LIST.length} niche landings
-												</p>
-											</TooltipContent>
-										</Tooltip>
-										<DropdownMenuContent
-											side="top"
-											align="center"
-											sideOffset={12}
-											className="max-h-[min(70vh,420px)] w-64 overflow-y-auto"
-										>
-											<DropdownMenuLabel>All templates</DropdownMenuLabel>
-											<DropdownMenuSeparator />
-											{grouped.map(([group, items], gi) => (
-												<React.Fragment key={group}>
-													{gi > 0 ? <DropdownMenuSeparator /> : null}
-													<DropdownMenuLabel className="text-[11px] font-medium text-muted-foreground">
-														{group}
-													</DropdownMenuLabel>
-													{items.map((p) => {
-														const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
-														return (
-															<DropdownMenuItem
-																key={p.id}
-																onSelect={() => selectTemplate(p.id)}
-																className={cn(
-																	"gap-2",
-																	presetId === p.id && "bg-accent"
-																)}
-															>
-																<Icon className="size-4 shrink-0" />
-																<span className="truncate font-medium">
-																	{p.brand}
-																</span>
-																<span className="ml-auto truncate text-[10px] text-muted-foreground">
-																	{p.tagline.split(" ")[0]}
-																</span>
-															</DropdownMenuItem>
-														);
-													})}
-												</React.Fragment>
-											))}
-										</DropdownMenuContent>
-									</DropdownMenu>
+									{showTemplateDropdown ? (
+										<DropdownMenu>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<DropdownMenuTrigger asChild>
+														<button
+															type="button"
+															aria-label="Templates"
+															className={cn(
+																"relative flex h-10 items-center gap-1.5 rounded-xl px-2.5 transition-colors",
+																"hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+																onDemo &&
+																	"bg-primary text-primary-foreground hover:bg-primary/90"
+															)}
+														>
+															<ActiveIcon className="size-4 shrink-0" />
+															<span className="hidden max-w-[88px] truncate text-xs font-medium sm:inline">
+																{activePreset?.brand || "Templates"}
+															</span>
+															<ChevronUp className="size-3.5 opacity-70" />
+														</button>
+													</DropdownMenuTrigger>
+												</TooltipTrigger>
+												<TooltipContent side="top" sideOffset={10}>
+													<p className="text-sm font-semibold">Templates</p>
+													<p className="text-[11px] text-muted-foreground">
+														{PRESET_LIST.length} niche landings
+													</p>
+												</TooltipContent>
+											</Tooltip>
+											<DropdownMenuContent
+												side="top"
+												align="center"
+												sideOffset={12}
+												className="max-h-[min(70vh,420px)] w-64 overflow-y-auto"
+											>
+												<DropdownMenuLabel>All templates</DropdownMenuLabel>
+												<DropdownMenuSeparator />
+												{grouped.map(([group, items], gi) => (
+													<React.Fragment key={group}>
+														{gi > 0 ? <DropdownMenuSeparator /> : null}
+														<DropdownMenuLabel className="text-[11px] font-medium text-muted-foreground">
+															{group}
+														</DropdownMenuLabel>
+														{items.map((p) => {
+															const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
+															return (
+																<DropdownMenuItem
+																	key={p.id}
+																	onSelect={() => selectTemplate(p.id)}
+																	className={cn(
+																		"gap-2",
+																		presetId === p.id && "bg-accent"
+																	)}
+																>
+																	<Icon className="size-4 shrink-0" />
+																	<span className="truncate font-medium">
+																		{p.brand}
+																	</span>
+																	<span className="ml-auto truncate text-[10px] text-muted-foreground">
+																		{p.tagline.split(" ")[0]}
+																	</span>
+																</DropdownMenuItem>
+															);
+														})}
+													</React.Fragment>
+												))}
+											</DropdownMenuContent>
+										</DropdownMenu>
+									) : null}
 
 									<DockIconButton
 										label="Browse templates"

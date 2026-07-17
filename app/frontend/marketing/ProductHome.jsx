@@ -3,37 +3,21 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
 	ArrowRight,
-	Blocks,
 	Check,
 	Code2,
 	Database,
 	ExternalLink,
 	LayoutTemplate,
 	Mail,
-	Package,
-	Palette,
-	Shapes,
-	Sparkles,
-	Terminal,
-	Twitter,
-	Zap,
-	Shield,
 	Search,
 	Calendar,
 	FileText,
 	Settings,
-	Ticket,
-	Briefcase,
-	GraduationCap,
-	Mic,
-	Puzzle,
-	Users,
-	BookOpen,
-	Percent,
-	Rocket,
+	Zap,
+	Shield,
+	Twitter,
+	Sparkles,
 } from "lucide-react";
-import { PRESET_LIST } from "@/lib/presets";
-import { usePreset } from "@/lib/presets/PresetContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,38 +36,16 @@ export const GUMROAD_TEMPLATE_URL =
 export const CONTACT_EMAIL = "shreyvijayvargiya26@gmail.com";
 export const CONTACT_X_URL = "https://x.com/shreyvijayvargiya26";
 
-const PRESET_ICONS = {
-	"ai-tools": Sparkles,
-	"prompt-library": Terminal,
-	"design-resources": Palette,
-	"ui-inspiration": LayoutTemplate,
-	resources: Package,
-	"icons-library": Shapes,
-	"components-library": Blocks,
-	"coupons-deals": Ticket,
-	"notion-templates": FileText,
-	"job-board": Briefcase,
-	"newsletter-directory": Mail,
-	"course-directory": GraduationCap,
-	"podcast-directory": Mic,
-	"chrome-extensions": Puzzle,
-	"no-code-tools": Blocks,
-	communities: Users,
-	"ebook-directory": BookOpen,
-	"affiliate-offers": Percent,
-	"indie-products": Rocket,
-};
-
 const FEATURES = [
 	{
 		icon: LayoutTemplate,
 		title: "19 niche landing templates",
-		body: "AI tools, Notion, deals, jobs, courses, podcasts, extensions, and more — each with a distinct hero. Switch and ship.",
+		body: "AI tools, Notion, deals, jobs, courses, podcasts, ebooks, and more — each with a distinct hero. Lock one and ship.",
 	},
 	{
 		icon: Search,
 		title: "Searchable directory",
-		body: "Filters, categories, tool detail pages, and submit flows ready for your niche.",
+		body: "Filters, categories, detail pages, and submit flows ready for your niche.",
 	},
 	{
 		icon: Calendar,
@@ -109,7 +71,7 @@ const FEATURES = [
 
 const TECH_STACK = [
 	{ name: "Next.js", detail: "Pages Router" },
-	{ name: "React", detail: "19" },
+	{ name: "React", detail: "18" },
 	{ name: "Supabase", detail: "Auth · DB · Storage" },
 	{ name: "Stripe", detail: "Checkout + webhooks" },
 	{ name: "Tailwind", detail: "v3" },
@@ -128,20 +90,13 @@ const INCLUDED = [
 ];
 
 /**
- * Demo product homepage — explains ToolDir as a boilerplate (not a live directory).
- * Niche templates remain unchanged at /demo.
+ * Demo product homepage — ToolDir boilerplate story only.
+ * Niche templates live on /templates; live previews on /demo.
  */
 export default function ProductHome() {
-	const { setPresetId, switcherEnabled } = usePreset();
-
-	const openTemplate = (presetId) => {
-		if (switcherEnabled) setPresetId(presetId);
-	};
-
 	return (
 		<>
-			{/* Hero */}
-			<MotionSection className="relative flex min-h-[70vh] items-center overflow-hidden border-b px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+			<MotionSection className="relative flex min-h-[72vh] items-center overflow-hidden border-b px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
 				<HeroBackdrop presetId="ai-tools" noiseOpacity={0.1} />
 				<div className="relative z-10 mx-auto max-w-4xl text-center">
 					<motion.div variants={heroItemVariants}>
@@ -154,16 +109,16 @@ export default function ProductHome() {
 						variants={heroItemVariants}
 						className="mb-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
 					>
-						Build directory &amp; animated{" "}
-						<span className="text-primary">websites in days</span>
+						Launch a directory site{" "}
+						<span className="text-primary">in days, not months</span>
 					</motion.h1>
 					<motion.p
 						variants={heroItemVariants}
 						className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground"
 					>
-						ToolDir is a Next.js + Supabase + Stripe template. The pages you can
-						preview below are niche landing templates — lock one, connect your
-						keys, and run your own directory site.
+						ToolDir is a Next.js + Supabase + Stripe boilerplate. Buy once, lock
+						your niche, connect your keys, and run your own directory with admin,
+						blog, and paid launch slots.
 					</motion.p>
 					<motion.div
 						variants={heroItemVariants}
@@ -186,35 +141,23 @@ export default function ProductHome() {
 							</Link>
 						</Button>
 					</motion.div>
-					<motion.p
-						variants={heroItemVariants}
-						className="mt-6 text-sm text-muted-foreground"
-					>
-						Use the bottom dock to switch niches live · then buy or{" "}
-						<a href="#contact" className="underline underline-offset-4 hover:text-foreground">
-							contact me
-						</a>
-					</motion.p>
 				</div>
 			</MotionSection>
 
-			{/* How it works */}
 			<MotionSection className="border-b px-4 py-16 sm:px-6 lg:px-8">
 				<div className="mx-auto max-w-5xl">
 					<motion.div variants={itemVariants} className="mb-10 text-center">
-						<h2 className="mb-2 text-2xl font-bold sm:text-3xl">
-							How it works
-						</h2>
+						<h2 className="mb-2 text-2xl font-bold sm:text-3xl">How it works</h2>
 						<p className="text-muted-foreground">
-							Simple path from this demo to your own live directory.
+							From this product page to your own live directory.
 						</p>
 					</motion.div>
 					<div className="grid gap-4 sm:grid-cols-3">
 						{[
 							{
 								step: "1",
-								title: "Preview templates",
-								body: "Open /templates or use the bottom dock dropdown to try each niche landing — deals, Notion, jobs, courses, and more.",
+								title: "Browse templates",
+								body: "Open the templates page to see every niche as a simple grid — then preview the ones you like.",
 							},
 							{
 								step: "2",
@@ -245,63 +188,36 @@ export default function ProductHome() {
 				</div>
 			</MotionSection>
 
-			{/* Templates */}
-			<MotionSection
-				id="templates"
-				className="border-b px-4 py-16 sm:px-6 lg:px-8"
-			>
-				<div className="mx-auto max-w-6xl">
-					<motion.div variants={itemVariants} className="mb-10 text-center">
-						<h2 className="mb-2 text-2xl font-bold sm:text-3xl">
-							Niche templates included
+			<MotionSection className="border-b px-4 py-16 sm:px-6 lg:px-8">
+				<div className="mx-auto max-w-3xl text-center">
+					<motion.div variants={itemVariants}>
+						<div className="mb-3 inline-flex items-center gap-2 text-primary">
+							<LayoutTemplate className="size-5" />
+							<span className="text-sm font-medium uppercase tracking-wider">
+								Templates
+							</span>
+						</div>
+						<h2 className="mb-3 text-2xl font-bold sm:text-3xl">
+							19 niches, one codebase
 						</h2>
-						<p className="mx-auto max-w-xl text-muted-foreground">
-							One codebase, many directory shapes. These are templates — not
-							separate products. Pick one niche and customize it.
+						<p className="mb-8 text-muted-foreground">
+							AI tools, prompts, design, jobs, courses, ebooks, and more. Preview
+							them on a dedicated page — this home page stays about ToolDir.
 						</p>
+						<Button asChild size="lg">
+							<Link href="/templates">
+								View all templates
+								<ArrowRight className="size-4" />
+							</Link>
+						</Button>
 					</motion.div>
-					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-						{PRESET_LIST.map((preset) => {
-							const Icon = PRESET_ICONS[preset.id] || LayoutTemplate;
-							return (
-								<motion.div key={preset.id} variants={itemVariants}>
-									<Link
-										href="/templates"
-										onClick={() => openTemplate(preset.id)}
-										className="block h-full"
-									>
-										<Card className="h-full transition-colors hover:border-primary/40 hover:bg-muted/30">
-											<CardContent className="flex flex-col gap-3 p-5">
-												<div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
-													<Icon className="size-5 text-primary" />
-												</div>
-												<div>
-													<p className="font-semibold">{preset.brand}</p>
-													<p className="text-xs text-muted-foreground">
-														{preset.tagline}
-													</p>
-												</div>
-												<span className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
-													Preview
-													<ArrowRight className="size-3" />
-												</span>
-											</CardContent>
-										</Card>
-									</Link>
-								</motion.div>
-							);
-						})}
-					</div>
 				</div>
 			</MotionSection>
 
-			{/* Features */}
 			<MotionSection className="border-b px-4 py-16 sm:px-6 lg:px-8">
 				<div className="mx-auto max-w-6xl">
 					<motion.div variants={itemVariants} className="mb-10 text-center">
-						<h2 className="mb-2 text-2xl font-bold sm:text-3xl">
-							What you get
-						</h2>
+						<h2 className="mb-2 text-2xl font-bold sm:text-3xl">What you get</h2>
 						<p className="text-muted-foreground">
 							Production pieces so you skip months of wiring.
 						</p>
@@ -329,7 +245,6 @@ export default function ProductHome() {
 				</div>
 			</MotionSection>
 
-			{/* Tech stack */}
 			<MotionSection className="border-b px-4 py-16 sm:px-6 lg:px-8">
 				<div className="mx-auto max-w-4xl">
 					<motion.div variants={itemVariants} className="mb-10 text-center">
@@ -372,11 +287,7 @@ export default function ProductHome() {
 				</div>
 			</MotionSection>
 
-			{/* Pricing */}
-			<MotionSection
-				id="buy"
-				className="border-b px-4 py-16 sm:px-6 lg:px-8"
-			>
+			<MotionSection id="buy" className="border-b px-4 py-16 sm:px-6 lg:px-8">
 				<div className="mx-auto max-w-lg">
 					<motion.div variants={itemVariants}>
 						<Card className="overflow-hidden border-primary/20 shadow-lg">
@@ -397,10 +308,7 @@ export default function ProductHome() {
 							<CardContent className="space-y-5 p-6">
 								<ul className="space-y-2.5">
 									{INCLUDED.map((line) => (
-										<li
-											key={line}
-											className="flex items-start gap-2 text-sm"
-										>
+										<li key={line} className="flex items-start gap-2 text-sm">
 											<Check className="mt-0.5 size-4 shrink-0 text-primary" />
 											{line}
 										</li>
@@ -425,11 +333,7 @@ export default function ProductHome() {
 				</div>
 			</MotionSection>
 
-			{/* Contact */}
-			<MotionSection
-				id="contact"
-				className="px-4 py-16 sm:px-6 lg:px-8"
-			>
+			<MotionSection id="contact" className="px-4 py-16 sm:px-6 lg:px-8">
 				<div className="mx-auto max-w-2xl text-center">
 					<motion.div variants={itemVariants}>
 						<div className="mb-3 inline-flex items-center gap-2 text-primary">
@@ -442,8 +346,8 @@ export default function ProductHome() {
 							Talk to the maker
 						</h2>
 						<p className="mb-8 text-muted-foreground">
-							Follow on X or email me directly — for template questions,
-							custom niches, or support.
+							Follow on X or email me directly — for template questions, custom
+							niches, or support.
 						</p>
 					</motion.div>
 					<motion.div

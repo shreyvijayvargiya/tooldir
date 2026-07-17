@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import {
-	ArrowLeft,
+	ArrowRight,
 	ExternalLink,
 	LayoutTemplate,
 	Search,
@@ -26,10 +27,10 @@ import {
 } from "lucide-react";
 import { PRESET_LIST } from "@/lib/presets";
 import { usePreset } from "@/lib/presets/PresetContext";
-import { getLandingComponent } from "@/app/frontend/landings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { GUMROAD_TEMPLATE_URL } from "./ProductHome";
 
@@ -56,10 +57,12 @@ const PRESET_ICONS = {
 };
 
 /**
- * Demo-only gallery: search + group chips + live niche preview + Gumroad CTA.
+ * Demo-only template gallery — searchable grid.
+ * Selecting a card opens the live niche preview on /demo.
  */
 export default function TemplatesBrowse() {
-	const { presetId, setPresetId, preset } = usePreset();
+	const router = useRouter();
+	const { setPresetId } = usePreset();
 	const [query, setQuery] = useState("");
 	const [group, setGroup] = useState("All");
 
@@ -83,144 +86,132 @@ export default function TemplatesBrowse() {
 		});
 	}, [query, group]);
 
-	const Landing = getLandingComponent(preset);
-
-	const select = (id) => {
+	const openPreview = (id) => {
 		setPresetId(id);
+		router.push("/demo");
 	};
 
 	return (
-		<div className="flex min-h-screen flex-col">
-			<div className="sticky top-0 z-[60] border-b bg-background/95 backdrop-blur-md">
-				<div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:px-8">
-					<div className="flex flex-wrap items-center gap-3">
-						<Button asChild variant="ghost" size="sm" className="shrink-0">
-							<Link href="/">
-								<ArrowLeft className="size-4" />
-								Product
-							</Link>
-						</Button>
-						<div className="min-w-0 flex-1">
-							<p className="truncate text-sm font-semibold">Browse templates</p>
-							<p className="truncate text-xs text-muted-foreground">
-								{PRESET_LIST.length} niche landings — click to preview
-							</p>
-						</div>
-						<div className="ml-auto flex shrink-0 items-center gap-2">
-							<Button asChild variant="outline" size="sm">
-								<Link href="/demo">
-									Full preview
-									<ExternalLink className="size-3.5" />
-								</Link>
-							</Button>
-							<Button asChild size="sm">
-								<a
-									href={GUMROAD_TEMPLATE_URL}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									Buy access
-								</a>
-							</Button>
-						</div>
-					</div>
-
-					<div className="relative max-w-xl">
-						<Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-						<Input
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-							placeholder="Search templates by name…"
-							className="pl-9"
-							aria-label="Search templates"
-						/>
-					</div>
-
-					<div className="flex flex-wrap gap-2">
-						{groups.map((g) => (
-							<button
-								key={g}
-								type="button"
-								onClick={() => setGroup(g)}
-								className={cn(
-									"rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-									group === g
-										? "border-primary bg-primary text-primary-foreground"
-										: "bg-background hover:bg-muted"
-								)}
-							>
-								{g}
-							</button>
-						))}
-					</div>
+		<div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+			<div className="mb-10 max-w-2xl">
+				<Badge variant="secondary" className="mb-3 gap-1">
+					<LayoutTemplate className="size-3" />
+					{PRESET_LIST.length} templates included
+				</Badge>
+				<h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+					Browse niche templates
+				</h1>
+				<p className="mt-3 text-muted-foreground">
+					Pick a niche, open a live preview, then buy ToolDir to lock it as your
+					product. One codebase — many directory shapes.
+				</p>
+				<div className="mt-5 flex flex-wrap gap-2">
+					<Button asChild variant="outline" size="sm">
+						<Link href="/">Back to product</Link>
+					</Button>
+					<Button asChild size="sm">
+						<a
+							href={GUMROAD_TEMPLATE_URL}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							Buy on Gumroad
+							<ExternalLink className="size-3.5 opacity-80" />
+						</a>
+					</Button>
 				</div>
 			</div>
 
-			<div className="mx-auto grid w-full max-w-7xl flex-1 gap-0 lg:grid-cols-[280px_1fr]">
-				<aside className="border-b lg:border-b-0 lg:border-r">
-					<div className="sticky top-[9.5rem] max-h-[calc(100vh-10rem)] space-y-1 overflow-y-auto p-3">
-						{filtered.length === 0 ? (
-							<p className="px-2 py-6 text-center text-sm text-muted-foreground">
-								No templates match.
-							</p>
-						) : (
-							filtered.map((p) => {
-								const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
-								const active = presetId === p.id;
-								return (
-									<button
-										key={p.id}
-										type="button"
-										onClick={() => select(p.id)}
-										className={cn(
-											"flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-left transition-colors",
-											active
-												? "bg-primary text-primary-foreground"
-												: "hover:bg-muted"
-										)}
-									>
-										<Icon className="mt-0.5 size-4 shrink-0 opacity-90" />
-										<span className="min-w-0">
-											<span className="block truncate text-sm font-semibold">
-												{p.brand}
-											</span>
-											<span
-												className={cn(
-													"block truncate text-[11px]",
-													active
-														? "text-primary-foreground/80"
-														: "text-muted-foreground"
-												)}
-											>
-												{p.tagline}
-											</span>
-										</span>
-									</button>
-								);
-							})
-						)}
-					</div>
-				</aside>
-
-				<section className="min-w-0">
-					<div className="flex flex-wrap items-center gap-2 border-b px-4 py-3 sm:px-6">
-						<Badge variant="secondary">{preset.brand}</Badge>
-						<span className="text-sm text-muted-foreground">{preset.tagline}</span>
-						<span className="ml-auto text-xs text-muted-foreground">
-							Live preview
-						</span>
-					</div>
-					<motion.div
-						key={preset.id}
-						initial={{ opacity: 0, y: 8 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.25 }}
-						className="pb-24"
-					>
-						<Landing />
-					</motion.div>
-				</section>
+			<div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div className="relative w-full max-w-md">
+					<Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+					<Input
+						value={query}
+						onChange={(e) => setQuery(e.target.value)}
+						placeholder="Search by name or niche…"
+						className="pl-9"
+						aria-label="Search templates"
+					/>
+				</div>
+				<p className="text-sm text-muted-foreground">
+					{filtered.length} of {PRESET_LIST.length}
+				</p>
 			</div>
+
+			<div className="mb-8 flex flex-wrap gap-2">
+				{groups.map((g) => (
+					<button
+						key={g}
+						type="button"
+						onClick={() => setGroup(g)}
+						className={cn(
+							"rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+							group === g
+								? "border-primary bg-primary text-primary-foreground"
+								: "bg-background hover:bg-muted"
+						)}
+					>
+						{g}
+					</button>
+				))}
+			</div>
+
+			{filtered.length === 0 ? (
+				<p className="py-16 text-center text-sm text-muted-foreground">
+					No templates match your search.
+				</p>
+			) : (
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{filtered.map((p, index) => {
+						const Icon = PRESET_ICONS[p.id] || LayoutTemplate;
+						return (
+							<motion.div
+								key={p.id}
+								initial={{ opacity: 0, y: 12 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{
+									delay: Math.min(index * 0.03, 0.3),
+									duration: 0.35,
+								}}
+							>
+								<button
+									type="button"
+									onClick={() => openPreview(p.id)}
+									className="group h-full w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+								>
+									<Card className="h-full transition-colors group-hover:border-primary/40 group-hover:bg-muted/20">
+										<CardContent className="flex h-full flex-col gap-4 p-5">
+											<div className="flex items-start justify-between gap-3">
+												<div className="flex size-11 items-center justify-center rounded-xl bg-primary/10">
+													<Icon className="size-5 text-primary" />
+												</div>
+												<Badge variant="outline" className="shrink-0 text-[10px]">
+													{p.group || "Directories"}
+												</Badge>
+											</div>
+											<div className="min-w-0 flex-1">
+												<p className="text-lg font-semibold tracking-tight">
+													{p.brand}
+												</p>
+												<p className="mt-1 text-sm text-muted-foreground">
+													{p.tagline}
+												</p>
+												<p className="mt-3 line-clamp-2 text-xs text-muted-foreground">
+													{p.seoDescription}
+												</p>
+											</div>
+											<span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+												Preview live
+												<ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+											</span>
+										</CardContent>
+									</Card>
+								</button>
+							</motion.div>
+						);
+					})}
+				</div>
+			)}
 		</div>
 	);
 }

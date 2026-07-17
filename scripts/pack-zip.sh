@@ -140,7 +140,7 @@ preset_meta() {
 			;;
 		ebook-directory)
 			BRAND="BookDir"; ZIP_NAME="bookdir.zip"
-			LANDING_FILE="LandingCatalogDir.jsx"; PRESET_FILE="ebook-directory.js"; IMPORT_NAME="ebookDirectoryPreset"
+			LANDING_FILE="LandingBookDir.jsx"; PRESET_FILE="ebook-directory.js"; IMPORT_NAME="ebookDirectoryPreset"
 			;;
 		affiliate-offers)
 			BRAND="AffDir"; ZIP_NAME="affdir.zip"
